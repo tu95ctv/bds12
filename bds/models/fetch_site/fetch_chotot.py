@@ -5,7 +5,7 @@ import re
 from unidecode import unidecode
 import datetime
 ##Nh fetch_bds
-
+import json
 import pytz
 ##############Cho tot###############
 
@@ -52,6 +52,7 @@ def convert_chotot_price(html):
     
 def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_return_price = False):
     #mục đích thêm các thông số vào update_dict
+    topic_html_or_json = json.loads(topic_html_or_json) 
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:

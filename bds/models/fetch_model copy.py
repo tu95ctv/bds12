@@ -10,7 +10,7 @@ import datetime
 #import thư viện lấy từ file fetch.py qua
 from odoo.exceptions import UserError
 from odoo import models,fields
-from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines, FetchError
+from odoo.addons.bds.models.bds_tools  import  request_html,g_or_c_ss, get_or_create_user_and_posternamelines, FetchError
 from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
 from odoo.addons.bds.models.fetch_site.fetch_chotot  import  get_topic_chotot, create_cho_tot_page_link, local_a_native_time, convert_chotot_price, convert_chotot_date_to_datetime, gmt_7_a_native_time
 from odoo.addons.bds.models.fetch_site.fetch_muaban  import get_muaban_vals_one_topic
@@ -52,24 +52,9 @@ def convert_muaban_string_gia_to_float(str):
         kq = gia/1000000000.0
     return kq
 
-    
-# class AFetch(models.AbstractModel):
-#     _name = 'abstract.fetch'
-
-#     def get_last_page_number_ct(self, url_id):
-#         page_1_url = create_cho_tot_page_link(url_id.url, 1)
-#         html = request_html(page_1_url)
-#         html = json.loads(html)
-#         total = int(html["total"])
-#         web_last_page_number = int(math.ceil(total/20.0))
-#         return web_last_page_number
-
-
 #lam gon lai ngay 23/02
 class Fetch(models.Model):
     _name = 'bds.fetch'
-    _inherit = 'abstract.fetch'
-    _auto = True
     name = fields.Char(compute='_compute_name', store=True)
     url_id = fields.Many2one('bds.url')
     url_ids = fields.Many2many('bds.url')
@@ -111,13 +96,6 @@ class Fetch(models.Model):
             self.fetch_a_url_id (url_id)
         
     def fetch_a_url_id (self, url_id):
-        self.site_name = url_id.siteleech_id.name
-        self.siteleech_id_id = url_id.siteleech_id.id
-        if self.site_name=='muaban':
-            self.allow_write_public_datetime = False
-        else:
-            self.allow_write_public_datetime = True
-
         end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(url_id) 
         begin_time = datetime.datetime.now()
         number_notice_dict = {
@@ -151,13 +129,46 @@ class Fetch(models.Model):
                     })
         return None
 
+    def gen_page_number_list(self, url_id ): 
+        url_id_site_leech_name  = url_id.siteleech_id.name
+        current_page = url_id.current_page
+        
+        if url_id_site_leech_name ==  'batdongsan':
+            web_last_page_number =  get_last_page_from_bdsvn_website(url_id.url)
+        elif url_id_site_leech_name=='chotot':
+            page_1_url = create_cho_tot_page_link(url_id.url, 1)
+            html = request_html(page_1_url)
+            html = json.loads(html)
+            total = int(html["total"])
+            web_last_page_number = int(math.ceil(total/20.0))
+        elif url_id_site_leech_name=='muaban':
+            web_last_page_number = 100
+        if   url_id.set_leech_max_page and  url_id.set_leech_max_page < web_last_page_number:
+            max_page =  url_id.set_leech_max_page
+        else:
+            max_page = web_last_page_number
+        url_id.web_last_page_number = web_last_page_number
+        begin = current_page + 1
+        if begin > max_page:
+            begin  = 1
+        end = begin   + url_id.set_number_of_page_once_fetch - 1
+        if end > max_page:
+            end = max_page
+        end_page_number_in_once_fetch = end
+        page_lists = range(begin, end+1)
+        number_of_pages = end - begin + 1
+        return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
 
-    def fetch_topics_info_for_page_handle(self, page_int, format_page_url):
+    def page_handle(self, page_int, url_id, number_notice_dict):
+        number_notice_dict['page_int'] = page_int
         topic_data_from_pages_of_a_page = []
         #topic_data_from_pages_of_a_page = [{'ad_id': 99350273, 'list_id': 69165465, 'list_time': 1583592684170, 'date': 'hôm qua', 'account_id': 13211589, 'account_oid': '547621fc551409
         #
+        format_page_url = url_id.url
+        siteleech_id = url_id.siteleech_id
+        allow_write_public_datetime = True # depend site, if muaban , it = False if page_int >2
         
-        if self.site_name == 'batdongsan':
+        if siteleech_id.name=='batdongsan':
             url = format_page_url + '/' + 'p' +str(page_int)
             html = request_html(url)
             soup = BeautifulSoup(html, 'html.parser')
@@ -180,7 +191,7 @@ class Fetch(models.Model):
                 topic_data_from_page['thumb'] = icon_soup[0]['src']
                 topic_data_from_pages_of_a_page.append(topic_data_from_page)
 
-        elif self.site_name == 'chotot':
+        elif siteleech_id.name =='chotot':
             url = create_cho_tot_page_link(format_page_url, page_int)
             json_a_page = request_html(url)
             json_a_page = json.loads(json_a_page)
@@ -194,7 +205,9 @@ class Fetch(models.Model):
                 topic_data_from_page ['public_datetime'] = naitive_dt
                 topic_data_from_pages_of_a_page.append(topic_data_from_page)
 
-        elif self.site_name == 'muaban':
+        elif siteleech_id.name =='muaban':
+            if page_int > 2:
+                allow_write_public_datetime = False
             page_url =  re.sub('\?cp=(\d*)', '?cp=%s'%page_int, format_page_url)
             a_page_html = request_html(page_url)
             a_page_html_soup = BeautifulSoup(a_page_html, 'html.parser')
@@ -234,15 +247,7 @@ class Fetch(models.Model):
                 public_datetime = datetime.datetime.strptime(ngay,"%d/%m/%Y")
                 topic_data_from_page['public_datetime'] = public_datetime  
                 topic_data_from_pages_of_a_page.append(topic_data_from_page)
-        return topic_data_from_pages_of_a_page
-
-    def page_handle(self, page_int, url_id, number_notice_dict):
-        number_notice_dict['page_int'] = page_int
-        format_page_url = url_id.url    
-       
-        
-        topic_data_from_pages_of_a_page = self.fetch_topics_info_for_page_handle(page_int, format_page_url)
-
+        print ('***topic_data_from_pages_of_a_page', len(topic_data_from_pages_of_a_page))
         number_notice_dict['curent_page'] = page_int 
         number_notice_dict['length_link_per_previous_page']  = number_notice_dict.get('length_link_per_curent_page', None)
         number_notice_dict['length_link_per_curent_page'] = len(topic_data_from_pages_of_a_page)
@@ -250,18 +255,19 @@ class Fetch(models.Model):
         for topic_data_from_page in topic_data_from_pages_of_a_page:
             topic_index +=1
             number_notice_dict['topic_index'] = topic_index
-            if  self.site_name =='chotot':
+            if  siteleech_id.name =='chotot':
                 link  = 'https://gateway.chotot.com/v1/public/ad-listing/' + str(topic_data_from_page['list_id'])
-            elif self.site_name =='batdongsan':
+            elif 'batdongsan' in siteleech_id.name:
                 link  = 'https://batdongsan.com.vn' +  topic_data_from_page['list_id']
             else:
                 link = topic_data_from_page['list_id']
-            self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
+                print ('link', link)
+            self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page, allow_write_public_datetime=allow_write_public_datetime)
 
     
             
             
-    def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}):
+    def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}, allow_write_public_datetime=None):
         print ('link trong deal_a_topic', link)
         update_dict = {}
         public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
@@ -271,7 +277,7 @@ class Fetch(models.Model):
         if search_link_obj:
             number_notice_dict["existing_link_number"] = number_notice_dict["existing_link_number"] + 1
             public_date_cu  = fields.Date.from_string(search_link_obj.public_date)
-            if self.allow_write_public_datetime and  public_date != public_date_cu and public_date_cu and public_date:
+            if allow_write_public_datetime and  public_date != public_date_cu and public_date_cu and public_date:
                 diff_public_date = (public_date - public_date_cu).days
                 update_dict.update({'public_date':public_date})
                 update_dict.update({'ngay_update_gia':datetime.datetime.now(),'diff_public_date':diff_public_date, 'public_date':public_date, 'publicdate_ids':[(0,False,{'diff_public_date':diff_public_date,'public_date':public_date,'public_date_cu':public_date_cu})]})
@@ -289,7 +295,6 @@ class Fetch(models.Model):
                                                                             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
             # lấy dữ liệu 1 topic về từ link
             self.request_topic(link, write_dict, url_id, topic_data_from_page)
-            write_dict['siteleech_id'] = self.siteleech_id_id
             write_dict['link'] = link
             write_dict.update({'url_ids':[(4, url_id.id)]})
             write_dict['cate'] = url_id.cate
@@ -301,12 +306,13 @@ class Fetch(models.Model):
 
     def request_topic (self, link, write_dict, url_id, topic_data_from_page):
         topic_html_or_json = request_html(link)
-        
-        # siteleech_id = url_id.siteleech_id
-        if self.site_name =='batdongsan':    
+        siteleech_id = url_id.siteleech_id
+        if siteleech_id.name =='chotot':
+            topic_html_or_json = json.loads(topic_html_or_json)
+        if siteleech_id.name =='batdongsan':    
             get_bds_dict_in_topic(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['thumb'] = topic_data_from_page.get('thumb',False)
-        elif self.site_name =='chotot':
+        elif siteleech_id.name =='chotot':
             get_topic_chotot(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['thumb'] = topic_data_from_page.get('image',False)
             chotot_moi_gioi_hay_chinh_chu = topic_data_from_page.get('company_ad',False)
@@ -315,7 +321,7 @@ class Fetch(models.Model):
             else:
                 chotot_moi_gioi_hay_chinh_chu = 'chinh_chu'
             write_dict['chotot_moi_gioi_hay_chinh_chu'] = chotot_moi_gioi_hay_chinh_chu
-        elif self.site_name =='muaban':
+        elif siteleech_id.name =='muaban':
             get_muaban_vals_one_topic(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['area'] = topic_data_from_page.get('area',False)
             write_dict['thumb'] = topic_data_from_page.get('thumb','ahahah')
