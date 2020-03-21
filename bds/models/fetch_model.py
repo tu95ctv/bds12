@@ -59,7 +59,6 @@ class Fetch(models.Model):
     url_id = fields.Many2one('bds.url')
     url_ids = fields.Many2many('bds.url')
     last_fetched_url_id = fields.Many2one('bds.url')#>0
-    is_for_first = fields.Selection([('1','1'),('2','2')])
 
     @api.depends('url_ids')
     def _compute_name(self):
@@ -120,13 +119,9 @@ class Fetch(models.Model):
             self.page_handle( page_int, url_id, number_notice_dict)
     
         self.last_fetched_url_id = url_id.id
-        if self.is_for_first=='2':
-            current_page_field_name = 'current_page_for_first'
-        else:
-            current_page_field_name = 'current_page'
         interval = (datetime.datetime.now() - begin_time).total_seconds()
         url_id.interval = interval
-        url_id.write({current_page_field_name: end_page_number_in_once_fetch,
+        url_id.write({'current_page': end_page_number_in_once_fetch,
                     'create_link_number': number_notice_dict['create_link_number'],
                     'update_link_number': number_notice_dict["update_link_number"],
                     'link_number': number_notice_dict["link_number"],
@@ -135,15 +130,8 @@ class Fetch(models.Model):
         return None
 
     def gen_page_number_list(self, url_id ): 
-        '''return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
-        '''
         url_id_site_leech_name  = url_id.siteleech_id.name
-
-        if self.is_for_first=='2':
-            current_page_or_current_page_for_first = 'current_page_for_first'
-        else:
-            current_page_or_current_page_for_first = 'current_page'
-        current_page = getattr(url_id, current_page_or_current_page_for_first)
+        current_page = url_id.current_page
         
         if url_id_site_leech_name ==  'batdongsan':
             web_last_page_number =  get_last_page_from_bdsvn_website(url_id.url)
@@ -238,9 +226,6 @@ class Fetch(models.Model):
                 src_img = img.get('data-original',False)
                 topic_data_from_page['list_id'] = href
                 topic_data_from_page['thumb'] = src_img
-            
-
-
                 area = 0
                 try:
                     area = title_and_icon.select('span.list-item__area b')[0].get_text()
@@ -299,7 +284,7 @@ class Fetch(models.Model):
             
             self.request_topic(link, update_dict, url_id, topic_data_from_page)
             if update_dict:
-                print (u'Update giá topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
+                print (u'-----------Update giá topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
                                                                             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
                 search_link_obj.write(update_dict)
                 number_notice_dict['update_link_number'] = number_notice_dict['update_link_number'] + 1

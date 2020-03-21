@@ -36,7 +36,6 @@
                 <group>
                     <field name="last_fetched_url_id" />
                     <field name="name" />
-                    <field name="is_for_first" />
                 </group>
             </form>
         </field>
