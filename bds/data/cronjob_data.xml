@@ -1,0 +1,16 @@
+<odoo>
+    <record id="cronjob_fetch" model="ir.cron">
+        <field name="name">CronJob Fetch</field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'loop.fetch.cron'" name="model"/>
+        <field ref="model_loop_fetch_cron" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.fetch_cron()</field>
+    </record>
+            
+</odoo>

@@ -1,0 +1,14 @@
+<odoo>
+    <record model="bds.url" id="url_chotot_quan_tanbinh_phuong15">
+        <field name="description">Chợ tốt quận Tân Bình Phường 15</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13112&amp;ward=9313&amp;cg=1000&amp;limit=20&amp;o=20&amp;st=s,k</field>
+    </record>
+    
+    <record model="bds.url" id="url_chotot_quan_tan_phu_phuong_tay_thanh">
+        <field name="description">Chợ tốt Tây Thạnh</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;ward=9315&amp;cg=1020&amp;limit=20&amp;o=20&amp;st=s,k</field>
+    </record>
+
+    
+    
+</odoo>

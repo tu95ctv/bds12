@@ -1,0 +1,122 @@
+<odoo>
+<data>
+	<!-- URL -->
+	 <record id="url_search" model="ir.ui.view">
+            <field name="name">ulr search</field>
+            <field name="model">bds.url</field>
+            <field name="arch" type="xml">
+                <search string="url search">
+                	<field name="name" string="name hoặc name không dấu" filter_domain="['|',('name','ilike',self), ('name_khong_dau','ilike',self)]"/>
+                	<field name="description"/>
+                	<field name="url"/>
+                	<filter name="siteleech_id" string="groupby siteleech_id" domain="[]" context="{'group_by':'siteleech_id'}" />
+                </search>
+                </field>
+                </record>
+                
+        <record id="url_form" model="ir.ui.view">
+            <field name="name">bds.url</field>
+            <field name="model">bds.url</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" />
+                                <field name="url" />
+                                <field name="description" />
+                                <field name="siteleech_id" />
+                            </group>
+                            <group>
+                                <field name="web_last_page_number" />
+                                <field name="quan_id" />
+                                <field name="phuong_id" />
+                                <field name="current_page" />
+                                <field name="current_page_for_first" />
+                            </group>
+                        </group>
+                        <group>
+                            <field name="quan_ids" />
+                            <field name="phuong_ids" />
+                            <field name="post_ids" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="url_list" model="ir.ui.view">
+            <field name="name">bds.url</field>
+            <field name="model">bds.url</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="id" />
+                    <field name="url" />
+                    <field name="description" />
+                    <field name="cate" />
+                    <field name="siteleech_id" />
+                    <field name="existing_link_number" />
+                    <field name="update_link_number" />
+                    <field name="create_link_number" />
+                    <field name="web_last_page_number" />
+                    <field name="quan_id" />
+                    <field name="phuong_id" />
+                    <field name="current_page" />
+                    <field name="current_page_for_first" />
+                    <field name="link_number" />
+                    <field name="interval" />
+                </tree>
+            </field>
+        </record>
+
+        
+        <record model="ir.actions.act_window" id="url_action">
+            <field name="name">quan action</field>
+            <field name="res_model">bds.url</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        
+         
+         
+          <record id="bds_siteleech_form" model="ir.ui.view">
+            <field name="name">bds.siteleech.form</field>
+            <field name="model">bds.siteleech</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" />
+                                <field name="name_viet_tat" />
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="bds_siteleech_tree" model="ir.ui.view">
+            <field name="name">bds.siteleech.tree</field>
+            <field name="model">bds.siteleech</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                     <field name="name_viet_tat" />
+                </tree>
+            </field>
+        </record>
+        
+        
+        <record model="ir.actions.act_window" id="siteleech_action">
+            <field name="name">bds.siteleech.action</field>
+            <field name="res_model">bds.siteleech</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        
+        
+        
+         
+        <!-- !URL -->
+</data>
+</odoo>

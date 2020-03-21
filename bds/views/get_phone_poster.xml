@@ -1,0 +1,52 @@
+<odoo>
+     <!-- GET PHONE POSTER -->
+        
+        <record id="getphoneposter_form" model="ir.ui.view">
+            <field name="name">get phone poster form</field>
+            <field name="model">bds.getphoneposter</field>
+            <field name="arch" type="xml">
+                <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="nha_mang" />
+                        </group>
+                        <group>
+                            <field name="post_count_min" />
+                            <field name="loc_gian_tiep_quan_bds_topic" />
+                        </group>
+
+                        <group string="Kết quả">
+                            <field name="len_poster" />
+                            <field name="phone_list" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page >
+                            <group>
+                                <field name="poster_ids" />
+                            </group>
+                        </page>
+                    </notebook>
+                	</sheet>
+                </form>
+            </field>
+        </record>
+        <record id="getphoneposter_tree" model="ir.ui.view">
+            <field name="name">get phone poster form</field>
+            <field name="model">bds.getphoneposter</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>
+                
+        <record model="ir.actions.act_window" id="getphoneposter_action">
+            <field name="name">get phone</field>
+            <field name="res_model">bds.getphoneposter</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- !GET PHONE POSTER -->
+</odoo>

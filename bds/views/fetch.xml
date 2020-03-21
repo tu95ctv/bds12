@@ -1,0 +1,62 @@
+<odoo>
+    <!-- làm gọn lại ngày 23/02 -->
+    <record id="fetch_form" model="ir.ui.view">
+        <field name="name">fetch</field>
+        <field name="model">bds.fetch</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="fetch" string="fetch next url" type="object" class="btn-primary" />
+                    <button name="fetch_all_url" string="fetch_all_url" type="object" class="btn-primary" />
+                    <button name="set_0" string="set_0" type="object" class="btn-primary" />
+                </header>
+                
+                <group>
+                    <field name="url_ids" nolabel="1" >
+                        <tree editable="1">
+                            <field name="id" />
+                            <field name="url" />
+                            <field name="description" />
+                            <field name="cate" />
+                            <field name="siteleech_id" />
+                            <field name="set_number_of_page_once_fetch" />
+                            <field name="link_number" />
+                            <field name="existing_link_number" />
+                            <field name="update_link_number" />
+                            <field name="create_link_number" />
+                            <field name="web_last_page_number" />
+                            <!-- <field name="quan_id" />
+                            <field name="phuong_id" /> -->
+                            <field name="current_page" />
+                            <field name="current_page_for_first" />
+                            <field name="interval" />
+                        </tree>
+                    </field>
+                </group>
+                <group>
+                    <field name="last_fetched_url_id" />
+                    <field name="name" />
+                    <field name="is_for_first" />
+                </group>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="fetch_list">
+        <field name="name">bds list</field>
+        <field name="model">bds.fetch</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id" />
+                <field name="name" />
+                <field name="url_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="fetch_action">
+        <field name="name">fetch window</field>
+        <field name="res_model">bds.fetch</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    
+</odoo>

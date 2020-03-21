@@ -1,0 +1,161 @@
+<odoo>
+<data>
+ <!-- BDS -->
+        
+        <record id="myimage_form" model="ir.ui.view">
+            <field name="name">bds.myimage.form</field>
+            <field name="model">bds.myimage</field>
+            <field name="arch" type="xml">
+                <form>
+                	<field name="image" filename="name" widget="image" ></field>
+                	<field name ="name"></field>
+                </form>
+                </field>
+                </record>
+                
+        
+        <record id="bds_form" model="ir.ui.view">
+            <field name="name">bds.form</field>
+            <field name="model">bds.bds</field>
+            <field name="arch" type="xml">
+                <form>
+                <header>
+                	<button name="test" string="test " type="object" class="btn-primary" />
+                    </header>
+                        <notebook>
+                            <page string="From Web">
+                            <group>
+                            <group>
+                            	 <field name="thumb_view" widget="image"/>
+                            	 <field name="thumb" />
+                                <field name="title" />
+                                <field name="quan_tam"></field>
+                                <field name="mqc"></field>
+                                <field name="link" />
+                                <field name="gia" />
+                                <field name="gia_trieu" />
+                                <field name="muc_gia" />
+                                <field name="area" />
+                                <field name="muc_dt" />
+                                <field name="don_gia" />
+                                <field name="muc_don_gia" />
+                                <field name="ti_le_don_gia" />
+                     			<field name="muc_ti_le_don_gia" />
+                                <field name="date_text" />
+                                <field name="public_datetime" />
+                                <field name="address" />
+                                <field name="quan_id" />
+                                <field name="phuong_id" />
+                                <field name="cho_tot_link_fake" />
+                                <field name="siteleech_id" />
+                                 <field name="ngay_update_gia" />
+                                 <field name="diff_gia" />
+                                
+                            </group>
+                            <group>
+                                <field name="poster_id" />
+                                <field name="count_post_all_site" />
+                                <field name="trich_dia_chi" />
+                                <field name="html" />
+                             <!--    <field name="data" /> -->
+                            </group>
+                            <group>
+                            	<field name="my_images_ids">
+                            		 <tree>
+                            			<field name="image"></field>
+                            			<field name="name"></field>
+                            		</tree> 
+                            	</field>
+                            </group>
+                            
+                            
+                             </group>
+                        	<field name="quantam_ids">
+                        	<tree editable="bottom">
+                        		<field name="user_id"></field>
+                        		<field name="dt"></field>
+                        		</tree>
+                        	</field>
+                        <group>
+                        
+                        
+                        
+                        </group>
+                        	<field name="gialines_ids">
+                        	<tree>
+                        		<field name="gia"></field>
+                        		<field name="gia_cu"></field>
+                        		<field name="diff_gia"></field>
+                        		<field name="create_date"></field>
+                        		</tree>
+                        	</field>
+                        <group>
+                        
+                        
+                          </group>
+                        	<field name="publicdate_ids">
+                        	<tree>
+                        		<field name="public_date"></field>
+                        		<field name="public_date_cu"></field>
+                        		</tree>
+                        	</field>
+                        <group>
+                        
+                        
+                        
+                        </group>
+                        <group>
+                         <field name="same_address_bds_ids" />
+                        </group>
+                        <group>
+                            <field name="post_ids_of_user" />
+                        </group>
+                        </page>
+                        <page string="My page">
+                        <group>
+                        	<field name="html_replace"></field>
+                        	<field name="chieu_ngang"></field>
+                        	<field name="chieu_dai"></field>
+                        	<field name="my_dien_tich"></field>
+                        </group>
+                        </page>
+                        </notebook>
+                </form>
+            </field>
+        </record>
+    
+        
+    <record id="bdssetread_form" model="ir.ui.view">
+         <field name="name">bds.setread.form</field>
+         <field name="model">bds.setread</field>
+         <field name="arch" type="xml">
+         	<form string="Download all model">
+         	<sheet>
+         	<group>
+         	  	</group>
+         	</sheet>
+         	<footer>
+     			<button name="set_bdsread"  
+     			string="Set bds đã đọc" type="object" class="oe_highlight" groups="base.group_user" />
+         	</footer>
+         	</form>
+         </field>
+         </record>
+         
+    
+    <act_window
+            id="downloadquants"
+            name="Set read"
+            res_model="bds.setread"
+            src_model="bds.bds"
+            view_mode="form"
+            multi="True"
+            target="new"
+            key2="client_action_multi"
+        />
+        
+        
+        
+        
+</data>
+</odoo>

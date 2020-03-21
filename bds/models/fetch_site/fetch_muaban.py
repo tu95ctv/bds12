@@ -1,0 +1,100 @@
+# -*- coding: utf-8 -*-
+from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines,g_or_c_chotot_quan
+from bs4 import BeautifulSoup
+import re
+import datetime
+############mua ban ############
+def get_mobile_name_for_muaban(soup):
+    try:
+        mobile_and_name_soup = soup.select('div.ct-contact ')[0]
+        mobile_soup = mobile_and_name_soup.select('div.price-name + div > b')[0]
+        mobile = mobile_soup.get_text()
+        name = mobile
+    except IndexError:
+        mobile =  None
+        name= None
+    return mobile,name
+def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_price=False):
+    def create_or_get_one_in_m2m_value(val):
+            val = val.strip()
+            if val:
+                return g_or_c_ss(self,'bds.images',{'url':val})
+    
+    update_dict['data'] = html
+    soup = BeautifulSoup(html, 'html.parser')
+
+    test = ''
+    image_soup = soup.select('div.slider__frame')
+    content_soup = soup.select('div.body-container')
+    update_dict['html']  = content_soup[0].get_text()
+#     #print ('**image_soup',image_soup)
+    images = []
+    for i in image_soup:
+        data_src = i.get('data-src',False)
+        if data_src:
+            images.append(data_src)
+        
+    if images:
+        update_dict['present_image_link'] = images[0]  
+        object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
+        m2m_ids = list(map(lambda x:x.id, object_m2m_list))
+        if m2m_ids:
+            val = [(6, False, m2m_ids)]
+            update_dict['images_ids'] = val
+
+
+    gia_soup = soup.select('div.price-container__value')
+    try:
+        gia =  gia_soup[0].get_text()
+        gia = re.sub(u'\.|đ|\s', '',gia)
+        gia = float(gia)
+        gia = gia/1000000000.0
+    except IndexError:
+        gia = 0
+        
+    # area_soup = soup.select('div.tect-content-block div.tech-item:nth-child(2) tech-item__value')
+    # print ('***area_soup**', area_soup, bool(area_soup))
+    # print (a)
+    # try:
+    #     area_soup = area_soup[0]
+    # except:
+    #     area_soup = None
+    #     pass
+    # if area_soup:
+    #     area = area_soup.get_text()
+    #     area = area.replace(' m2')
+    #     area = float(area)
+    #     print ('area***', area)
+    #     update_dict['area'] = area
+
+
+
+    if only_return_price:
+        return gia
+    update_dict['gia'] = gia
+    
+    title = soup.select('h1.title')[0].get_text()
+    title = title.strip()
+    update_dict['title']=title
+    update_dict['siteleech_id'] = siteleech_id.id
+   
+    quan_soup = soup.select('span.location-clock__location')
+    quan_txt =  quan_soup[0].get_text()
+    quan_name =  quan_txt.split('-')[0].strip()
+    quan_id = g_or_c_chotot_quan(self,quan_name)
+    update_dict['quan_id'] = quan_id
+
+    # mobile,name = get_mobile_name_for_muaban(soup)
+    name_soup = soup.select('div.user-info__fullname')[0]
+    name =  name_soup.get_text()
+    span_mobile_soup = soup.select('div.mobile-container__value span')[0]
+    mobile = span_mobile_soup['mobile']
+
+    if mobile != None:
+        user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id.name)
+        update_dict['user_name_poster']=name
+        update_dict['phone_poster']=mobile
+        update_dict['poster_id'] = user.id
+
+    print ('***update_dict*** trong fetch_muaban', update_dict)
+############## end mua ban  ###########

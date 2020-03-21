@@ -1,0 +1,6 @@
+<odoo>
+    <record id="detail_guest" model="res.groups">
+        <field name="name">detail_guest</field>
+        <!-- <field name="category_id" ref="base.module_category_hidden"/> -->
+    </record>
+</odoo>

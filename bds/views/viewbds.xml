@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <!-- Images -->
+        <record id="images_search" model="ir.ui.view">
+            <field name="name">images</field>
+            <field name="model">bds.images</field>
+            <field name="arch" type="xml">
+                <search string="images  search">
+                    <field name="url" />
+                </search>
+            </field>
+        </record>
+        <record id="images_form" model="ir.ui.view">
+            <field name="name">images</field>
+            <field name="model">bds.images</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="url" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="images_list" model="ir.ui.view">
+            <field name="name">image list</field>
+            <field name="model">bds.images</field>
+            <field name="arch" type="xml">
+                <tree>
+                  <!--  <field name="url" /> --> 
+                    <field name="url" widget="image" height="300" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="images_action">
+            <field name="name">bds images</field>
+            <field name="res_model">bds.images</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- !images -->
+        
+        
+       
+       
+       
+        <!-- LUONG -->
+        <record id="luong_tree" model="ir.ui.view">
+            <field name="name">luong</field>
+            <field name="model">bds.luong</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="threadname" />
+                    <field name="url_id" />
+                    <field name="current_page" />
+                </tree>
+            </field>
+        </record>
+        <!-- !LUONG -->
+     
+        
+        
+        
+        
+        
+        <!-- IMPORT CONTACT -->
+        <record id="importcontact_form" model="ir.ui.view">
+            <field name="name">Export ADA form</field>
+            <field name="model">bds.importcontact</field>
+            <field name="arch" type="xml">
+                <form string="Import quan huyen">
+                    <sheet>
+                        <group>
+                            <field name="file" />
+                            <field name="land_contact_saved_number" />
+                            <field name="trigger_fields" />
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="import_contact" string="_import_contact" type="object" class="btn-primary" />
+                        <button name="trigger" string="Trigger" type="object" class="btn-primary" />
+                        <button name="add_nha_mang" string="add_nha_mang" type="object" class="btn-primary" />
+                        <button name="add_site_leech_tobds" string="add_site_leech_tobds" type="object" class="btn-primary" />
+                        <button name="add_min_max_avg_for_user" string="add_min_max_avg_for_user" type="object" class="btn-primary" />
+                        <button name="add_quan_lines_ids_to_poster" string="Add quan lines ids poster" type="object" class="btn-primary" />
+                        <button name="add_quan_lines_ids_to_poster_theo_siteleech_id" string="add_quan_lines_ids_to_poster_theo_siteleech_id" type="object" class="btn-primary" />
+                        <button name="add_site_leech_to_url" string="add_site_leech_to_url" type="object" class="btn-primary" />
+                        <button name="count_post_of_poster" string="count_post_of_poster" type="object" class="btn-primary" />
+                        <button name="insert_count_by_sql" string="insert_count_by_sql" type="object" class="btn-primary" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="importcontact_action">
+            <field name="name">bds.importcontact</field>
+            <field name="res_model">bds.importcontact</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!--! IMPORT CONTACT -->
+        <!--  MYCONTACT -->
+        <record id="mycontact_list" model="ir.ui.view">
+            <field name="name">bds.mycontact</field>
+            <field name="model">bds.mycontact</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="phone" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="mycontact_action">
+            <field name="name">bds.mycontact</field>
+            <field name="res_model">bds.mycontact</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- MY contact -->
+        
+        
+       
+        
+        
+        
+        <!-- DIEN Thoai -->
+        <record id="dienthoai_search" model="ir.ui.view">
+            <field name="name">số điện thoại search</field>
+            <field name="model">dienthoai</field>
+            <field name="arch" type="xml">
+                <search string="bds search">
+                    <field name="link" />
+                    <filter name="original link" domain="[('is_bien_dong_item','=',False)]"></filter>
+                </search>
+            </field>
+        </record>
+        <record id="dienthoai_form" model="ir.ui.view">
+            <field name="name">dien thoai</field>
+            <field name="model">dienthoai</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="title" />
+                                <field name="link" />
+                    			<field name="iphonetype_id" />
+                                <field name="gia" />
+                                <field name="gia_hien_thoi" />
+                   				 <field name="topic_id" />
+                                <field name="so_luong" />
+                                <field name="duoc_ban_boi" />
+                                <field name="is_bien_dong_item" />
+                                <field name="original_itself_id" />
+                                <field name="bien_dong_ids" />
+                            </group>
+                            <group />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="dienthoai_list" model="ir.ui.view">
+            <field name="name">dien thoai</field>
+            <field name="model">dienthoai</field>
+            <field name="arch" type="xml">
+                <tree>
+                     <field name="title" />
+                    <field name="link" />
+                    <field name="iphonetype_id" />
+                    <field name="gia" />
+                    <field name="gia_hien_thoi" />
+                    <field name="so_luong" />
+                    <field name="topic_id" />
+                    <field name="duoc_ban_boi" />
+                    <field name="is_bien_dong_item" />
+                    <field name="original_itself_id" />
+                    <field name="bien_dong_ids" />
+                    <field name="noi_dung_bien_dong" />
+                    <field name="create_date" />
+                    <field name="write_date" />
+                </tree>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="dienthoai_action">
+            <field name="name">dien thoai</field>
+            <field name="res_model">dienthoai</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- !dien thoai -->
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    </data>
+</openerp>

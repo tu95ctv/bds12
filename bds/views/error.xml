@@ -1,0 +1,39 @@
+<odoo>
+	<data>
+			 <!-- error -->
+        <record id="error_form1" model="ir.ui.view">
+            <field name="name">bds</field>
+            <field name="model">bds.error</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" />
+                            </group>
+                            <group />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="error_list1" model="ir.ui.view">
+            <field name="name">bds.error.list</field>
+            <field name="model">bds.error</field>
+            <field name="arch" type="xml">
+                <tree>
+                 <field name="name" />
+                  <field name="des" />
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="error_action">
+            <field name="name">error action</field>
+            <field name="res_model">bds.error</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <!-- error -->
+	</data>
+</odoo>

@@ -1,0 +1,37 @@
+<odoo>
+    <data >
+        <record id="loop_fetch_cron_form" model="ir.ui.view">
+            <field name="name">loop_fetch_cron_form</field>
+            <field name="model">loop.fetch.cron</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="id" />
+                     		<field name="fetch_ids" />
+                     		<field name="fetch_current_id" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record id="loop_fetch_cron_list" model="ir.ui.view">
+            <field name="name">loop_fetch_cron_list</field>
+            <field name="model">loop.fetch.cron</field>
+            <field name="arch" type="xml">
+                <tree>
+                     <field name="id" />
+                     <field name="fetch_ids" />
+                     <field name="fetch_current_id" />
+                </tree>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="loop_fetch_cron_action">
+            <field name="name">Cron fetch</field>
+            <field name="res_model">loop.fetch.cron</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+  
+   </data>
+</odoo>

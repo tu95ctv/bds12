@@ -1,0 +1,41 @@
+<openerp>
+    <data>
+   <!-- <record id="sukientype_suco" model="sukientype"> 
+          <field name="name">Sự Cố</field> 
+      </record>
+      
+      <record id="sukientype_congviec" model="sukientype"> 
+          <field name="name"></field> 
+      </record>
+      
+      <record id="sukientype_ghichu" model="sukientype"> 
+          <field name="name">Ghi chú</field> 
+      </record> -->
+      
+        <!--   <record id="object0" model="bds.bds"> -->
+        <!--     <field name="name">Object 0</field> -->
+        <!--     <field name="value">0</field> -->
+        <!--   </record> -->
+        <!--  -->
+        <!--   <record id="object1" model="bds.bds"> -->
+        <!--     <field name="name">Object 1</field> -->
+        <!--     <field name="value">10</field> -->
+        <!--   </record> -->
+        <!--  -->
+        <!--   <record id="object2" model="bds.bds"> -->
+        <!--     <field name="name">Object 2</field> -->
+        <!--     <field name="value">20</field> -->
+        <!--   </record> -->
+        <!--  -->
+        <!--   <record id="object3" model="bds.bds"> -->
+        <!--     <field name="name">Object 3</field> -->
+        <!--     <field name="value">30</field> -->
+        <!--   </record> -->
+        <!--  -->
+        <!--   <record id="object4" model="bds.bds"> -->
+        <!--     <field name="name">Object 4</field> -->
+        <!--     <field name="value">40</field> -->
+        <!--   </record> -->
+        <!--  -->
+    </data>
+</openerp>
