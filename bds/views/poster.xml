@@ -7,8 +7,6 @@
             <field name="arch" type="xml">
                 <search string="poster search">
                     <field name="name" />
-                    <field name="contact_address" />
-                    <field name="mycontact_id" />
                     <field name="quan_id_for_search" />
                     <field name="count_post_all_site" string='count_post_all_site lon hon' filter_domain ="[('count_post_all_site','&gt;=',self)]"/>
                     <field name="count_post_all_site" string='count_post_all_site be hon' filter_domain ="[('count_post_all_site','&lt;=',self)]"/>
@@ -23,7 +21,6 @@
                         <filter name="quan_chuyen_1_id" string="quan_chuyen_1_id" domain="[]" context="{'group_by':'quan_chuyen_1_id'}" />
                         <filter name="detail_du_doan_cc_or_mg" string="detail_du_doan_cc_or_mg" domain="[]" context="{'group_by':'detail_du_doan_cc_or_mg'}" />
                         <filter name="du_doan_cc_or_mg" string="du_doan_cc_or_mg" domain="[]" context="{'group_by':'du_doan_cc_or_mg'}" />
-                        <filter name="is_numberphone_09" string="is_numberphone_09" domain="[]" context="{'group_by':'is_numberphone_09'}" />
                     </group>
                 </search>
             </field>
@@ -48,18 +45,13 @@
                     <sheet>
                         <group>
                             <group>
-                                <field name="contact_address" />
-                                <field name="max_trang_thai_lien_lac" />
-                                <field name="da_goi_dien_hay_chua" />
                                 <field name="nha_mang" />
-                                <field name="set_name" />
                                 <field name="count_chotot_post_of_poster" />
                                 <field name="count_bds_post_of_poster" />
                                 <field name="count_post_all_site" />
                                 <field name="address_topic_number" />
                             </group>
                             <group>
-                                <field name="mycontact_id" />
                                 <field name="cong_ty" />
                                 <field name="created_by_site_id" />
                                 <field name="username_in_site_ids">
@@ -101,20 +93,16 @@
             <field name="model">bds.poster</field>
             <field name="priority">3</field>
             <field name="arch" type="xml">
-                <tree decoration-danger="0" decoration-info="is_recent==True">
+                <tree>
                     <field name="id" />
                     <field name="name" readonly="0"/>
                     <button name="open_something" type="object"/>
                     <field name="created_by_site_id"></field>
-                    <field name="ten_zalo"></field>
-                    <field name="trang_thai_zalo"></field>
-                    <field name="mycontact_id" />
                      <field name="quan_chuyen_1" />
                      <field name="quan_chuyen_2" />
                      <field name="number_post_of_quan" />
                      <field name="rate_chinh_chu" />
                      <field name="rate_moi_gioi" />
-                     <field name="is_numberphone_09" />
                      <field name="username" />
                     <field name="count_post_all_site" />
                     <field name="address_topic_number" />
@@ -127,10 +115,8 @@
                     <field name="count_bds_post_of_poster" />
                     <field name="mtg_number" />
                     <field name="mqc_number" />
-                    <field name="max_trang_thai_lien_lac" />
                     <field name="quanofposter_ids_show" />
                     <field name="create_date" />
-                    <field name="is_recent"  invisible="1"/>
                     <field name="write_date" />
                     <field name="cong_ty" />
                     <field name="username_in_site_ids" invisible="1"/>

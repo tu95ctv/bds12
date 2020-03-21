@@ -2,68 +2,12 @@
 import re
 import base64
 from odoo import models, fields, api,sql_db, tools
-try:
-    import urllib.request as urllib2_or_urllib_request
-except:
-    import urllib2 as urllib2_or_urllib_request
 from odoo.exceptions import UserError
 from unidecode import unidecode
 import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
-class Setread(models.TransientModel):
-    _name = "bds.setread"
-    
-    @api.multi
-    def set_bdsread(self):
-        print ('self._context',self._context,'self._context.get("active_ids")',self._context.get("active_ids"))
-        self.env['bds.bds'].browse(self._context.get("active_ids")).write({'is_read':True})
-        return {
-                'type': 'ir.actions.act_window',
-                'res_model': 'bds.setread',
-                'view_mode': 'form',
-                'view_type': 'form',
-                'res_id': self.id,
-                'views': [(False, 'form')],
-                'target': 'new',
-            }
-         
-class QuanTamBDSUser(models.Model):
-    _name = 'bds.quantam'
-    bds_id = fields.Many2one('bds.bds')
-    user_id = fields.Many2one('res.users',default=lambda self: self.env.user.id)
-    dt = fields.Datetime(default = lambda self: datetime.datetime.now())
-    
-class KhachXemBDS(models.Model):
-    _name = 'bds.khachxembds'
-    bds_id = fields.Many2one('bds.bds')
-    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id)
-    poster_id = fields.Many2one('bds.poster')     
-
-    
-class Images(models.Model):
-    _name='bds.myimage'
-    image = fields.Binary(attachment=True)
-    name = fields.Char()
-    bds_id = fields.Many2one('bds.bds')
-    
-class Gialines(models.Model):
-    _name='bds.gialines'
-    gia = fields.Float()
-    bds_id = fields.Many2one('bds.bds')
-    gia_cu = fields.Float()
-    diff_gia = fields.Float()
-    
-class Publicdate(models.Model):
-    _name='bds.publicdate'
-    public_date_cu = fields.Date()
-    bds_id = fields.Many2one('bds.bds')
-    public_date = fields.Date()
-    diff_public_date = fields.Integer()
 
 
-        
-        
-        
 def skip_if_cate_not_bds(depend_func):
     def wrapper(*args,**kargs):
         self = args[0]
@@ -71,165 +15,127 @@ def skip_if_cate_not_bds(depend_func):
             if r.cate ==u'bds':
                 depend_func(r)
     return wrapper
+
 class bds(models.Model):
     _name = 'bds.bds'
     _order = "id desc"
-   
+    _rec_name = 'title'
+    
+    link = fields.Char()
+    cate = fields.Selection([('bds','BDS'),('phone','Phone'),('laptop','Laptop')])
     url_id = fields.Many2one('bds.url')
-    khachxembds_ids = fields.One2many('bds.khachxembds','bds_id')
-    quantam_ids = fields.One2many('bds.quantam','bds_id')
     publicdate_ids =fields.One2many('bds.publicdate','bds_id')
     len_publicdate_ids = fields.Integer(compute='len_publicdate_ids_', store=True)
-    
     public_date = fields.Date()
     diff_public_date = fields.Integer()
     gialines_ids = fields.One2many('bds.gialines','bds_id')
     my_images_ids = fields.One2many('bds.myimage','bds_id')
-    is_co_image = fields.Boolean(compute='is_co_image_', store=True)
-    html_replace = fields.Html(compute='html_replace_')
-    
-    chieu_ngang = fields.Float()
-    chieu_dai =  fields.Float()
-    my_dien_tich = fields.Float()
- 
-    is_read = fields.Boolean()
-    name = fields.Char(compute = 'name_',store = True)
     title = fields.Char()
     images_ids = fields.One2many('bds.images','bds_id')
     siteleech_id = fields.Many2one('bds.siteleech')
     thumb = fields.Char()
-    thumb_view = fields.Binary(compute='thumb_view_')  
-    image = fields.Binary(compute='thumb_view_')   
-    present_image_link = fields.Char()
-    present_image_link_show = fields.Binary(compute='present_image_link_show_')
-    muc_gia = fields.Selection([('<1','<1'),('1-2','1-2'),('2-3','2-3'),('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
-                               compute='muc_gia_',store = True,string=u'Mức Giá')
-    muc_dt = fields.Selection(
-        [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
-        compute='muc_dt_',store = True,string=u'Mức diện tích')
-    don_gia = fields.Float(digit=(6,0),compute='don_gia_',store=True,string=u'Đơn giá')
-    muc_don_gia = fields.Selection([('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
-                                    ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),('180-210','180-210'),('>210','>210')],compute='muc_don_gia_',store=True)
-    ti_le_don_gia = fields.Float(digits=(6,2),compute='ti_le_don_gia_',store=True)
-    muc_ti_le_don_gia = fields.Selection([('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
-                                    ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),('2.4-2.8','2.4-2.8'),('>2.8','>2.8')],compute='muc_ti_le_don_gia_',store=True)
-    
     poster_id = fields.Many2one('bds.poster')
-    
-    
-    
-    # related
-    
-    post_ids_of_user  = fields.One2many('bds.bds','poster_id',related='poster_id.post_ids')
-    username = fields.Char(related='poster_id.username')
-    
-    detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
-    du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
-    
-    
-    max_trang_thai_lien_lac = fields.Selection(related='poster_id.max_trang_thai_lien_lac',store=True)
-    count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
-    count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
-    count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
-    
-    
     html = fields.Html()
-    html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
-    link_show =  fields.Char(compute='link_show_')
     chotot_moi_gioi_hay_chinh_chu = fields.Selection([('moi_gioi', 'Bán chuyên'), 
         ('chinh_chu', 'Cá nhân'),('khong_biet','Không Phải bài ở chợt tốt')], default='khong_biet',string='Bán chuyên')
-    mtg = fields.Boolean(compute = 'mien_tiep_mg_', store = True,string='Miễn trung gian')
-    mqc = fields.Boolean(compute = 'mqc_', store = True)
-  
-    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
-    dd_tin_cua_co = fields.Boolean(compute='trich_dia_chi_', store = True, string='kw môi giới')
-    dd_tin_cua_dau_tu = fields.Boolean(compute='dd_tin_cua_dau_tu_', store = True,string='kw đầu tư')
-    
-    html_show = fields.Text(compute='html_show_',string=u'Nội dung')
     gia = fields.Float('Giá')
-  
     gia_trieu = fields.Float()
     area = fields.Float(digits=(32,1),string='Diện tích')
     address=fields.Char()
     quan_id = fields.Many2one('bds.quan',ondelete='restrict',string='Quận')
     phuong_id = fields.Many2one('bds.phuong','Phường')
-
+    date_text = fields.Char()
+    public_datetime = fields.Datetime()
+    ngay_update_gia = fields.Datetime()
+    #set field (field mà mình điền vào)
+    is_read = fields.Boolean()
     quan_tam = fields.Datetime(string=u'Quan Tâm')
     ko_quan_tam = fields.Datetime(string=u'Không Quan Tâm')
 
-    comment = fields.Char()
-    ket_cau = fields.Selection([(u'Đất Trống',u'Đất Trống'),(u'Cấp 4',u'Cấp 4'),(u'1 Tầng',u'1 Tầng'),(u'2 Tầng',u'2 Tầng'),(u'3 Tầng',u'3 Tầng'),(u'4 Tầng',u'4 Tầng'),(u'5 Tầng',u'5 Tầng'),(u'lon hon 5 ',u'lon hon 5')])
-    date_text = fields.Char()
-    quan_id_selection = fields.Selection('get_quan_')
-
-    sub_html = fields.Html(compute='sub_html_',store=True)
+    #compute field
+    html_show = fields.Text(compute='html_show_',string=u'Nội dung')
+    html_replace = fields.Html(compute='html_replace_')
+    html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
+    link_show =  fields.Char(compute='link_show_')
+    mtg = fields.Boolean(compute = 'mien_tiep_mg_', store = True,string='Miễn trung gian')
+    mqc = fields.Boolean(compute = 'mqc_', store = True)
+    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
+    dd_tin_cua_co = fields.Boolean(compute='trich_dia_chi_', store = True, string='kw môi giới')
+    dd_tin_cua_dau_tu = fields.Boolean(compute='dd_tin_cua_dau_tu_', store = True,string='kw đầu tư')
+    subtitle_html_for_agency = fields.Html(compute='subtitle_html_for_agency_',store=True, string="Để làm cò")
     auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    choosed_area = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
-    len_same_address_bds_ids = fields.Integer(compute='same_address_bds_ids_',store=True)
-    
-    
-    # phuong_quan = fields.Char(compute='phuong_quan_', store=True)
-    # phuong = fields.Char(compute='phuong_quan_', store=True)
-    # quan = fields.Char(compute='phuong_quan_', store=True)
-
-    # @skip_if_cate_not_bds
-    # @api.depends('html')
-    # def phuong_quan_(self):
-    #     for r in self:
-    #         str= r.html
-    #         rs = re.search(r'(?:\bphường|p)[ .]{0,2}((?:\w+ {0,1}){1,4})[ ,]{1,3}(?:quận|q)[ .]{0,2}((?:\w+ {0,1}){1,4})\b',str,re.I)
-    #         if rs:
-    #             r.phuong_quan = rs.group(0)
-    #             r.phuong = rs.group(1)
-    #             r.quan = rs.group(2)
-
-  
     after_trich_dia_chi = fields.Char(compute='trich_dia_chi_',store = True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
-    diff_gia = fields.Float()
-    
-    
-    link = fields.Char()
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
-    public_datetime = fields.Datetime()
-    first_public_datetime = fields.Datetime()
-    
-    data = fields.Text()
-    # url_ids = fields.Many2many('bds.url','url_post_relate','post_id','url_id')
-    again_update_date = fields.Datetime()
-    # phuong_15 = fields.Boolean()
+    thumb_view = fields.Binary(compute='thumb_view_')  
+    image = fields.Binary(compute='thumb_view_')   
+    muc_gia = fields.Selection([('<1','<1'),('1-2','1-2'),('2-3','2-3'),
+                                ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
+                                ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
+                                ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
+                               compute='muc_gia_',store = True,string=u'Mức Giá')
+    muc_dt = fields.Selection(
+        [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
+        compute='muc_dt_',store = True,string=u'Mức diện tích')
+    don_gia = fields.Float(digit=(6,0),compute='don_gia_',store=True,string=u'Đơn giá')
+    ti_le_don_gia = fields.Float(digits=(6,2),compute='ti_le_don_gia_',store=True)
+    muc_don_gia = fields.Selection([('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
+                                    ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
+                                    ('180-210','180-210'),('>210','>210')],compute='muc_don_gia_',store=True)
+    muc_ti_le_don_gia = fields.Selection([('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
+                                    ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
+                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')],compute='muc_ti_le_don_gia_',store=True)
+    hoahongsearch = fields.Char(compute ='hoahongsearch_',store=True)
 
-    # greater_day for filter
+    # !compute field
+    # related 
+    post_ids_of_user  = fields.One2many('bds.bds','poster_id',related='poster_id.post_ids')
+    username = fields.Char(related='poster_id.username')
+    detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
+    du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
+    count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
+    count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
+    count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
+    #!related
+    # for filter field
+    quan_id_selection = fields.Selection('get_quan_')
     greater_day = fields.Integer()
-    trang_thai_lien_lac = fields.Selection([(u'1',u'request zalo'),(u'2',u'added zalo'),
-                                            (u'3',u'Đã gửi sổ'),(u'4',u'Đã xem nhà'),(u'5',u'Đã Dẫn khách'), (u'6',u'Không có zalo')])
-    
-    ngay_update_gia = fields.Datetime()
-    begin_gia = fields.Float()
-    def siteleech_id_selection_(self):
-        rs = list(map(lambda i:(i.name,i.name),self.env['bds.siteleech'].search([])))
-        return rs
     siteleech_id_selection = fields.Selection('siteleech_id_selection_')
-    trigger = fields.Boolean()
+    # !for search
+    
+    @api.multi
+    def open_something(self):
+        return {
+                'name': 'abc',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'bds.bds',
+                'view_id': self.env.ref('bds.bds_form').id,
+                'type': 'ir.actions.act_window',
+                'res_id': self.id,
+                'target': 'new'
+            }
 
 
-    
-    # mới thêm vào ngày 23/02
-    cate = fields.Selection([('bds','BDS'),('phone','Phone'),('laptop','Laptop')])
-    def test(self):
-        for r in self:
-            same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi), ('id','!=',r.id)])
-            raise UserError(same_address_bds_ids)
-    
     def set_quan_tam(self):
         for r in self:
             r.quan_tam = fields.Datetime.now()
-            
+
+    # for filter function
+    def siteleech_id_selection_(self):
+        rs = list(map(lambda i:(i.name,i.name),self.env['bds.siteleech'].search([])))
+        return rs
+
+    def get_quan_(self):
+        quans = self.env['bds.quan'].search([])
+        rs = list(map(lambda i:(i.name,i.name),quans))
+        return rs
+           
+    #depends function
     @api.depends('publicdate_ids')
     def len_publicdate_ids_(self):
         for r in self:
@@ -244,12 +150,7 @@ class bds(models.Model):
             if r.trich_dia_chi:
                 html_replace = html_replace.replace(r.trich_dia_chi,'')
             r.html_replace = html_replace
-
             
-    @api.depends('my_images_ids')
-    def is_co_image_(self):
-        for r in self:
-            r.is_co_image = bool(r.my_images_ids)
 
     @skip_if_cate_not_bds
     @api.depends('html')
@@ -259,8 +160,6 @@ class bds(models.Model):
             if rs:
                 r.mien_tiep_mg = rs.group(0)
                 r.mtg = True
-
-    
     
     @api.depends('html')
     def trich_dia_chi_(self):
@@ -319,7 +218,6 @@ class bds(models.Model):
         for r in self:
             if r.trich_dia_chi:
                 same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi),('id','!=',r.id)])
-                r.len_same_address_bds_ids = len(same_address_bds_ids)
                 r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
                 
     @skip_if_cate_not_bds            
@@ -341,59 +239,26 @@ class bds(models.Model):
                 ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
                 r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich = auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
                 
-                if ti_le_dien_tich_web_vs_auto_dien_tich < 1.3 and ti_le_dien_tich_web_vs_auto_dien_tich > 0.7:
-                    choosed_area =  rarea
-                else:
-                    choosed_area = auto_dien_tich
-            else:
-                choosed_area = r.area
-            r.choosed_area = choosed_area
-                
-    # nếu không có decor bị lỗi
     @skip_if_cate_not_bds   
     @api.depends('html')
-    def sub_html_(self):
+    def subtitle_html_for_agency_(self):
         for r in self:
             pt ='(liên hệ|lh|dt)([: ]{0,3})(.{1,20}[\d. -]{8,14})+'
             rs = re.sub(pt, '', r.html, flags = re.I)
             pt= '(hoa hồng|huê hồng|hh).*?(1%|\d{2,3}\s{0,1}(triệu|tr))'
             rs = re.sub(pt, '',rs, flags = re.I)
-            r.sub_html = rs
+            r.subtitle_html_for_agency = rs
     
     
-    hoahongsearch = fields.Char(compute ='hoahongsearch_',store=True)
+    
     @skip_if_cate_not_bds
-    @api.depends('sub_html')
+    @api.depends('subtitle_html_for_agency')
     def hoahongsearch_(self):
         for r in self:
             pt= '(hoa hồng|huê hồng|hh).+?(\d[\.\d]{0,2}%|\d{2,3}\s{0,1}(triệu|tr))'
-            rs = re.search(pt, r.sub_html,flags = re.I)
+            rs = re.search(pt, r.subtitle_html_for_agency,flags = re.I)
             if rs:
                 r.hoahongsearch = rs.group(0)
-    search_remain_phone = fields.Char(compute ='search_remain_phone_',store=True)
-
-    @skip_if_cate_not_bds
-    @api.depends('sub_html')
-    def search_remain_phone_(self):
-        for r in self:
-            pt ='[\d. -]{8,14}'
-            rs = re.search(pt, r.sub_html,flags = re.I)
-            if rs:
-                r.search_remain_phone = rs.group(0)
-                       
-            
-            
-    search_lien_he = fields.Char(compute ='search_lien_he_',store=True)
-    @skip_if_cate_not_bds
-    @api.depends('html')
-    def search_lien_he_(self):
-        for r in self:
-            pt ='(liên hệ|lh|dt)([: ]{0,3})(.{1,20}[\d. -]{8,14})+'
-            rs = re.search(pt, r.html,flags = re.I)
-            if rs:
-                r.search_lien_he = rs.group(0)
-    
-    
     
     @skip_if_cate_not_bds
     @api.depends('html')
@@ -408,12 +273,10 @@ class bds(models.Model):
                     break
             if is_match:
                 r.mqc = True
-                    
 
     @skip_if_cate_not_bds               
     @api.depends('html')
     def dd_tin_cua_dau_tu_(self):
-
         kss= ['hoa hồng','hh 1%', 'hh 0.5%','hh .{1,3}tr','1%','1 %','huê hồng','phí môi giới',]
         for r in self:
             is_match = False
@@ -425,57 +288,20 @@ class bds(models.Model):
             if is_match:
                 r.dd_tin_cua_dau_tu = True
                     
-                    
-
-    
     def link_show_(self):
         for r in self:
             if r.siteleech_id.name == 'chotot':
                 r.link_show = r.cho_tot_link_fake
             else:
                 r.link_show = r.link
-    recent_create =  fields.Boolean(compute='recent_create_')
-    
-    def recent_create_(self):
-        for r in self:
-            create_date =  fields.Datetime.from_string(r.create_date)
-            rs = datetime.datetime.now() - create_date
-            rs = rs.seconds
-            if rs < 3000:
-                r.recent_create = True
-    
-    def get_quan_(self):
-        quans = self.env['bds.quan'].search([])
-        rs = list(map(lambda i:(i.name,i.name),quans))
-        return rs
-
-    
-    
-
     
     @api.depends('html')
     def html_khong_dau_(self):
         for r in self:
             r.html_khong_dau = unidecode(r.html) if r.html else r.html
     
-    
-    @api.multi
-    def open_something(self):
-        return {
-                'name': 'abc',
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'bds.bds',
-                'view_id': self.env.ref('bds.bds_form').id,
-                'type': 'ir.actions.act_window',
-                'res_id': self.id,
-                'target': 'new'
-            }
-        
-        
-        
-        
-        
+  
+
     @api.depends('ti_le_don_gia')
     def muc_ti_le_don_gia_(self):
         muc_dt_list =[('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
@@ -489,6 +315,7 @@ class bds(models.Model):
                     break
             if not selection:
                 r.muc_ti_le_don_gia = '>2.8'
+
     @api.depends('don_gia','quan_id')
     def ti_le_don_gia_(self):
         for r in self:
@@ -498,16 +325,12 @@ class bds(models.Model):
             except:
                 pass
                 
-    @api.depends('gia','choosed_area', 'area')
+    @api.depends('gia','area')
     def don_gia_(self):
         for r in self:
-            if r.gia:
-                if r.choosed_area:
-                    r.don_gia = r.gia*1000/r.choosed_area
-                elif r.area:
-                    r.don_gia = r.gia*1000/r.area
-            else:
-                r.don_gia = False
+            if r.gia and r.area:
+                r.don_gia = r.gia*1000/r.area
+                
     @api.depends('don_gia')
     def muc_don_gia_(self):
         muc_dt_list =[('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
@@ -521,7 +344,8 @@ class bds(models.Model):
                     break
             if not selection:
                 r.muc_don_gia = '>210'
-    @api.depends('choosed_area')
+
+    @api.depends('area')
     def muc_dt_(self):
         muc_dt_list = [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')]
         for r in self:
@@ -533,6 +357,7 @@ class bds(models.Model):
                     break
             if not selection:
                 r.muc_dt = '>70'
+
     @api.depends('gia')
     def muc_gia_(self):
         muc_gia_list = [('<1','<1'),('1-2','1-2'),('2-3','2-3'),('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')]
@@ -546,12 +371,11 @@ class bds(models.Model):
             if not selection:
                 r.muc_gia = muc_gia_list[-1][0]
 
-    
-    
+
     @api.depends('html')
     def html_show_(self):
         for r in self:
-            html = '<b>%s</b>'%((r.title) if r.title else '') + \
+            r.html_show = '<b>%s</b>'%((r.title) if r.title else '') + \
             ('\n' + r.quan_id.name if r.quan_id.name  else '') +\
             ('\n' + r.html if r.html else '') +\
             ('\nPhone: ' + (r.poster_id.name or '')) +\
@@ -562,30 +386,16 @@ class bds(models.Model):
             ('\nĐơn giá:%.2f'%r.don_gia) + \
             ('Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
             ('\nCount post all site:%s'%r.count_post_all_site) +\
-            ('\nlen_same_address_bds_ids: %s'%r.len_same_address_bds_ids) +\
             ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)
-            # (u', detail_du_doan_cc_or_mg: %s'%r.detail_du_doan_cc_or_mg)
-            # ('\n choosed_area:%s'%r.choosed_area) + (u', auto_ngang: %s'%r.auto_ngang) + (u', auto_doc: %s'%r.auto_doc) + (u', auto_dien_tich:%s'%r.auto_dien_tich) +  \
-        #   ('\n' + u'Chào anh/chị %s, em bên cty môi giới, anh chị có thể  kết bạn zalo và gửi sổ căn nhà "%s" không ạ, phí cty là 1 %%'%(r.username if r.username else '', r.title) if r.title else '')
 
-            r.html_show = html
-            
-    @api.model
-    def create(self, vals):
-        if 'gia' in vals:
-            vals['begin_gia'] = vals['gia']
-        if 'public_datetime' in vals:
-            vals['first_public_datetime'] = vals['public_datetime']
-        cv = super(bds, self).create(vals)
-        return cv
-        
-    @api.multi
+    @api.depends('link')
     def cho_tot_link_fake_(self):
         for r in self:
             if 'chotot' in r.link:
                 rs = re.search('/(\d*)$',r.link)
                 id_link = rs.group(1)
                 r.cho_tot_link_fake = 'https://nha.chotot.com/quan-10/mua-ban-nha-dat/' + 'xxx-' + id_link+ '.htm'
+                
     @api.depends('thumb')
     def thumb_view_(self):
         for r in self:
@@ -594,16 +404,9 @@ class bds(models.Model):
                     photo = base64.encodestring(request_html(r.thumb, False, is_decode_utf8 = False))
                     r.thumb_view = photo 
                     r.image = photo
-    @api.depends('present_image_link')
-    def present_image_link_show_(self):
-        for r in self:
-            if r.present_image_link:
-                photo = base64.encodestring(urllib2_or_urllib_request.urlopen(r.present_image_link).read())
-                r.present_image_link_show = photo 
 
-    @api.depends('title')
-    def name_(self):
-        self.name = self.title
+
+    
         
 
                

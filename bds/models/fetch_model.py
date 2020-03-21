@@ -10,7 +10,7 @@ import datetime
 #import thư viện lấy từ file fetch.py qua
 from odoo.exceptions import UserError
 from odoo import models,fields
-from odoo.addons.bds.models.bds_tools  import  request_html,g_or_c_ss, get_or_create_user_and_posternamelines, MyError
+from odoo.addons.bds.models.bds_tools  import  request_html,g_or_c_ss, get_or_create_user_and_posternamelines, FetchError
 from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
 from odoo.addons.bds.models.fetch_site.fetch_chotot  import  get_topic_chotot, create_cho_tot_page_link, local_a_native_time, convert_chotot_price, convert_chotot_date_to_datetime, gmt_7_a_native_time
 from odoo.addons.bds.models.fetch_site.fetch_muaban  import get_muaban_vals_one_topic
@@ -87,7 +87,7 @@ class Fetch(models.Model):
         url_id = self.url_ids[new_index]
         try:
             self.fetch_a_url_id (url_id)
-        except MyError as e:
+        except FetchError as e:
             self.env['bds.error'].create({'name':str(e),'des':e.url})
 
 
@@ -299,7 +299,7 @@ class Fetch(models.Model):
             
             self.request_topic(link, update_dict, url_id, topic_data_from_page)
             if update_dict:
-                print (u'___________Update giá topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
+                print (u'Update giá topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
                                                                             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
                 search_link_obj.write(update_dict)
                 number_notice_dict['update_link_number'] = number_notice_dict['update_link_number'] + 1

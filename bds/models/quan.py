@@ -53,7 +53,6 @@ class QuanHuyen(models.Model):
     name_without_quan = fields.Char()
     post_ids = fields.One2many('bds.bds','quan_id')
     muc_gia_quan = fields.Float(digit=(6,2),compute='muc_gia_quan_',store=True,string=u'Mức Đơn Giá(triệu/m2)')
-    trigger = fields.Boolean()
     len_post_ids = fields.Integer(compute='len_post_ids_')
     @api.depends('post_ids')
     def len_post_ids_(self):
@@ -61,7 +60,7 @@ class QuanHuyen(models.Model):
             r.len_post_ids = self.env['bds.bds'].search_count([('quan_id','=',r.id)])
 #             r.len_post_ids = len(r.post_ids)
         
-    @api.depends('name','trigger')
+    @api.depends('name')
     def name_khong_dau_(self):
         name_khong_dau_compute(self)
         

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines,g_or_c_chotot_quan
+from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines,g_or_c_quan
 from bs4 import BeautifulSoup
 import re
 import datetime
@@ -35,7 +35,6 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
             images.append(data_src)
         
     if images:
-        update_dict['present_image_link'] = images[0]  
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
         m2m_ids = list(map(lambda x:x.id, object_m2m_list))
         if m2m_ids:
@@ -81,7 +80,7 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
     quan_soup = soup.select('span.location-clock__location')
     quan_txt =  quan_soup[0].get_text()
     quan_name =  quan_txt.split('-')[0].strip()
-    quan_id = g_or_c_chotot_quan(self, quan_name)
+    quan_id = g_or_c_quan(self, quan_name)
     update_dict['quan_id'] = quan_id
 
     # mobile,name = get_mobile_name_for_muaban(soup)

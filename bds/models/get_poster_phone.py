@@ -1,5 +1,4 @@
 from odoo import models, fields, api,sql_db
-from odoo.addons.bds.models.import_contact import import_contact
 import logging
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
 import re

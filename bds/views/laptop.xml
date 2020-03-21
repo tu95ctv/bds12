@@ -23,9 +23,8 @@
             <field name="name">laptop_search</field>
             <field name="model">bds.bds</field>
             <field name="arch" type="xml">
-                <search string="bds search">
+                <search string="laptop search">
                 
-                    <field name="name" />
                     <field name="title" />
                     <field name="gia"  string="Tạo cách đây bn phút" filter_domain="[('create_date','&gt;', (datetime.datetime.now() -  datetime.timedelta(hours=7,minutes=self)).strftime('%Y-%%m-%%d %%H:%%M:%%S'))]"   />
                     <field name="gia"  string="giá bé hơn" filter_domain="[('gia','&lt;',self)]"/>

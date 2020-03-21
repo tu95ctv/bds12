@@ -13,49 +13,19 @@ class Poster(models.Model):
     login = fields.Char()
     username = fields.Char(compute = 'username_')
     name = fields.Char(compute ='name_',store= True)
-    set_name = fields.Char()
     @api.depends('phone')
     def name_(self):
         for r in self:
             r.name = r.phone
-    poster_type = fields.Selection([('chinh_chu', 'chinh_chu'), ('dau_tu', 'dau_tu'), ('moi_gioi', 'moi_gioi')])
-    contact_address = fields.Char()
     post_ids = fields.One2many('bds.bds','poster_id')
-    mycontact_id = fields.Many2one('bds.mycontact',compute='mycontact_id_',store=True)
     cong_ty = fields.Char()
     site_count_of_poster = fields.Integer(compute='site_count_of_poster_',store=True)
     nhan_xet = fields.Char()
     nha_mang = fields.Selection([('vina','vina'),('mobi','mobi'),('viettel','viettel'),('khac','khac')],compute='nha_mang_',store=True)
-    log_text = fields.Char()
     username_in_site_ids = fields.One2many('bds.posternamelines','poster_id')
     username_in_site_ids_show = fields.Char(compute='username_in_site_ids_show_')
     quan_id_for_search = fields.Many2one('bds.quan',related = 'quanofposter_ids.quan_id')
-    
-    
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
-    
-    set_trang_thai_lien_lac = fields.Selection([(u'request_zalo',u'request zalo'),(u'added_zalo',u'added zalo'),
-                                            (u'da_gui_so',u'Đã gửi sổ'),(u'da_xem_nha',u'Đã xem nhà'),(u'da_dan_khach',u'Đã Dẫn khách')])
-    
-    max_trang_thai_lien_lac = fields.Selection([(u'1',u'request zalo'),(u'2',u'added zalo'),
-                                            (u'3',u'Đã gửi sổ'),(u'4',u'Đã xem nhà'),(u'5',u'Đã Dẫn khách'),(u'6',u'Không có zalo')],compute='max_trang_thai_lien_lac_',store=True)
-    
-    @api.depends('post_ids.trang_thai_lien_lac', 'trigger')
-    def max_trang_thai_lien_lac_(self):
-        for r in self:
-            trang_thai_lien_lac = r.post_ids.mapped('trang_thai_lien_lac')
-            if trang_thai_lien_lac:
-                trang_thai_lien_lac = map(lambda i: int(i), trang_thai_lien_lac)
-                max_trang_thai_lien_lac= max(trang_thai_lien_lac)
-                if max_trang_thai_lien_lac:
-                    r.max_trang_thai_lien_lac = str(max_trang_thai_lien_lac)
-    da_goi_dien_hay_chua = fields.Selection([(u'Chưa gọi điện',u'Chưa gọi điện'),(u'Đã liên lạc',u'Đã liên lạc'),(u'Không bắt máy',u'Không đổ chuông')],
-                                            default = u'Chưa gọi điện')
-    is_recent = fields.Boolean(compute='is_recent_')
-    log_text = fields.Char()
-    
-    
-    #count_post_of_poster_
     address_topic_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
     address_rate = fields.Float(compute ='count_post_of_poster_', store  = True)
     chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
@@ -69,6 +39,20 @@ class Poster(models.Model):
                                          ('dd_cc','CC'),
                                          ('dd_kb', 'KB')],
                                         compute = 'count_post_of_poster_', store=True, string="Dự đoán CC hay MG")
+    
+    count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',store=True,string=u'chotot count')
+    count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_',store=True)
+    count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
+    count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_',store=True) 
+    rate_chinh_chu = fields.Float(compute='count_post_of_poster_', store=True)
+    rate_moi_gioi = fields.Float(compute='count_post_of_poster_', store=True)
+    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)#,compute='quanofposter_ids_',store = True
+    quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
+    quan_chuyen_2 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
+    quan_chuyen_1_id = fields.Many2one('bds.quan', related ='quan_chuyen_1.quan_id' , store = True)
+   
+    number_post_of_quan = fields.Char(compute='number_post_of_quan_')
+    created_by_site_id = fields.Many2one('bds.siteleech')
     detail_du_doan_cc_or_mg = fields.Selection(
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
@@ -89,33 +73,6 @@ class Poster(models.Model):
                                                    ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
                                                    ('dd_kb','dd_kb')
                                                    ], compute = 'count_post_of_poster_' , store = True)
-    count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',store=True,string=u'chotot count')
-    count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_',store=True)
-    count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
-    count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_',store=True) 
-    rate_chinh_chu = fields.Float(compute='count_post_of_poster_', store=True)
-    rate_moi_gioi = fields.Float(compute='count_post_of_poster_', store=True)
-    
-    
-    
-    
-    trigger = fields.Boolean()
-
-   
-    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)#,compute='quanofposter_ids_',store = True
-    quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
-    quan_chuyen_2 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
-    quan_chuyen_1_id = fields.Many2one('bds.quan', related ='quan_chuyen_1.quan_id' , store = True)
-   
-    
-    
-    is_numberphone_09 =  fields.Selection([('09','09'),('not09','not09')], compute ='is_numberphone_09_', store=True)
-    number_post_of_quan = fields.Char(compute='number_post_of_quan_')
-    ten_zalo = fields.Char()
-    created_by_site_id = fields.Many2one('bds.siteleech')
-    trigger4 = fields.Boolean()
-    trang_thai_zalo = fields.Selection([(u'no_zalo',u'no_zalo'),(u'request_zalo',u'request zalo'),(u'added_zalo',u'added zalo'),
-                                            ])
     @api.multi
     def open_something(self):
         return {
@@ -134,16 +91,7 @@ class Poster(models.Model):
             alist = map(lambda i:u'%s_%s:%s'%(i.siteleech_id.name_viet_tat, i.quan_id.name_viet_tat,i.quantity), qops)
             rs = u', '.join(alist)
             r.number_post_of_quan = rs
-    @api.depends('phone')
-    def is_numberphone_09_(self):
-        for r in self:
-            if r.phone:
-                rs = re.search('^(09|082)\d+',r.phone)
-                if rs:
-                    r.is_numberphone_09  = '09'
-                else:
-                    r.is_numberphone_09  = 'not09'
-    
+
     @api.multi
     def username_(self):
         for r in self:
@@ -170,24 +118,8 @@ class Poster(models.Model):
                 r.quan_chuyen_1 = qops[0]
                 if len(qops) == 2:
                     r.quan_chuyen_2 = qops[1]
-                    
-#     txt_cc_or_mg = fields.Char()
-    @api.multi
-    def test(self):
-        product_category_query =\
-                 '''
-                 select avg(gia),count(gia) from 
-                 (select DISTINCT(trich_dia_chi),gia from bds_bds where poster_id = %s) as foo '''%self.id
-        self.env.cr.execute(product_category_query)
-        product_category = self.env.cr.dictfetchall()
-        raise UserError('%s'%product_category)
-        
-    @api.multi
-    def trig(self):
-        self.trigger4 = True
 
-
-    @api.depends('post_ids', 'trigger', 'post_ids.trich_dia_chi', 'post_ids.dd_tin_cua_dau_tu', 'post_ids.dd_tin_cua_co')
+    @api.depends('post_ids','post_ids.trich_dia_chi', 'post_ids.dd_tin_cua_dau_tu', 'post_ids.dd_tin_cua_co')
     def count_post_of_poster_(self):
         for r in self:
             count_chotot_post_of_poster = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
@@ -290,7 +222,7 @@ class Poster(models.Model):
 
 
     
-    @api.depends('post_ids','post_ids.gia','trigger4')
+    @api.depends('post_ids','post_ids.gia')
     def quanofposter_ids_(self):
         for r in self:
             if r.id:
@@ -350,18 +282,7 @@ class Poster(models.Model):
             username_in_site_ids_shows = map(lambda r : r.username_in_site + '(' + r.site_id.name +   ')',r.username_in_site_ids)
             r.username_in_site_ids_show = ','.join(username_in_site_ids_shows)
                 
-    @api.multi
-    def is_recent_(self):
-        for r in self:
-            #print fields.Date.from_string(r.create_date)
-            #print datetime.date.today() - datetime.timedelta(days=1)
-            try:
-                if fields.Date.from_string(r.create_date) >=  (datetime.date.today() - datetime.timedelta(days=1)):
-                    r.is_recent = True
-            except TypeError:
-                pass
 
-    
 
     
     @api.depends('phone')
@@ -424,16 +345,6 @@ class Poster(models.Model):
             r.site_count_of_poster = len(r.username_in_site_ids)
             
             
-    @api.depends('phone')
-    def mycontact_id_(self):
-        for r in self:
-            r.mycontact_id = self.env['bds.mycontact'].search([('phone','=',r.phone)])
+    
             
    
-
-    def avg(self):
-        product_category_query = '''select min(gia),avg(gia),max(gia) from bds_bds  where poster_id = %s and gia > 0'''%self.id
-        self.env.cr.execute(product_category_query)
-        product_category = self.env.cr.fetchall()
-        #print product_category
-        self.log_text = product_category

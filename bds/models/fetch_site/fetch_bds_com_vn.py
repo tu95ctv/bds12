@@ -55,7 +55,6 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id,only_return_price=F
     update_dict['siteleech_id'] = siteleech_id.id
     images = get_images_for_bds_com_vn(soup)
     if images:
-        update_dict['present_image_link'] = images[0]  
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
         m2m_ids = list(map(lambda x:x.id, object_m2m_list))
         ###print '**m2m_ids**',m2m_ids

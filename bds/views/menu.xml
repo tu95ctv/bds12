@@ -5,8 +5,6 @@
     <!-- <menuitem name="BDS" id="bds_menu" parent="not_use_menu" action="full_bds_action" /> -->
     <menuitem name="Get Poster" id="getphoneposter__menu" parent="not_use_menu" action="bds.getphoneposter_action" />
     <menuitem name="images_menu" id="images_menu" parent="not_use_menu" action="bds.images_action" />
-    <menuitem name="mycontact_menu" id="mycontact_menu" parent="not_use_menu" action="bds.mycontact_action" />
-    <menuitem name="importcontact_menu" id="importcontact_menu" parent="not_use_menu" action="bds.importcontact_action" />            
 
     <menuitem name="Laptop" id="bds_menu_laptop" parent="bds_icon" action="bds.action_window_laptop"  sequence="2"/>
 

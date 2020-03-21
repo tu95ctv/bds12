@@ -5,14 +5,11 @@
     <field name="priority">5</field>
     <field name="arch" type="xml">
       <search string="bds search">
-        <field name="name" />
         <field name="title" />
         <field name="gia"  string="Tạo cách đây bn phút" filter_domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=self)).strftime('%Y-%m-%d %H:%M:%S'))]"   />
         <field name="gia"  string="giá bé hơn" filter_domain="[('gia','&lt;',self)]"/>
         <field name="gia"  string="giá  lớn hơn" filter_domain="[('gia','&gt;',self)]"/>
         <field name="count_post_all_site"  string="count_post_all_site  bé hơn" filter_domain="[('count_post_all_site','&lt;',self)]"/>
-        <field name="len_same_address_bds_ids" />
-        <field  name="len_same_address_bds_ids" string="len_same_address_bds_ids lon hon"  filter_domain="[ ('len_same_address_bds_ids','&gt;=',self)]"/>
         <field name="du_doan_cc_or_mg" />
         <field name="link" />
         <field name="html" />

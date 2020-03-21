@@ -7,7 +7,7 @@ import datetime
 from unidecode import unidecode
 
 
-class MyError(Exception):
+class FetchError(Exception):
     type = None
     pass
 
@@ -83,18 +83,17 @@ def get_or_create_user_and_posternamelines(self, mobile, name, site_id):
     search_dict['phone'] = mobile 
     search_dict['login'] = str(mobile)+'@gmail.com'
     user =  self.env['bds.poster'].search([('phone','=', mobile)])
-    site_id = g_or_c_ss(self,'bds.siteleech', {'created_by_site_id':site_id}, {})
     if user:
         posternamelines_search_dict = {'username_in_site':name, 'site_id':site_id.id, 'poster_id':user.id}
         g_or_c_ss(self,'bds.posternamelines',posternamelines_search_dict)
                                               
     else:
-        search_dict.update({'ghi_chu':'created by %s'%site_name})
+        search_dict.update({'created_by_site_id': site_id.id})
         user =  self.env['bds.poster'].create(search_dict)
         self.env['bds.posternamelines'].create( {'username_in_site':name,'site_id':site_id.id,'poster_id':user.id})
     return user 
 
-def g_or_c_chotot_quan(self, quan_name):
+def g_or_c_quan(self, quan_name):
     name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
     quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
     quan_search_dict = {'name_without_quan':name_without_quan_huyen}

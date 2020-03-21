@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss,  get_or_create_user_and_posternamelines, g_or_c_chotot_quan
+from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss,  get_or_create_user_and_posternamelines, g_or_c_quan
 from bs4 import BeautifulSoup
 import re
 from unidecode import unidecode
@@ -58,16 +58,11 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
                 return g_or_c_ss(self,'bds.images',{'url':val})
 
     html = topic_html_or_json['ad']
-    # print ('***html', html)
     ad_params = topic_html_or_json['ad_params']
-    # print ('***ad_params', ad_params)
-    # address_new = ad_params['address']['value']
     try:
         ward =  ad_params['ward']['value']
     except KeyError:
         ward = None
-    # print ('***address_new',address_new, 'ward', ward)
-    # print (a)
     date = html['date']
     price, price_trieu = convert_chotot_price(html)
     update_dict['date_text'] = date
@@ -76,7 +71,6 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
         return price
     images = html.get('images',[])
     if images:
-        update_dict['present_image_link'] = images[0]  
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
         m2m_ids = list(map(lambda x:x.id, object_m2m_list))
         if m2m_ids:
@@ -90,7 +84,7 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
     
     try:
         quan_name = topic_html_or_json['ad_params']['area']['value']
-        quan_id = g_or_c_chotot_quan(self, quan_name)
+        quan_id = g_or_c_quan(self, quan_name)
         update_dict['quan_id'] = quan_id
     except KeyError:
         quan_id = None
