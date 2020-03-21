@@ -6,6 +6,7 @@ from odoo.exceptions import UserError
 from unidecode import unidecode
 import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
+from odoo.exceptions import UserError
 
 
 def skip_if_cate_not_bds(depend_func):

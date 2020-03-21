@@ -35,7 +35,7 @@ def get_images_for_bds_com_vn(soup):
     images =  list(map(lambda i:i['content'],rs))
     return images
 
-def get_bds_dict_in_topic(self,update_dict,html,siteleech_id,only_return_price=False):
+def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id,only_return_price=False):
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:
@@ -52,7 +52,6 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id,only_return_price=F
     
 #     update_dict['public_datetime'] = get_public_datetime(soup)
     update_dict['html'] = get_product_detail(soup)
-    update_dict['siteleech_id'] = siteleech_id.id
     images = get_images_for_bds_com_vn(soup)
     if images:
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
@@ -73,7 +72,7 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id,only_return_price=F
     update_dict['title']=title
     ####print 'title',title
     mobile,name = get_mobile_name_for_batdongsan(soup)
-    user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id)
+    user = get_or_create_user_and_posternamelines(self, mobile, name, siteleech_id_id)
     update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id    

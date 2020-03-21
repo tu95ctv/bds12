@@ -14,7 +14,9 @@ def get_mobile_name_for_muaban(soup):
         mobile =  None
         name= None
     return mobile,name
-def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_price=False):
+def get_muaban_vals_one_topic(self, html, siteleech_id_id, 
+    only_return_price=False):
+    update_dict  = {}
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:
@@ -23,7 +25,6 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
     update_dict['data'] = html
     soup = BeautifulSoup(html, 'html.parser')
 
-    test = ''
     image_soup = soup.select('div.slider__frame')
     content_soup = soup.select('div.body-container')
     update_dict['html']  = content_soup[0].get_text()
@@ -50,21 +51,6 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
         gia = gia/1000000000.0
     except IndexError:
         gia = 0
-        
-    # area_soup = soup.select('div.tect-content-block div.tech-item:nth-child(2) tech-item__value')
-    # print ('***area_soup**', area_soup, bool(area_soup))
-    # print (a)
-    # try:
-    #     area_soup = area_soup[0]
-    # except:
-    #     area_soup = None
-    #     pass
-    # if area_soup:
-    #     area = area_soup.get_text()
-    #     area = area.replace(' m2')
-    #     area = float(area)
-    #     print ('area***', area)
-    #     update_dict['area'] = area
 
 
 
@@ -75,15 +61,13 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
     title = soup.select('h1.title')[0].get_text()
     title = title.strip()
     update_dict['title']=title
-    update_dict['siteleech_id'] = siteleech_id.id
+    update_dict['siteleech_id'] = siteleech_id_id
    
     quan_soup = soup.select('span.location-clock__location')
     quan_txt =  quan_soup[0].get_text()
     quan_name =  quan_txt.split('-')[0].strip()
     quan_id = g_or_c_quan(self, quan_name)
     update_dict['quan_id'] = quan_id
-
-    # mobile,name = get_mobile_name_for_muaban(soup)
     try:
         name_soup = soup.select('div.user-info__fullname')[0]
         name =  name_soup.get_text()
@@ -96,10 +80,10 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
         mobile = None
 
     if mobile != None:
-        user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id)
+        user = get_or_create_user_and_posternamelines(self,mobile,name, siteleech_id_id)
         update_dict['user_name_poster']=name
         update_dict['phone_poster']=mobile
         update_dict['poster_id'] = user.id
+    return update_dict
 
-    print ('***update_dict*** trong fetch_muaban', update_dict)
 ############## end mua ban  ###########

@@ -78,19 +78,19 @@ def g_or_c_ss(self,
             searched_object.write(create_write_dict)
     return return_obj       
 
-def get_or_create_user_and_posternamelines(self, mobile, name, site_id):
+def get_or_create_user_and_posternamelines(self, mobile, name, siteleech_id_id):
     search_dict = {}
     search_dict['phone'] = mobile 
     search_dict['login'] = str(mobile)+'@gmail.com'
     user =  self.env['bds.poster'].search([('phone','=', mobile)])
     if user:
-        posternamelines_search_dict = {'username_in_site':name, 'site_id':site_id.id, 'poster_id':user.id}
+        posternamelines_search_dict = {'username_in_site':name, 'site_id':siteleech_id_id, 'poster_id':user.id}
         g_or_c_ss(self,'bds.posternamelines',posternamelines_search_dict)
                                               
     else:
-        search_dict.update({'created_by_site_id': site_id.id})
+        search_dict.update({'created_by_site_id': siteleech_id_id})
         user =  self.env['bds.poster'].create(search_dict)
-        self.env['bds.posternamelines'].create( {'username_in_site':name,'site_id':site_id.id,'poster_id':user.id})
+        self.env['bds.posternamelines'].create( {'username_in_site':name,'site_id':siteleech_id_id,'poster_id':user.id})
     return user 
 
 def g_or_c_quan(self, quan_name):

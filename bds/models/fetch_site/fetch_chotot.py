@@ -50,8 +50,8 @@ def convert_chotot_price(html):
         price_trieu = 0
     return price, price_trieu
     
-def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_return_price = False):
-    #mục đích thêm các thông số vào update_dict
+def get_topic_chotot(self, topic_html_or_json, siteleech_id, only_return_price = False):
+    update_dict = {}
     topic_html_or_json = json.loads(topic_html_or_json) 
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
@@ -67,7 +67,6 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
     date = html['date']
     price, price_trieu = convert_chotot_price(html)
     update_dict['date_text'] = date
-    update_dict['siteleech_id'] = siteleech_id.id
     if only_return_price:
         return price
     images = html.get('images',[])
@@ -108,6 +107,7 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
     
     update_dict['area']=html.get('size',0)
     update_dict['title']=html['subject']
+    return update_dict
     
     
 def local_a_native_time(datetime_input):
@@ -120,6 +120,7 @@ def get_mobile_name_cho_tot(html):
     mobile = html['phone']
     name = html['account_name']
     return mobile,name
+
 
 
 
