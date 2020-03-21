@@ -1,115 +1,41 @@
 <odoo>
-	<data>
-	
-	<!-- BDS2 -->
-    <record model="ir.ui.view" id="bds.list2">
-            <field name="name">bds list</field>
-            <field name="model">bds.bds</field>
-            <field name ="priority">16</field>
-            <field name="arch" type="xml">
-                <tree default_order="public_datetime DESC" editable="bottom" decoration-info="quan_tam!=False"  decoration-warning="lam_co!=False" 
-                decoration-danger="ko_quan_tam!=False or spam==True"  >
-                    <button name="open_something" type="object"/>
-                    <field name="quan_tam"></field>
-                    <!-- <field name="thumb_view" widget="image"></field> -->
-                    <field name="is_read"></field>
-                    <field name="spam"></field>
-                    <field name="id"></field>
-                    <field name="gia"/>
-                    <field name="don_gia"></field>
-                    <field name="ti_le_don_gia" />
-                    <field name="area"/>
-                    <field name="phuong_id"/>
-                    <field name="quan_id"/>
-                    <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
-                   	<field name="date_text" />
-                   	<field name="public_date" />
-                   	<field name="public_datetime" />
-                    <field name="trich_dia_chi" />
-                    <field name="cate"/>
-                   	<field name="du_doan_cc_or_mg" />
-                   	<field name="detail_du_doan_cc_or_mg" groups="bds.detail_guest" />
-                   	<field name="ko_quan_tam"/>
-                    <field name="spam"/>
-                    <field name="lam_co"></field>
-                    <field name="count_post_all_site" />
-                   <!-- 
-                   	<field name="dia_chi_mat_tien" />
-                   	<field name="dia_chi_2" />
-                   	<field name="url_id" />
-                   	<field name="dd_tin_cua_co" />
-                   	<field name="public_date" />
-                   	<field name="public_datetime" />
-                   	<field name="ngay_update_gia" />
-                   	<field name="mien_tiep_mg" />
-                   	<field name="begin_gia" />
-                   	<field name="gialines_ids" />
-                   	<field name="diff_gia" />
-                   	<field name="len_publicdate_ids" />
-                   	<field name="diff_public_date" />
-                   	<field name="len_same_address_bds_ids" />
-                    <field name="moi_gioi_hay_chinh_chu" />
-                    <field name="ket_luan_cc_or_mg"></field>
-                    <field name="count_post_all_site" />
-                     <field name="gia"></field>
-                     <field name="choosed_area"></field>
-                     <field name="don_gia"></field>
-                     <field name="ti_le_don_gia" />
-                     <field name="ti_le_dien_tich_web_vs_auto_dien_tich"></field>
-                     <field name="mtg"></field>
-                    <field name="mqc"></field>
-                    <field name="is_read" />
-                    <field name="search_remain_phone"></field>
-                    <field name="trang_thai_lien_lac"></field>
-                   <field name="max_trang_thai_lien_lac"></field>
-                   <field name="is_co_image"></field>
-                    <field name="dd_tin_cua_co"></field>
-                    <field name="dd_tin_cua_dau_tu"></field>
-                  	<field name="poster_id"></field>
-                    <field name="gia_show" />
-                    <field name="area" />
-                     <field name="address" />
-                      <field name="hoahongsearch"></field>
-                    <field name="search_lien_he"></field>
-                    <field name="username"/>
-             
-                    <field name="public_datetime" />
-                    <field name="create_date" />
-                    <field name="recent_create"  />
-                     <field name="comment" />
-                     
-                      -->
-                     
-                  
-                </tree>
-            </field>
-        </record>
-        
-        
-        <!-- <record model="ir.actions.act_window" id="full_bds_action">
-            <field name="name">bds window</field>
-            <field name="res_model">bds.bds</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-         -->
-        
-        
-        
-        
-        
+    <record model="ir.ui.view" id="bds_list_main">
+        <field name="name">bds list</field>
+        <field name="model">bds.bds</field>
+        <field name ="priority">16</field>
+        <field name="arch" type="xml">
+            <tree default_order="public_datetime DESC" editable="bottom" decoration-info="quan_tam!=False"
+            decoration-danger="ko_quan_tam!=False" >
+                <button name="open_something" type="object"/>
+                <field name="quan_tam"></field>
+                <!-- <field name="thumb_view" widget="image"></field> -->
+                <field name="is_read"></field>
+                <field name="id"></field>
+                <field name="gia"/>
+                <field name="don_gia"></field>
+                <field name="ti_le_don_gia" />
+                <field name="area"/>
+                <field name="phuong_id"/>
+                <field name="quan_id"/>
+                <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
+                <field name="date_text" />
+                <field name="public_date" />
+                <field name="public_datetime" />
+                <field name="trich_dia_chi" />
+                <field name="cate"/>
+                <field name="du_doan_cc_or_mg" />
+                <field name="chotot_moi_gioi_hay_chinh_chu" />
+                <field name="detail_du_doan_cc_or_mg" groups="bds.detail_guest" />
+                <field name="ko_quan_tam"/>
+                <field name="count_post_all_site" />
+            </tree>
+        </field>
+    </record>
     <record model="ir.actions.act_window" id="main_bds_action">
-            <field name="name">bds window</field>
-            <field name="res_model">bds.bds</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="bds.list2"></field>
-            <field name="search_id" ref="bds_search"/>
-        </record>
-
-   
-
-        
-	
-	
-	
-	</data>
+        <field name="name">bds window</field>
+        <field name="res_model">bds.bds</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="bds_list_main"></field>
+        <field name="search_id" ref="bds_search"/>
+    </record>
 </odoo>

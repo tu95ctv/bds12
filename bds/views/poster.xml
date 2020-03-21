@@ -57,14 +57,11 @@
                                 <field name="count_bds_post_of_poster" />
                                 <field name="count_post_all_site" />
                                 <field name="address_topic_number" />
-                    			<field name="set_cc_or_mg" />
-                    			<field name="ket_luan_cc_or_mg" />
-                    			<field name="ghi_chu_import" />
                             </group>
                             <group>
                                 <field name="mycontact_id" />
                                 <field name="cong_ty" />
-                                <field name="ghi_chu" />
+                                <field name="created_by_site_id" />
                                 <field name="username_in_site_ids">
                                     <tree>
                                         <field name="username_in_site" />
@@ -104,11 +101,11 @@
             <field name="model">bds.poster</field>
             <field name="priority">3</field>
             <field name="arch" type="xml">
-                <tree decoration-danger="0" decoration-info="is_recent==True" editable="bottom">
+                <tree decoration-danger="0" decoration-info="is_recent==True">
                     <field name="id" />
                     <field name="name" readonly="0"/>
                     <button name="open_something" type="object"/>
-                    <field name="ghi_chu"></field>
+                    <field name="created_by_site_id"></field>
                     <field name="ten_zalo"></field>
                     <field name="trang_thai_zalo"></field>
                     <field name="mycontact_id" />
@@ -131,8 +128,6 @@
                     <field name="mtg_number" />
                     <field name="mqc_number" />
                     <field name="max_trang_thai_lien_lac" />
-                    <field name="set_cc_or_mg" />
-                    <field name="ket_luan_cc_or_mg" />
                     <field name="quanofposter_ids_show" />
                     <field name="create_date" />
                     <field name="is_recent"  invisible="1"/>

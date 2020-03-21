@@ -16,3 +16,5 @@ access_bds_publicdate,access_bds_publicdate,model_bds_publicdate,,1,1,1,1
 access_bds_myimage,access_bds_myimage,model_bds_myimage,,1,1,1,1
 access_bds_quantam,access_bds_quantam,model_bds_quantam,,1,1,1,1
 access_bds_gialines,access_bds_gialines,model_bds_gialines,,1,1,1,1
+access_loop_fetch_cron,access_loop_fetch_cron,model_loop_fetch_cron,,1,1,1,1
+

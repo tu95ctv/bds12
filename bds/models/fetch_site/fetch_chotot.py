@@ -89,20 +89,20 @@ def get_topic_chotot(self,update_dict, topic_html_or_json, siteleech_id, only_re
         pass
     
     try:
-        quan = topic_html_or_json['ad_params']['area']['value']
-        quan_id = g_or_c_chotot_quan(self,quan)
+        quan_name = topic_html_or_json['ad_params']['area']['value']
+        quan_id = g_or_c_chotot_quan(self, quan_name)
         update_dict['quan_id'] = quan_id
     except KeyError:
         quan_id = None
     if quan_id and ward:
-        phuong_id = g_or_c_ss(self,'bds.phuong', {'name_phuong':ward, 'quan_id':quan_id}, {},is_up_date=False)
+        phuong_id = g_or_c_ss(self,'bds.phuong', {'name_phuong':ward, 'quan_id':quan_id}, {})
         update_dict['phuong_id'] = phuong_id.id
 
 
     update_dict['gia'] = price
     update_dict['gia_trieu'] = price_trieu
     mobile,name = get_mobile_name_cho_tot(html)
-    user = get_or_create_user_and_posternamelines(self,mobile,name ,siteleech_id.name)
+    user = get_or_create_user_and_posternamelines(self,mobile,name ,siteleech_id)
     update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id

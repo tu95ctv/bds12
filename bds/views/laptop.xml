@@ -11,7 +11,7 @@
                     <field name="gia_trieu"/>
                     <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
                    	<field name="trich_dia_chi" />
-                   	<field name="moi_gioi_hay_chinh_chu" />
+                   	<field name="chotot_moi_gioi_hay_chinh_chu" />
                     <field name="count_post_all_site" />
                     <field name="date_text" />
                     <field name="create_date" />
@@ -35,11 +35,11 @@
                     <field name="html_khong_dau" />
                   	<filter name="recently change" string="Tạo gần đây" domain="[('write_date','&gt;', (datetime.datetime.now() -  datetime.timedelta(hours=1,minutes=35)).strftime('%Y-%%m-%%d %%H:%%M:%%S'))]" help="Pickings that are late on scheduled time" />
 
-                  	<filter name="chinh_chu" string="Chính chủ" domain="[('moi_gioi_hay_chinh_chu','=', 'chinh_chu')]"  />
-                  	<filter name="mo_gioi" string="Mô giới" domain="[('moi_gioi_hay_chinh_chu','=', 'moi_gioi')]"  />
+                  	<filter name="chinh_chu" string="Chính chủ" domain="[('chotot_moi_gioi_hay_chinh_chu','=', 'chinh_chu')]"  />
+                  	<filter name="mo_gioi" string="Mô giới" domain="[('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')]"  />
                     <separator />
                     <group expand="0" string="Group By">
-                        <filter name="moi_gioi_hay_chinh_chu" string="moi_gioi_hay_chinh_chu" domain="[]" context="{'group_by':'moi_gioi_hay_chinh_chu'}" />
+                        <filter name="chotot_moi_gioi_hay_chinh_chu" string="chotot_moi_gioi_hay_chinh_chu" domain="[]" context="{'group_by':'chotot_moi_gioi_hay_chinh_chu'}" />
                     </group>
                 </search>
             </field>

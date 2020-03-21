@@ -25,20 +25,11 @@ def get_phuong_xa_from_topic(self,soup,quan_id):
     sl = soup.select('div#divWard li.current')   
     if sl:
         phuong_name =  sl[0].get_text()
-        phuong = g_or_c_ss(self,'bds.phuong', {'name_phuong':phuong_name,'quan_id':quan_id}, {'quan_id':quan_id}, False)
+        phuong = g_or_c_ss(self,'bds.phuong', {'name_phuong':phuong_name,'quan_id':quan_id}, {'quan_id':quan_id})
         return phuong.id
     else:
         return False
-# def get_all_phuong_xa_of_quan_from_topic(self,soup,quan_id):
-#     sls = soup.select('div#divWard li')   
-#     if sls:
-#         for sl in sls:
-#             phuong_name =  sl.get_text()
-#             if '--' in phuong_name:
-#                 continue
-#             phuong = g_or_c_ss(self,'bds.phuong', {'name_phuong':phuong_name,'quan_id':quan_id}, {'quan_id':quan_id}, False)
-#     else:
-#         return False
+
 def get_images_for_bds_com_vn(soup):
     rs = soup.select('meta[property="og:image"]')
     images =  list(map(lambda i:i['content'],rs))
@@ -83,7 +74,7 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id,only_return_price=F
     update_dict['title']=title
     ####print 'title',title
     mobile,name = get_mobile_name_for_batdongsan(soup)
-    user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id.name)
+    user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id)
     update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id    
@@ -120,7 +111,7 @@ def g_or_c_bds_quan(self,soup):
         name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
         quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
         quan = g_or_c_ss(self,'bds.quan', {'name_without_quan':name_without_quan_huyen},
-                          {'name':quan_name,'name_unidecode':quan_unidecode}, False,is_up_date=False)
+                          {'name':quan_name,'name_unidecode':quan_unidecode}, False)
         return quan.id
     else:
         return False

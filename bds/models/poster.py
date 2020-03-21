@@ -5,6 +5,7 @@ import datetime
 import re
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
 from odoo.exceptions import UserError
+
 class Poster(models.Model):
     _name = 'bds.poster'
     _order = 'count_post_all_site desc'
@@ -22,13 +23,7 @@ class Poster(models.Model):
     post_ids = fields.One2many('bds.bds','poster_id')
     mycontact_id = fields.Many2one('bds.mycontact',compute='mycontact_id_',store=True)
     cong_ty = fields.Char()
-    ghi_chu_import = fields.Char()
     site_count_of_poster = fields.Integer(compute='site_count_of_poster_',store=True)
-    
-    
-   
-    
-    
     nhan_xet = fields.Char()
     nha_mang = fields.Selection([('vina','vina'),('mobi','mobi'),('viettel','viettel'),('khac','khac')],compute='nha_mang_',store=True)
     log_text = fields.Char()
@@ -56,15 +51,16 @@ class Poster(models.Model):
                     r.max_trang_thai_lien_lac = str(max_trang_thai_lien_lac)
     da_goi_dien_hay_chua = fields.Selection([(u'Chưa gọi điện',u'Chưa gọi điện'),(u'Đã liên lạc',u'Đã liên lạc'),(u'Không bắt máy',u'Không đổ chuông')],
                                             default = u'Chưa gọi điện')
-    is_recent = fields.Boolean(compute=  'is_recent_')
+    is_recent = fields.Boolean(compute='is_recent_')
     log_text = fields.Char()
-    spam = fields.Boolean()
     
     
     #count_post_of_poster_
     address_topic_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
     address_rate = fields.Float(compute ='count_post_of_poster_', store  = True)
-    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), ('chinh_chu','chinh_chu'), ('khong_biet', 'khong_biet')], compute ='count_post_of_poster_', store  = True)
+    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
+            ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
+            compute ='count_post_of_poster_', store  = True)
     mqc_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
     mtg_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
    
@@ -103,13 +99,8 @@ class Poster(models.Model):
     
     
     
-    ket_luan_cc_or_mg = fields.Selection([('dd_mg','dd_mg'),('dd_dt','dd_dt'), ('dd_cc','dd_cc'), ('dd_kb', 'dd_kb')], compute = 'ket_luan_cc_or_mg_' , store = True)
-    set_cc_or_mg = fields.Selection([('dd_mg','dd_mg'),('dd_dt','dd_dt'), ('dd_cc','dd_cc'), ('dd_kb', 'dd_kb')])
     trigger = fields.Boolean()
-    @api.depends('du_doan_cc_or_mg','set_cc_or_mg')
-    def ket_luan_cc_or_mg_(self):
-        for r in self:
-            r.ket_luan_cc_or_mg = r.set_cc_or_mg or r.du_doan_cc_or_mg
+
    
     quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)#,compute='quanofposter_ids_',store = True
     quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
@@ -118,11 +109,10 @@ class Poster(models.Model):
    
     
     
-    ghi_chu = fields.Char()
     is_numberphone_09 =  fields.Selection([('09','09'),('not09','not09')], compute ='is_numberphone_09_', store=True)
     number_post_of_quan = fields.Char(compute='number_post_of_quan_')
     ten_zalo = fields.Char()
-    ghi_chu = fields.Text()
+    created_by_site_id = fields.Many2one('bds.siteleech')
     trigger4 = fields.Boolean()
     trang_thai_zalo = fields.Selection([(u'no_zalo',u'no_zalo'),(u'request_zalo',u'request zalo'),(u'added_zalo',u'added zalo'),
                                             ])
@@ -200,7 +190,6 @@ class Poster(models.Model):
     @api.depends('post_ids', 'trigger', 'post_ids.trich_dia_chi', 'post_ids.dd_tin_cua_dau_tu', 'post_ids.dd_tin_cua_co')
     def count_post_of_poster_(self):
         for r in self:
-            print ('count_post_of_poster_ r.id+++',r.id)
             count_chotot_post_of_poster = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
             r.count_chotot_post_of_poster = count_chotot_post_of_poster
             
@@ -223,7 +212,7 @@ class Poster(models.Model):
             
             mqc_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mqc','=',True)])
             r.mqc_number = mqc_number
-            count_chotot_moi_gioi = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
+            count_chotot_moi_gioi = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
             if count_chotot_moi_gioi:
                 chotot_mg_or_cc = 'moi_gioi'
             else:
@@ -304,7 +293,6 @@ class Poster(models.Model):
     @api.depends('post_ids','post_ids.gia','trigger4')
     def quanofposter_ids_(self):
         for r in self:
-            print ('quanofposter_ids_**** r.id',r.id)
             if r.id:
                 quanofposter_ids_lists= []
                 product_category_query_siteleech =\
@@ -336,16 +324,17 @@ class Poster(models.Model):
                         else:
                             quan_id = int(tuple_count_quan[1])
                             siteleech_id = int(tuple_count_quan[5])
-                            
-                        quanofposter = g_or_c_ss(self,'bds.quanofposter', 
-                            {'quan_id':quan_id,
+                        quanofposter_search_dict =  {'quan_id':quan_id,
                             'poster_id':r.id,
                             'siteleech_id':siteleech_id 
-                            }, {'quantity':tuple_count_quan[0],
+                            }  
+                        quanofposter_update_dict ={'quantity':tuple_count_quan[0],
                                 'min_price':tuple_count_quan[2-offset],
                                 'avg_price':tuple_count_quan[3-offset],
                                 'max_price':tuple_count_quan[4-offset],
-                                }, True)
+                                }
+                        quanofposter = g_or_c_ss(self,'bds.quanofposter', quanofposter_search_dict, quanofposter_update_dict,update_no_need_check_change = True)
+                            
 
                         quanofposter_ids_lists.append(quanofposter[0].id)
                         
@@ -354,17 +343,7 @@ class Poster(models.Model):
                             r.avg_price = tuple_count_quan[3-offset]
                             r.max_price = tuple_count_quan[4-offset]
                 r.quanofposter_ids = quanofposter_ids_lists                    
-                    
-                
-                
-           
-            
-                    
-    
-    
-    
-    
-    
+  
     @api.depends('username_in_site_ids')
     def username_in_site_ids_show_(self):
         for r in self:

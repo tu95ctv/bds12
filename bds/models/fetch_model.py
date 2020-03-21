@@ -321,27 +321,21 @@ class Fetch(models.Model):
 
     def request_topic (self, link, write_dict, url_id, topic_data_from_page):
         topic_html_or_json = request_html(link)
-        # print ('***topic_data_from_page***', topic_data_from_page)
-        # print ('***topic_html_or_json***', topic_html_or_json)
-        # print (a)
         siteleech_id = url_id.siteleech_id
         if siteleech_id.name =='chotot':
             topic_html_or_json = json.loads(topic_html_or_json)
-
         if siteleech_id.name =='batdongsan':    
             get_bds_dict_in_topic(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['thumb'] = topic_data_from_page.get('thumb',False)
-
         elif siteleech_id.name =='chotot':
             get_topic_chotot(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['thumb'] = topic_data_from_page.get('image',False)
-            moi_gioi_hay_chinh_chu = topic_data_from_page.get('company_ad',False)
-            if moi_gioi_hay_chinh_chu:
-                moi_gioi_hay_chinh_chu = 'moi_gioi'
+            chotot_moi_gioi_hay_chinh_chu = topic_data_from_page.get('company_ad',False)
+            if chotot_moi_gioi_hay_chinh_chu:
+                chotot_moi_gioi_hay_chinh_chu = 'moi_gioi'
             else:
-                moi_gioi_hay_chinh_chu = 'chinh_chu'
-            write_dict['moi_gioi_hay_chinh_chu'] = moi_gioi_hay_chinh_chu
-
+                chotot_moi_gioi_hay_chinh_chu = 'chinh_chu'
+            write_dict['chotot_moi_gioi_hay_chinh_chu'] = chotot_moi_gioi_hay_chinh_chu
         elif siteleech_id.name =='muaban':
             get_muaban_vals_one_topic(self, write_dict, topic_html_or_json, siteleech_id)
             write_dict['area'] = topic_data_from_page.get('area',False)

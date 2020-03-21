@@ -28,7 +28,10 @@ class loop_fetch_cron(models.Model):
                     fetch_id.fetch_all_url()
                     loop_fetch_cron_id.fetch_current_id = fetch_id.id
                 except Exception as e:
-                    self.env['bds.error'].create({'name':str(e), 'des': 'id:%s - name:%s'(fetch_id.id, fetch_id.name)})
+                    try:
+                        self.env['bds.error'].create({'name':e, 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
+                    except Exception as e:
+                        self.env['bds.error'].create({'name':'có một lỗi khi fetch', 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
             else:
                 raise ValueError('khong ton tai: fetch_ids')
         else:

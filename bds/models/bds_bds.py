@@ -122,9 +122,11 @@ class bds(models.Model):
     
     post_ids_of_user  = fields.One2many('bds.bds','poster_id',related='poster_id.post_ids')
     username = fields.Char(related='poster_id.username')
+    
     detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
     du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
-    ket_luan_cc_or_mg = fields.Selection(related='poster_id.ket_luan_cc_or_mg', store = True)
+    
+    
     max_trang_thai_lien_lac = fields.Selection(related='poster_id.max_trang_thai_lien_lac',store=True)
     count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
     count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
@@ -134,28 +136,27 @@ class bds(models.Model):
     html = fields.Html()
     html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
     link_show =  fields.Char(compute='link_show_')
-    moi_gioi_hay_chinh_chu = fields.Selection([('moi_gioi', 'moi_gioi'), 
-        ('chinh_chu', 'chinh_chu'), ('khong_biet', 'khong_biet')], default='khong_biet')
+    chotot_moi_gioi_hay_chinh_chu = fields.Selection([('moi_gioi', 'Bán chuyên'), 
+        ('chinh_chu', 'Cá nhân'),('khong_biet','Không Phải bài ở chợt tốt')], default='khong_biet',string='Bán chuyên')
     mtg = fields.Boolean(compute = 'mien_tiep_mg_', store = True,string='Miễn trung gian')
     mqc = fields.Boolean(compute = 'mqc_', store = True)
   
-    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True)
+    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
     dd_tin_cua_co = fields.Boolean(compute='trich_dia_chi_', store = True, string='kw môi giới')
     dd_tin_cua_dau_tu = fields.Boolean(compute='dd_tin_cua_dau_tu_', store = True,string='kw đầu tư')
     
-    html_show = fields.Text(compute='html_show_',string = u'Nội dung')
-    gia = fields.Float()
-    gia_show = fields.Char(compute = 'gia_show_')
+    html_show = fields.Text(compute='html_show_',string=u'Nội dung')
+    gia = fields.Float('Giá')
   
     gia_trieu = fields.Float()
-    area = fields.Float(digits=(32,1))
+    area = fields.Float(digits=(32,1),string='Diện tích')
     address=fields.Char()
-    quan_id = fields.Many2one('bds.quan',ondelete='restrict')
+    quan_id = fields.Many2one('bds.quan',ondelete='restrict',string='Quận')
+    phuong_id = fields.Many2one('bds.phuong','Phường')
+
     quan_tam = fields.Datetime(string=u'Quan Tâm')
-    lam_co = fields.Datetime(string=u'làm có')
     ko_quan_tam = fields.Datetime(string=u'Không Quan Tâm')
 
-    hem_truoc_nha = fields.Float(digit=(6,2))
     comment = fields.Char()
     ket_cau = fields.Selection([(u'Đất Trống',u'Đất Trống'),(u'Cấp 4',u'Cấp 4'),(u'1 Tầng',u'1 Tầng'),(u'2 Tầng',u'2 Tầng'),(u'3 Tầng',u'3 Tầng'),(u'4 Tầng',u'4 Tầng'),(u'5 Tầng',u'5 Tầng'),(u'lon hon 5 ',u'lon hon 5')])
     date_text = fields.Char()
@@ -167,26 +168,39 @@ class bds(models.Model):
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     choosed_area = fields.Float(compute = 'auto_ngang_doc_',store=True)
+    
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     len_same_address_bds_ids = fields.Integer(compute='same_address_bds_ids_',store=True)
     
     
-    phuong_quan = fields.Char(compute='phuong_quan_', store=True)
-    phuong = fields.Char(compute='phuong_quan_', store=True)
-    quan = fields.Char(compute='phuong_quan_', store=True)
+    # phuong_quan = fields.Char(compute='phuong_quan_', store=True)
+    # phuong = fields.Char(compute='phuong_quan_', store=True)
+    # quan = fields.Char(compute='phuong_quan_', store=True)
+
+    # @skip_if_cate_not_bds
+    # @api.depends('html')
+    # def phuong_quan_(self):
+    #     for r in self:
+    #         str= r.html
+    #         rs = re.search(r'(?:\bphường|p)[ .]{0,2}((?:\w+ {0,1}){1,4})[ ,]{1,3}(?:quận|q)[ .]{0,2}((?:\w+ {0,1}){1,4})\b',str,re.I)
+    #         if rs:
+    #             r.phuong_quan = rs.group(0)
+    #             r.phuong = rs.group(1)
+    #             r.quan = rs.group(2)
+
+  
     after_trich_dia_chi = fields.Char(compute='trich_dia_chi_',store = True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     diff_gia = fields.Float()
     
     
-    phuong_id = fields.Many2one('bds.phuong')
     link = fields.Char()
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
     public_datetime = fields.Datetime()
     first_public_datetime = fields.Datetime()
     
     data = fields.Text()
-    url_ids = fields.Many2many('bds.url','url_post_relate','post_id','url_id')
+    # url_ids = fields.Many2many('bds.url','url_post_relate','post_id','url_id')
     again_update_date = fields.Datetime()
     # phuong_15 = fields.Boolean()
 
@@ -197,7 +211,6 @@ class bds(models.Model):
     
     ngay_update_gia = fields.Datetime()
     begin_gia = fields.Float()
-    spam = fields.Boolean()
     def siteleech_id_selection_(self):
         rs = list(map(lambda i:(i.name,i.name),self.env['bds.siteleech'].search([])))
         return rs
@@ -231,12 +244,7 @@ class bds(models.Model):
             if r.trich_dia_chi:
                 html_replace = html_replace.replace(r.trich_dia_chi,'')
             r.html_replace = html_replace
-   
-    @api.depends('gia')
-    def gia_show_(self):
-        for r in self:
-            r.gia_show = '%s tỷ'%r.gia
-            
+
             
     @api.depends('my_images_ids')
     def is_co_image_(self):
@@ -252,17 +260,7 @@ class bds(models.Model):
                 r.mien_tiep_mg = rs.group(0)
                 r.mtg = True
 
-    # bỏ skip_if_cate_not_bds thì bị lỗi         
-    @skip_if_cate_not_bds
-    @api.depends('html')
-    def phuong_quan_(self):
-        for r in self:
-            str= r.html
-            rs = re.search(r'(?:\bphường|p)[ .]{0,2}((?:\w+ {0,1}){1,4})[ ,]{1,3}(?:quận|q)[ .]{0,2}((?:\w+ {0,1}){1,4})\b',str,re.I)
-            if rs:
-                r.phuong_quan = rs.group(0)
-                r.phuong = rs.group(1)
-                r.quan = rs.group(2)
+    
     
     @api.depends('html')
     def trich_dia_chi_(self):
@@ -373,6 +371,7 @@ class bds(models.Model):
             if rs:
                 r.hoahongsearch = rs.group(0)
     search_remain_phone = fields.Char(compute ='search_remain_phone_',store=True)
+
     @skip_if_cate_not_bds
     @api.depends('sub_html')
     def search_remain_phone_(self):
@@ -552,16 +551,19 @@ class bds(models.Model):
     @api.depends('html')
     def html_show_(self):
         for r in self:
-            html = ((r.title) if r.title else '') + \
+            html = '<b>%s</b>'%((r.title) if r.title else '') + \
             ('\n' + r.quan_id.name if r.quan_id.name  else '') +\
-            ('\n' + r.html if r.html else '') + ('\n' +r.poster_id.name if r.poster_id.name  else '') +\
-            ('\n' +r.link_show if  r.link_show else '') + (u'\n Giá: %s tỷ'%r.gia if r.gia else '') + (u'\n Area: %s m2'%r.area if r.area else '')+\
+            ('\n' + r.html if r.html else '') +\
+            ('\nPhone: ' + (r.poster_id.name or '')) +\
+            ('\n' +r.link_show if  r.link_show else '')+ \
+            ('\n Giá: %s tỷ'%r.gia if r.gia else '') +\
+            ('\n Area: %s m2'%r.area if r.area else '')+\
             ('\nSite: %s'%r.siteleech_id.name) +\
-            ('\nĐơn giá:%.2f'%r.don_gia) + (u' Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
+            ('\nĐơn giá:%.2f'%r.don_gia) + \
+            ('Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
             ('\nCount post all site:%s'%r.count_post_all_site) +\
-            (u'\nlen_same_address_bds_ids: %s'%r.len_same_address_bds_ids) +\
-            (u'\nChợ tốt CC or MG: %s'%r.moi_gioi_hay_chinh_chu) + \
-            (u'\nKết Luận CC or MG: %s'%r.ket_luan_cc_or_mg)
+            ('\nlen_same_address_bds_ids: %s'%r.len_same_address_bds_ids) +\
+            ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)
             # (u', detail_du_doan_cc_or_mg: %s'%r.detail_du_doan_cc_or_mg)
             # ('\n choosed_area:%s'%r.choosed_area) + (u', auto_ngang: %s'%r.auto_ngang) + (u', auto_doc: %s'%r.auto_doc) + (u', auto_dien_tich:%s'%r.auto_dien_tich) +  \
         #   ('\n' + u'Chào anh/chị %s, em bên cty môi giới, anh chị có thể  kết bạn zalo và gửi sổ căn nhà "%s" không ạ, phí cty là 1 %%'%(r.username if r.username else '', r.title) if r.title else '')

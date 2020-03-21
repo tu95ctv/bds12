@@ -81,17 +81,23 @@ def get_muaban_vals_one_topic(self,update_dict,html,siteleech_id,only_return_pri
     quan_soup = soup.select('span.location-clock__location')
     quan_txt =  quan_soup[0].get_text()
     quan_name =  quan_txt.split('-')[0].strip()
-    quan_id = g_or_c_chotot_quan(self,quan_name)
+    quan_id = g_or_c_chotot_quan(self, quan_name)
     update_dict['quan_id'] = quan_id
 
     # mobile,name = get_mobile_name_for_muaban(soup)
-    name_soup = soup.select('div.user-info__fullname')[0]
-    name =  name_soup.get_text()
-    span_mobile_soup = soup.select('div.mobile-container__value span')[0]
-    mobile = span_mobile_soup['mobile']
+    try:
+        name_soup = soup.select('div.user-info__fullname')[0]
+        name =  name_soup.get_text()
+    except:
+        name = None
+    try:
+        span_mobile_soup = soup.select('div.mobile-container__value span')[0]
+        mobile = span_mobile_soup['mobile']
+    except:
+        mobile = None
 
     if mobile != None:
-        user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id.name)
+        user = get_or_create_user_and_posternamelines(self,mobile,name,siteleech_id)
         update_dict['user_name_poster']=name
         update_dict['phone_poster']=mobile
         update_dict['poster_id'] = user.id
