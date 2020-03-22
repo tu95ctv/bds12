@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import re
 import datetime
 ############mua ban ############
+
+
 def get_mobile_name_for_muaban(soup):
     try:
         mobile_and_name_soup = soup.select('div.ct-contact ')[0]
@@ -14,6 +16,7 @@ def get_mobile_name_for_muaban(soup):
         mobile =  None
         name= None
     return mobile,name
+
 def get_muaban_vals_one_topic(self, html, siteleech_id_id):
     update_dict  = {}
     def create_or_get_one_in_m2m_value(val):
@@ -74,8 +77,7 @@ def get_muaban_vals_one_topic(self, html, siteleech_id_id):
         mobile = None
 
     if mobile != None:
-        user = get_or_create_user_and_posternamelines(self, mobile,name, siteleech_id_id)
-        update_dict['user_name_poster']=name
+        user = get_or_create_user_and_posternamelines(self.env, mobile,name, siteleech_id_id)
         update_dict['phone_poster']=mobile
         update_dict['poster_id'] = user.id
     return update_dict

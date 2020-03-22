@@ -95,7 +95,6 @@ def get_topic_chotot(self, topic_html_or_json, siteleech_id):
     update_dict['gia_trieu'] = price_trieu
     mobile,name = get_mobile_name_cho_tot(html)
     user = get_or_create_user_and_posternamelines(self.env, mobile,name ,siteleech_id)
-    update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id
     try:

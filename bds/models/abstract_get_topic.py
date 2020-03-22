@@ -60,81 +60,10 @@ def convert_chotot_price(html):
 class ChototFetch(models.AbstractModel):
     _name = 'abstract.topic.fetch'
 
-    # def create_or_get_one_in_m2m_value(self, val):
-    #     val = val.strip()
-    #     if val:
-    #         return g_or_c_ss(self.env['bds.images'],{'url':val})
-
-
-    # def write_images(self, html):
-    #     update_dict = {}
-    #     images_urls = html.get('images',[])
-    #     if images_urls:
-    #         object_m2m_list = list(map(self.create_or_get_one_in_m2m_value, images_urls))
-    #         m2m_ids = list(map(lambda x:x.id, object_m2m_list))
-    #         if m2m_ids:
-    #             val = [(6, False, m2m_ids)]
-    #             update_dict['images_ids'] = val
-    #     return update_dict
-
-    # def write_quan_phuong(self, ad_params):
-    #     update_dict = {}
-    #     try:
-    #         quan_name = ad_params['area']['value']
-    #         quan_id = g_or_c_quan(self.env, quan_name)
-    #         update_dict['quan_id'] = quan_id
-    #     except KeyError:
-    #         quan_id = None
-
-    #     try:
-    #         ward =  ad_params['ward']['value']
-    #     except KeyError:
-    #         ward = None
-
-    #     if quan_id and ward:
-    #         phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
-    #         update_dict['phuong_id'] = phuong_id.id
-    #     return update_dict
-
-
-
     def get_topic_chotot(self, topic_html_or_json, siteleech_id_id):
         obj = Chotot_get_topic(self)
         return obj.get_topic_chotot(topic_html_or_json, siteleech_id_id)
-        # update_dict = {}
-
-        # topic_html_or_json = json.loads(topic_html_or_json) 
-        # ad = topic_html_or_json['ad']
-        # ad_params = topic_html_or_json['ad_params']
         
-        # date = ad['date']
-
-        # price, price_trieu = convert_chotot_price(ad)
-        # update_dict['gia'] = price
-        # update_dict['gia_trieu'] = price_trieu
-
-        # update_dict['date_text'] = date
-        # update_dict.update(self.write_images(ad))
-        # update_dict.update(self.write_quan_phuong(ad_params))
-        # try:
-        #     address = ad['address']
-        #     update_dict['address'] = address
-        # except KeyError:
-        #     pass
-
-        # mobile, name = get_mobile_name_cho_tot(ad)
-        # user = get_or_create_user_and_posternamelines(self,mobile, name ,siteleech_id_id)
-        # update_dict['user_name_poster'] = name
-        # update_dict['phone_poster'] = mobile
-        # update_dict['poster_id'] = user.id
-        # try:
-        #     update_dict['html'] = ad['body']
-        # except KeyError:
-        #     pass
-        
-        # update_dict['area']= ad.get('size',0)
-        # update_dict['title']= ad['subject']
-        # return update_dict
 class Chotot_get_topic():
     
     def __init__(self, self_fetch_obj):
@@ -144,8 +73,6 @@ class Chotot_get_topic():
         val = val.strip()
         if val:
             return g_or_c_ss(self.env['bds.images'],{'url':val})
-
-
     def write_images(self, html):
         update_dict = {}
         images_urls = html.get('images',[])
@@ -176,7 +103,12 @@ class Chotot_get_topic():
             update_dict['phuong_id'] = phuong_id.id
         return update_dict
 
-
+    def write_gia(self, ad):
+        update_dict = {}
+        price, price_trieu = convert_chotot_price(ad)
+        update_dict['gia'] = price
+        update_dict['gia_trieu'] = price_trieu
+        return update_dict
 
     def get_topic_chotot(self, topic_html_or_json, siteleech_id_id):
         update_dict = {}
@@ -185,15 +117,13 @@ class Chotot_get_topic():
         ad = topic_html_or_json['ad']
         ad_params = topic_html_or_json['ad_params']
         
+
         date = ad['date']
-
-        price, price_trieu = convert_chotot_price(ad)
-        update_dict['gia'] = price
-        update_dict['gia_trieu'] = price_trieu
-
         update_dict['date_text'] = date
         update_dict.update(self.write_images(ad))
         update_dict.update(self.write_quan_phuong(ad_params))
+        update_dict.update(self.write_gia(ad))
+        
         try:
             address = ad['address']
             update_dict['address'] = address
@@ -202,9 +132,9 @@ class Chotot_get_topic():
 
         mobile, name = get_mobile_name_cho_tot(ad)
         user = get_or_create_user_and_posternamelines(self.env, mobile, name ,siteleech_id_id)
-        update_dict['user_name_poster'] = name
         update_dict['phone_poster'] = mobile
         update_dict['poster_id'] = user.id
+
         try:
             update_dict['html'] = ad['body']
         except KeyError:

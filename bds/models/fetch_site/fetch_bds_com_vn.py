@@ -69,7 +69,6 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     ####print 'title',title
     mobile,name = get_mobile_name_for_batdongsan(soup)
     user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
-    update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id    
     

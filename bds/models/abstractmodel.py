@@ -6,7 +6,9 @@ import json
 import math
 from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
 from odoo.addons.bds.models.fetch_site.fetch_chotot  import  create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.fetch_site.fetch_muaban  import get_muaban_vals_one_topic
+# from odoo.addons.bds.models.fetch_site.fetch_muaban  import get_muaban_vals_one_topic
+from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
+
 from bs4 import BeautifulSoup
 import re
 import datetime
@@ -124,7 +126,7 @@ class MuabanFetch(models.AbstractModel):
         topic_dict = super(MuabanFetch, self).request_topic(link, url_id)
         if self.site_name =='muaban':
             topic_html_or_json = request_html(link)
-            topic_dict = get_muaban_vals_one_topic(self,  topic_html_or_json, self.siteleech_id_id)
+            topic_dict = MuabanObject(self).get_muaban_vals_one_topic(topic_html_or_json, self.siteleech_id_id)
         return topic_dict
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
         copy_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
