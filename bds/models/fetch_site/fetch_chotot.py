@@ -50,13 +50,13 @@ def convert_chotot_price(html):
         price_trieu = 0
     return price, price_trieu
     
-def get_topic_chotot(self, topic_html_or_json, siteleech_id, only_return_price = False):
+def get_topic_chotot(self, topic_html_or_json, siteleech_id):
     update_dict = {}
     topic_html_or_json = json.loads(topic_html_or_json) 
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:
-                return g_or_c_ss(self,'bds.images',{'url':val})
+                return g_or_c_ss(self.env['bds.images'],{'url':val})
 
     html = topic_html_or_json['ad']
     ad_params = topic_html_or_json['ad_params']
@@ -67,8 +67,6 @@ def get_topic_chotot(self, topic_html_or_json, siteleech_id, only_return_price =
     date = html['date']
     price, price_trieu = convert_chotot_price(html)
     update_dict['date_text'] = date
-    if only_return_price:
-        return price
     images = html.get('images',[])
     if images:
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
@@ -84,19 +82,19 @@ def get_topic_chotot(self, topic_html_or_json, siteleech_id, only_return_price =
     
     try:
         quan_name = topic_html_or_json['ad_params']['area']['value']
-        quan_id = g_or_c_quan(self, quan_name)
+        quan_id = g_or_c_quan(self.env, quan_name)
         update_dict['quan_id'] = quan_id
     except KeyError:
         quan_id = None
     if quan_id and ward:
-        phuong_id = g_or_c_ss(self,'bds.phuong', {'name_phuong':ward, 'quan_id':quan_id}, {})
+        phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
         update_dict['phuong_id'] = phuong_id.id
 
 
     update_dict['gia'] = price
     update_dict['gia_trieu'] = price_trieu
     mobile,name = get_mobile_name_cho_tot(html)
-    user = get_or_create_user_and_posternamelines(self,mobile,name ,siteleech_id)
+    user = get_or_create_user_and_posternamelines(self.env, mobile,name ,siteleech_id)
     update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id

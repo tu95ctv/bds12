@@ -25,7 +25,7 @@ def get_phuong_xa_from_topic(self,soup,quan_id):
     sl = soup.select('div#divWard li.current')   
     if sl:
         phuong_name =  sl[0].get_text()
-        phuong = g_or_c_ss(self,'bds.phuong', {'name_phuong':phuong_name,'quan_id':quan_id}, {'quan_id':quan_id})
+        phuong = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':phuong_name,'quan_id':quan_id}, {'quan_id':quan_id})
         return phuong.id
     else:
         return False
@@ -35,11 +35,11 @@ def get_images_for_bds_com_vn(soup):
     images =  list(map(lambda i:i['content'],rs))
     return images
 
-def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id,only_return_price=False):
+def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:
-                return g_or_c_ss(self,'bds.images',{'url':val})
+                return g_or_c_ss(self.env['bds.images'],{'url':val})
     update_dict['data'] = html
     soup = BeautifulSoup(html, 'html.parser')
     try:
@@ -47,10 +47,6 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id,only_return_pric
     except:
         gia =0
     update_dict['gia'] = gia
-    if  only_return_price:
-        return gia
-    
-#     update_dict['public_datetime'] = get_public_datetime(soup)
     update_dict['html'] = get_product_detail(soup)
     images = get_images_for_bds_com_vn(soup)
     if images:
@@ -72,7 +68,7 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id,only_return_pric
     update_dict['title']=title
     ####print 'title',title
     mobile,name = get_mobile_name_for_batdongsan(soup)
-    user = get_or_create_user_and_posternamelines(self, mobile, name, siteleech_id_id)
+    user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
     update_dict['user_name_poster']=name
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id    
@@ -108,7 +104,7 @@ def g_or_c_bds_quan(self,soup):
         quan_name =  sl[0].get_text()
         name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
         quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
-        quan = g_or_c_ss(self,'bds.quan', {'name_without_quan':name_without_quan_huyen},
+        quan = g_or_c_ss(self.env['bds.quan'], {'name_without_quan':name_without_quan_huyen},
                           {'name':quan_name,'name_unidecode':quan_unidecode}, False)
         return quan.id
     else:

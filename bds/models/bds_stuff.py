@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 from odoo import models, fields, api
-
+from odoo.addons.bds.models.bds_tools  import  request_html
+import base64
 class Setread(models.TransientModel):
     _name = "bds.setread"
     
@@ -20,11 +21,11 @@ class Setread(models.TransientModel):
             }
 
     
-class Images(models.Model):
-    _name='bds.myimage'
-    image = fields.Binary(attachment=True)
-    name = fields.Char()
-    bds_id = fields.Many2one('bds.bds')
+# class Images(models.Model):
+#     _name='bds.myimage'
+#     image = fields.Binary(attachment=True)
+#     name = fields.Char()
+#     bds_id = fields.Many2one('bds.bds')
     
 
 class Gialines(models.Model):
@@ -53,5 +54,13 @@ class Images(models.Model):
     _name = 'bds.images'
     url = fields.Char()
     bds_id = fields.Many2one('bds.bds')
+    thumb_view = fields.Binary(compute='thumb_view_')  
+
+    @api.depends('url')
+    def thumb_view_(self):
+        for r in self:
+            if r.url:
+                photo = base64.encodestring(request_html(r.url, False, is_decode_utf8 = False))
+                r.thumb_view = photo 
 
 

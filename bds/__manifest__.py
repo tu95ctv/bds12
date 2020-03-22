@@ -30,7 +30,7 @@
         'data/cronjob_data.xml',
         'data/bds_chotot_data.xml',
         'data/laptopdata.xml',
-        'views/viewbds.xml',
+        'views/bds_images.xml',
         'views/cron.xml',
         'views/fetch.xml',
         'views/bds_search.xml',

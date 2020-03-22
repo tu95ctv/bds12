@@ -35,8 +35,7 @@ def request_html(url, try_again=True, is_decode_utf8 = True):
             if count_fail ==5:
                 raise ValueError(u'Lỗi get html')
 
-def g_or_c_ss(self,
-                class_name,search_dict,
+def g_or_c_ss(self_env_class_name,search_dict,
                 create_write_dict ={},
                 update_no_need_check_change=False,
                 is_up_date = True,
@@ -51,10 +50,10 @@ def g_or_c_ss(self,
         tuple_in = (i,'=',search_dict[i])
         domain.append(tuple_in)
     domain = expression.AND([domain_not_active, domain])
-    searched_object  = self.env[class_name].search(domain)
+    searched_object  = self_env_class_name.search(domain)
     if not searched_object:
         search_dict.update(create_write_dict)
-        created_object = self.env[class_name].create(search_dict)
+        created_object = self_env_class_name.create(search_dict)
         return_obj =  created_object
     else:
         return_obj = searched_object
@@ -78,25 +77,25 @@ def g_or_c_ss(self,
             searched_object.write(create_write_dict)
     return return_obj       
 
-def get_or_create_user_and_posternamelines(self, mobile, name, siteleech_id_id):
+def get_or_create_user_and_posternamelines(env, mobile, name, siteleech_id_id):
     search_dict = {}
     search_dict['phone'] = mobile 
     search_dict['login'] = str(mobile)+'@gmail.com'
-    user =  self.env['bds.poster'].search([('phone','=', mobile)])
+    user =  env['bds.poster'].search([('phone','=', mobile)])
     if user:
         posternamelines_search_dict = {'username_in_site':name, 'site_id':siteleech_id_id, 'poster_id':user.id}
-        g_or_c_ss(self,'bds.posternamelines',posternamelines_search_dict)
+        g_or_c_ss(env['bds.posternamelines'], posternamelines_search_dict)
                                               
     else:
         search_dict.update({'created_by_site_id': siteleech_id_id})
-        user =  self.env['bds.poster'].create(search_dict)
-        self.env['bds.posternamelines'].create( {'username_in_site':name,'site_id':siteleech_id_id,'poster_id':user.id})
+        user =  env['bds.poster'].create(search_dict)
+        env['bds.posternamelines'].create( {'username_in_site':name,'site_id':siteleech_id_id,'poster_id':user.id})
     return user 
 
-def g_or_c_quan(self, quan_name):
+def g_or_c_quan(env, quan_name):
     name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
     quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
     quan_search_dict = {'name_without_quan':name_without_quan_huyen}
     quan_update_dict = {'name':quan_name,'name_unidecode':quan_unidecode}
-    quan = g_or_c_ss(self,'bds.quan',quan_search_dict, quan_update_dict )
+    quan = g_or_c_ss(env['bds.quan'],quan_search_dict, quan_update_dict )
     return quan.id

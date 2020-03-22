@@ -1,16 +1,7 @@
 <odoo>
     <data>
         <!-- BDS -->
-        <record id="myimage_form" model="ir.ui.view">
-            <field name="name">bds.myimage.form</field>
-            <field name="model">bds.myimage</field>
-            <field name="arch" type="xml">
-                <form>
-                    <field name="image" filename="name" widget="image"></field>
-                    <field name="name"></field>
-                </form>
-            </field>
-        </record>
+       
 
         <record id="bds_form" model="ir.ui.view">
             <field name="name">bds.form</field>
@@ -50,18 +41,9 @@
                                     <field name="count_post_all_site" />
                                     <field name="trich_dia_chi" />
                                     <field name="html" />
-                                    <!--    <field name="data" /> -->
-                                </group>
-                                <group>
-                                    <field name="my_images_ids">
-                                        <tree>
-                                            <field name="image"></field>
-                                            <field name="name"></field>
-                                        </tree>
-                                    </field>
                                 </group>
                             </group>
-                            <group></group>
+                            <field name="images_ids"/>
                             <field name="gialines_ids">
                                 <tree>
                                     <field name="gia"></field>
@@ -70,20 +52,14 @@
                                     <field name="create_date"></field>
                                 </tree>
                             </field>
-                            <group></group>
                             <field name="publicdate_ids">
                                 <tree>
                                     <field name="public_date"></field>
                                     <field name="public_date_cu"></field>
                                 </tree>
                             </field>
-                            <group></group>
-                            <group>
-                                <field name="same_address_bds_ids" />
-                            </group>
-                            <group>
-                                <field name="post_ids_of_user" />
-                            </group>
+                            <field name="same_address_bds_ids" />
+                            <field name="post_ids_of_user" />
                         </page>
                     </notebook>
                 </form>

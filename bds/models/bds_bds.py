@@ -30,9 +30,8 @@ class bds(models.Model):
     public_date = fields.Date()
     diff_public_date = fields.Integer()
     gialines_ids = fields.One2many('bds.gialines','bds_id')
-    my_images_ids = fields.One2many('bds.myimage','bds_id')
     title = fields.Char()
-    images_ids = fields.One2many('bds.images','bds_id')
+    images_ids = fields.One2many('bds.images', 'bds_id' )
     siteleech_id = fields.Many2one('bds.siteleech')
     thumb = fields.Char()
     poster_id = fields.Many2one('bds.poster')
@@ -73,7 +72,6 @@ class bds(models.Model):
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
     thumb_view = fields.Binary(compute='thumb_view_')  
-    image = fields.Binary(compute='thumb_view_')   
     muc_gia = fields.Selection([('<1','<1'),('1-2','1-2'),('2-3','2-3'),
                                 ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
                                 ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
@@ -404,7 +402,6 @@ class bds(models.Model):
                 if 'nophoto' not in r.thumb:
                     photo = base64.encodestring(request_html(r.thumb, False, is_decode_utf8 = False))
                     r.thumb_view = photo 
-                    r.image = photo
 
 
     

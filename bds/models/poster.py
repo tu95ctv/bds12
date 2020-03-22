@@ -265,7 +265,7 @@ class Poster(models.Model):
                                 'avg_price':tuple_count_quan[3-offset],
                                 'max_price':tuple_count_quan[4-offset],
                                 }
-                        quanofposter = g_or_c_ss(self,'bds.quanofposter', quanofposter_search_dict, quanofposter_update_dict,update_no_need_check_change = True)
+                        quanofposter = g_or_c_ss(self.env['bds.quanofposter'], quanofposter_search_dict, quanofposter_update_dict,update_no_need_check_change = True)
                             
 
                         quanofposter_ids_lists.append(quanofposter[0].id)

@@ -23,7 +23,6 @@ def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         return gio_bat_dau_vn
 
 
-
 #lam gon lai ngay 23/02
 class Fetch(models.Model):
     _name = 'bds.fetch'

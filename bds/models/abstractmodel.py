@@ -5,7 +5,7 @@ from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
 from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
-from odoo.addons.bds.models.fetch_site.fetch_chotot  import  get_topic_chotot, create_cho_tot_page_link, local_a_native_time, convert_chotot_price, convert_chotot_date_to_datetime, gmt_7_a_native_time
+from odoo.addons.bds.models.fetch_site.fetch_chotot  import  create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
 from odoo.addons.bds.models.fetch_site.fetch_muaban  import get_muaban_vals_one_topic
 from bs4 import BeautifulSoup
 import re
@@ -36,6 +36,7 @@ def convert_muaban_string_gia_to_float(str):
 
 class ChototFetch(models.AbstractModel):
     _name = 'abstract.fetch'
+    _inherit = 'abstract.topic.fetch'
 
     def get_last_page_number(self, url_id):
         if self.site_name =='chotot':
@@ -86,7 +87,6 @@ class ChototFetch(models.AbstractModel):
         self.page_url = self.create_page_link(format_page_url, page_int)
         self.html_page = request_html(self.page_url)
         if self.site_name == 'chotot':
-            print ('***self.page_url', self.page_url)
             json_a_page = json.loads(self.html_page)
             topic_data_from_pages_of_a_page_origin = json_a_page['ads']
             for topic_data_from_page_cho_tot in topic_data_from_pages_of_a_page_origin:
@@ -102,7 +102,7 @@ class ChototFetch(models.AbstractModel):
     def request_topic (self, link, url_id):
         if self.site_name =='chotot':
             topic_html_or_json = request_html(link)           
-            topic_dict = get_topic_chotot(self, topic_html_or_json, self.siteleech_id_id)
+            topic_dict = self.get_topic_chotot(topic_html_or_json,self.siteleech_id_id)
             return topic_dict
 
     def copy_page_data_to_rq_topic(self, topic_data_from_page):

@@ -14,13 +14,12 @@ def get_mobile_name_for_muaban(soup):
         mobile =  None
         name= None
     return mobile,name
-def get_muaban_vals_one_topic(self, html, siteleech_id_id, 
-    only_return_price=False):
+def get_muaban_vals_one_topic(self, html, siteleech_id_id):
     update_dict  = {}
     def create_or_get_one_in_m2m_value(val):
             val = val.strip()
             if val:
-                return g_or_c_ss(self,'bds.images',{'url':val})
+                return g_or_c_ss(self.env['bds.images'],{'url':val})
     
     update_dict['data'] = html
     soup = BeautifulSoup(html, 'html.parser')
@@ -52,12 +51,7 @@ def get_muaban_vals_one_topic(self, html, siteleech_id_id,
     except IndexError:
         gia = 0
 
-
-
-    if only_return_price:
-        return gia
     update_dict['gia'] = gia
-    
     title = soup.select('h1.title')[0].get_text()
     title = title.strip()
     update_dict['title']=title
@@ -66,7 +60,7 @@ def get_muaban_vals_one_topic(self, html, siteleech_id_id,
     quan_soup = soup.select('span.location-clock__location')
     quan_txt =  quan_soup[0].get_text()
     quan_name =  quan_txt.split('-')[0].strip()
-    quan_id = g_or_c_quan(self, quan_name)
+    quan_id = g_or_c_quan(self.env, quan_name)
     update_dict['quan_id'] = quan_id
     try:
         name_soup = soup.select('div.user-info__fullname')[0]
@@ -80,7 +74,7 @@ def get_muaban_vals_one_topic(self, html, siteleech_id_id,
         mobile = None
 
     if mobile != None:
-        user = get_or_create_user_and_posternamelines(self,mobile,name, siteleech_id_id)
+        user = get_or_create_user_and_posternamelines(self, mobile,name, siteleech_id_id)
         update_dict['user_name_poster']=name
         update_dict['phone_poster']=mobile
         update_dict['poster_id'] = user.id

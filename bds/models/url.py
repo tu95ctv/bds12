@@ -47,4 +47,4 @@ class URL(models.Model):
                     name = 'muaban'
                 else:
                     name = re.search('\.(.*?)\.', r.url).group(1)
-                r.siteleech_id = g_or_c_ss(self,'bds.siteleech', {'name':name})
+                r.siteleech_id = g_or_c_ss(self.env['bds.siteleech'], {'name':name})

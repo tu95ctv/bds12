@@ -27,8 +27,7 @@
         <field name="model">bds.images</field>
         <field name="arch" type="xml">
             <tree>
-                <!--  <field name="url" /> --> 
-                <field name="url" widget="image" height="300" />
+                <field name="thumb_view" widget="image" height="600" />
             </tree>
         </field>
     </record>
