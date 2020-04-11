@@ -10,7 +10,7 @@
     </record>
 
     <record id="action_set_not_read" model="ir.actions.server">
-        <field name="name">Đánh dấu đã đọc</field>
+        <field name="name">Đánh dấu chưa đọc</field>
         <field name="model_id" ref="model_bds_bds"/>
         <field name="binding_model_id" ref="bds.model_bds_bds"/>
         <field name="state">code</field>
@@ -19,7 +19,7 @@
         </field>
     </record>
 
-    <record id="action_set_not_read" model="ir.actions.server">
+    <!-- <record id="action_set_quan_tam" model="ir.actions.server">
         <field name="name">Đánh dấu quan tâm</field>
         <field name="model_id" ref="model_bds_bds"/>
         <field name="binding_model_id" ref="bds.model_bds_bds"/>
@@ -27,7 +27,7 @@
         <field name="code">
             records.set_quan_tam()
         </field>
-    </record>
+    </record> -->
 
 
 

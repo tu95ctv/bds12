@@ -1,0 +1,119 @@
+<odoo>
+
+    <record model="bds.url" id="url_chotot_cho_thue_tan binh">
+        <field name="description">Chợ tốt cho thuê tân bình</field>
+        <field name="sell_or_rent">rent</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13112&amp;cg=1000&amp;limit=20&amp;o=20&amp;st=u,h&amp;page=2</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_quan_tanbinh">
+        <field name="description">Chợ tốt Tân Bình</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=112&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_tan_phu">
+        <field name="description">Chợ tốt Tân phú</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=113&amp;cg=1000&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_tan_phu_chung_cu">
+        <field name="description">Chợ tốt Tân phú chung cư </field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=1010&amp;limit=20&amp;o=20&amp;st=s,k</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_tan_phu_all">
+        <field name="description">Chợ tốt Tân phú all </field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=1000&amp;limit=20&amp;o=20&amp;st=s,k</field>
+    </record>
+
+
+
+    <record model="bds.url" id="url_chotot_quan_10">
+        <field name="description">Chợ tốt 10</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=105&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_quan_5">
+        <field name="description">Chợ tốt 5</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=100&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+    
+    <record model="bds.url" id="url_chotot_quan_3">
+        <field name="description">Chợ tốt 3</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=98&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+    
+    <record model="bds.url" id="url_chotot_phu_nhuan">
+        <field name="description">Chợ tốt Phú Nhuận</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=111&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    <record model="bds.url" id="url_chotot_quan_1">
+        <field name="description">Chợ tốt 1</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=96&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+        <record model="bds.url" id="url_chotot_quan_bt">
+        <field name="description">Chợ tốt Bình Thạnh</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=109&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    <record model="bds.url" id="url_chotot_quan_11">
+        <field name="description">Chợ tốt 11</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=106&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+        <record model="bds.url" id="url_chotot_quan_8">
+        <field name="description">Chợ tốt 8</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13103&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+        <record model="bds.url" id="url_chotot_quan_7">
+        <field name="description">Chợ tốt 7</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13102&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+        <record model="bds.url" id="url_chotot_quan_6">
+        <field name="description">Chợ tốt 6</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13101&amp;cg=1000&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    
+        <record model="bds.url" id="url_chotot_quan_4">
+        <field name="description">Chợ tốt 4</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13099&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+        <record model="bds.url" id="url_chotot_quan_binh_tan">
+        <field name="description">Chợ tốt Bình Tân</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13108&amp;cg=1020&amp;limit=20&amp;o=60&amp;st=s,k</field>
+    
+    </record>
+    
+    <record model="bds.url" id="url_chotot_quan_9">
+        <field name="description">Chợ tốt 9</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13104&amp;cg=1020&amp;limit=20&amp;o=60&amp;st=s,k</field>
+    </record>
+    
+    
+    <record model="bds.url" id="url_chotot_quan_thuduc">
+        <field name="description">Chợ tốt Thủ Đức</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13114&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    <record model="bds.url" id="url_chotot_quan_hocmon">
+        <field name="description">Chợ tốt Hóc Môn</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13117&amp;cg=1020&amp;limit=20&amp;o=0&amp;st=s,k</field>
+    </record>
+    
+    <record model="bds.url" id="url_chotot_quan_go_vap">
+        <field name="description">Chợ tốt Gò Vấp</field>
+        <field name="url"> https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13110&amp;cg=1020&amp;limit=20&amp;o=20&amp;st=s,k</field>
+    </record>
+</odoo>

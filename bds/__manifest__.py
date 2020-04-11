@@ -20,16 +20,20 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base'],
+    'depends': ['base','mail'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
-        'data/bdsdata.xml',
+
+        'data/data_chotot_chung_cu.xml',
+        'data/data_chotot_other.xml',
+        'data/data_chotot_phuong.xml',
+        'data/data_chotot.xml',
+        'data/data_muaban.xml',
         'data/cronjob_data.xml',
-        'data/bds_chotot_data.xml',
-        'data/laptopdata.xml',
+
         'views/bds_images.xml',
         'views/cron.xml',
         'views/fetch.xml',

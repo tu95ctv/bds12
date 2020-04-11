@@ -34,7 +34,7 @@
             </field>
         </record>
         <record model="ir.actions.act_window" id="quan_action">
-            <field name="name">quan action</field>
+            <field name="name">Quận</field>
             <field name="res_model">bds.quan</field>
             <field name="view_mode">tree,form</field>
         </record>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+    
+        
+        
+        <record model="bds.url" id="url_muaban_quan_10">
+            <field name="description">Mua bán 10</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-10-l5907-c3202?cp=5</field>
+        </record>
+        
+        <record model="bds.url" id="url_muaban_tan_binh">
+            <field name="description">Mua bán Tân Bình</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-tan-binh-l5922-c3202?cp=3</field>
+        </record>
+        
+            <record model="bds.url" id="url_muaban_tan_binh">
+            <field name="description">Mua bán Tân Bình</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-tan-binh-l5922-c3202?cp=3</field>
+        </record>
+        
+         <record model="bds.url" id="url_muaban_phu_nhuan">
+            <field name="description">Mua bán Phú Nhuận</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-phu-nhuan-l5921-c3202?cp=3</field>
+        </record>
+        
+       <record model="bds.url" id="url_muaban_quan_3">
+            <field name="description">Mua bán 3</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-3-l5911-c3202?cp=4</field>
+        </record>
+       
+       
+        <record model="bds.url" id="url_muaban_quan_1">
+            <field name="description">Mua bán 1</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-1-l5906-c3202?cp=2</field>
+        </record>
+        
+     <record model="bds.url" id="url_muaban_quan_5">
+            <field name="description">Mua bán 5</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-5-l5913-c3202?cp=20</field>
+        </record>
+        
+        <record model="bds.url" id="url_muaban_tan_phu">
+            <field name="description">Mua bán Tân Phú</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-tan-phu-l5923-c3202?cp=2</field>
+        </record>
+        
+        
+         <record model="bds.url" id="url_muaban_binh_thanh">
+            <field name="description">Mua bán Bình Thạnh</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-binh-thanh-l5919-c3202?cp=3</field>
+        </record>
+        
+        <record model="bds.url" id="url_muaban_quan11">
+            <field name="description">Mua bán 11</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-11-l5908-c3202?cp=3</field>
+        </record>
+        
+          <record model="bds.url" id="url_muaban_quan8">
+            <field name="description">Mua bán 8</field>
+            <field name="url">https://muaban.net/ban-nha-can-ho-quan-8-l5916-c32?cp=3</field>
+        </record>
+         
+   
+        <record model="bds.url" id="url_muaban_quan6">
+            <field name="description">Mua bán 6</field>
+            <field name="url">https://muaban.net/ban-nha-can-ho-quan-6-l5914-c32?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_quan4">
+            <field name="description">Mua bán 4</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-4-l5912-c3202?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_quan7">
+            <field name="description">Mua bán 7</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-7-l5915-c3202?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_govap">
+            <field name="description">Mua bán Gò Vấp</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-go-vap-l5920-c3202?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_thuduc">
+            <field name="description">Mua bán Thủ Đức</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-thu-duc-l5924-c3202?cp=3</field>
+        </record>
+
+        
+        
+        <record model="bds.url" id="url_muaban_quan9">
+            <field name="description">Mua bán 9</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-quan-9-l5917-c3202?cp=3</field>
+        </record>
+        
+        
+         
+        <record model="bds.url" id="url_muaban_quan12">
+            <field name="description">Mua bán 12</field>
+            <field name="url">https://muaban.net/ban-nha-can-ho-quan-12-l5909-c32?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_hocmon">
+            <field name="description">Mua bán Hóc Môn</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-huyen-hoc-mon-l5904-c3202?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_nhabe">
+            <field name="description">Mua bán Nhà bè</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-huyen-nha-be-l5905-c3202?cp=3</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_mat_tien_tan_phu">
+            <field name="description">Mặt tiền tân phú</field>
+            <field name="url">https://muaban.net/nha-mat-tien-quan-tan-phu-l5923-c3201?cp=6</field>
+        </record>
+        
+        
+        <record model="bds.url" id="url_muaban_can_ho_tan_phu">
+            <field name="description">Căn hộ tân phú</field>
+            <field name="url">https://muaban.net/can-ho-chung-cu-tap-the-quan-tan-phu-l5923-c3204?cp=6</field>
+        </record>
+        
+        
+        
+        
+        
+        
+        
+	 </data>
+</odoo>

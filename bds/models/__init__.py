@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from . import abstract_get_topic
 from . import abstractmodel
 from . import bds_bds, url, bds_tools,\
 poster, loop_fetch_cron, fetch_model,\

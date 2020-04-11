@@ -6,6 +6,7 @@
             <field name="arch" type="xml">
                 <tree default_order="public_datetime DESC" editable="bottom"   >
                     <button name="open_something" type="object"/>
+                    <field name="is_read"></field>
                     <field name="quan_tam"></field>
                     <field name="id"></field>
                     <field name="gia_trieu"/>
@@ -37,6 +38,7 @@
                   	<filter name="chinh_chu" string="Chính chủ" domain="[('chotot_moi_gioi_hay_chinh_chu','=', 'chinh_chu')]"  />
                   	<filter name="mo_gioi" string="Mô giới" domain="[('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')]"  />
                     <separator />
+                    <filter name="is_read" string="Chưa đọc" domain="[('is_read','=',False)]"></filter>
                     <group expand="0" string="Group By">
                         <filter name="chotot_moi_gioi_hay_chinh_chu" string="chotot_moi_gioi_hay_chinh_chu" domain="[]" context="{'group_by':'chotot_moi_gioi_hay_chinh_chu'}" />
                     </group>
@@ -52,7 +54,18 @@
         <field name="view_mode">tree,form</field>
         <field name="domain">[('cate','=','laptop')]</field>
         <field name="view_id" ref="laptop_list"></field>
-        <field name="search_id" ref="laptop_search"></field>
+        <field name="search_view_id" ref="bds_search"></field>
 
     </record>
+
+    <record model="ir.actions.act_window" id="phone_action">
+        <field name="name">Phone</field>
+        <field name="res_model">bds.bds</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('cate','=','phone')]</field>
+        <field name="view_id" ref="laptop_list"></field>
+        <field name="search_id" ref="bds_search"/>
+    </record>
+
+
 </odoo>

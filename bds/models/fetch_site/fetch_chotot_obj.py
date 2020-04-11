@@ -13,9 +13,15 @@ import pytz
 
 def create_cho_tot_page_link(url_input, page_int):
     repl = 'o=%s'%(20*(page_int-1))
-    url_input = re.sub('o=\d+',repl,url_input)
-    url = url_input +  '&page=' +str(page_int)
-    return url
+    url_input,count = re.subn('o=\d+', repl, url_input)
+    if not count:
+        url_input += '&'+ repl
+    if '&page=' not in url_input: 
+        url_input = url_input +  '&page=' +str(page_int)
+    else:
+        repl = 'page=' +str(page_int)
+        url_input = re.sub('page=\d+', repl, url_input)
+    return url_input
 
 MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA = {u'ngày':'days',u'tuần':'weeks',u'hôm qua':'days',u'giờ':'hours',u'phút':'minutes',u'giây':'seconds',u'năm':'days',u'tháng':'days'}
 
@@ -37,7 +43,7 @@ def convert_chotot_date_to_datetime(string):
     return dt
 
 
-def local_a_native_time(datetime_input):
+def convert_to_utc_tz_a_vn_native_time(datetime_input):
     local = pytz.timezone("Etc/GMT-7")
     local_dt = local.localize(datetime_input, is_dst=None)
     utc_dt = local_dt.astimezone (pytz.utc)
@@ -61,18 +67,19 @@ class ChototFetch(models.AbstractModel):
     _name = 'abstract.topic.fetch'
 
     def get_topic_chotot(self, topic_html_or_json, siteleech_id_id):
-        obj = Chotot_get_topic(self)
+        obj = ChototGetTopic(self)
         return obj.get_topic_chotot(topic_html_or_json, siteleech_id_id)
         
-class Chotot_get_topic():
+class ChototGetTopic():
     
-    def __init__(self, self_fetch_obj):
-        self.env = self_fetch_obj.env
+    def __init__(self, env):
+        self.env = env
 
-    def create_or_get_one_in_m2m_value(self, val):
-        val = val.strip()
-        if val:
-            return g_or_c_ss(self.env['bds.images'],{'url':val})
+    def create_or_get_one_in_m2m_value(self, url):
+        url = url.strip()
+        if url:
+            return g_or_c_ss(self.env['bds.images'],{'url':url})
+
     def write_images(self, html):
         update_dict = {}
         images_urls = html.get('images',[])
@@ -110,7 +117,13 @@ class Chotot_get_topic():
         update_dict['gia_trieu'] = price_trieu
         return update_dict
 
-    def get_topic_chotot(self, topic_html_or_json, siteleech_id_id):
+    def write_poster(self, ad, siteleech_id_id):
+        mobile, name = get_mobile_name_cho_tot(ad)
+        user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
+        return {'poster_id': user.id }
+
+
+    def get_topic(self, topic_html_or_json, siteleech_id_id):
         update_dict = {}
 
         topic_html_or_json = json.loads(topic_html_or_json) 
@@ -123,17 +136,15 @@ class Chotot_get_topic():
         update_dict.update(self.write_images(ad))
         update_dict.update(self.write_quan_phuong(ad_params))
         update_dict.update(self.write_gia(ad))
-        
+        update_dict.update(self.write_poster(ad, siteleech_id_id))
+
         try:
             address = ad['address']
             update_dict['address'] = address
         except KeyError:
             pass
 
-        mobile, name = get_mobile_name_cho_tot(ad)
-        user = get_or_create_user_and_posternamelines(self.env, mobile, name ,siteleech_id_id)
-        update_dict['phone_poster'] = mobile
-        update_dict['poster_id'] = user.id
+        
 
         try:
             update_dict['html'] = ad['body']

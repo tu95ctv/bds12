@@ -8,11 +8,11 @@ access_bds_url,access_bds_url,model_bds_url,,1,1,1,1
 access_bds_images,access_bds_images,model_bds_images,,1,1,1,1
 access_bds_phuong,access_bds_phuong,model_bds_phuong,,1,1,1,1
 access_bds_quan,access_bds_quan,model_bds_quan,,1,1,1,1
-access_bds_mycontact,access_bds_mycontact,model_bds_mycontact,,1,1,1,1
 access_bds_quanofposter,access_bds_quanofposter,model_bds_quanofposter,,1,1,1,1
 access_bds_posternamelines,access_bds_posternamelines,model_bds_posternamelines,,1,1,1,1
 access_bds_publicdate,access_bds_publicdate,model_bds_publicdate,,1,1,1,1
-access_bds_myimage,access_bds_myimage,model_bds_myimage,,1,1,1,1
 access_bds_gialines,access_bds_gialines,model_bds_gialines,,1,1,1,1
 access_loop_fetch_cron,access_loop_fetch_cron,model_loop_fetch_cron,,1,1,1,1
+access_bds_getphoneposter,access_bds_getphoneposter,model_bds_getphoneposter,,1,1,1,1
+
 

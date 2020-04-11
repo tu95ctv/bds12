@@ -1,0 +1,61 @@
+<odoo>
+    <record model="bds.url" id="url_bds_com_vn_quan_1">
+            <field name="description">bds.com.vn 1</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-quan-1</field>
+        </record>
+        
+        <record model="bds.url" id="url_bds_com_vn_quan_10">
+            <field name="description">bds.com.vn 10</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-quan-10</field>
+        </record>
+        <record model="bds.url" id="url_bds_com_vn_quan_5">
+            <field name="description">bds.com.vn 5</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-quan-5</field>
+        </record>
+      <record model="bds.url" id="url_bds_com_vn_qtanbinh">
+            <field name="description">bds.com.vn Tân Bình</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-tan-binh</field>
+        </record>
+      <record model="bds.url" id="url_bds_com_vn_tan_phu">
+            <field name="description">bds.com.vn Tân Phú</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-tan-phu</field>
+        </record>
+        
+         <record model="bds.url" id="url_bds_com_vn_binh_thanh">
+            <field name="description">bds.com.vn Bình Thạnh</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-binh-thanh</field>
+        </record>
+        
+        
+          <record model="bds.url" id="url_bds_com_vn_11">
+            <field name="description">bds.com.vn 11</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-quan-11</field>
+        </record>
+        
+         <record model="bds.url" id="url_bds_com_vn_go_vap">
+            <field name="description">bds.com.vn gò vấp</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-go-vap</field>
+        </record>
+        
+        
+           <record model="bds.url" id="url_bds_com_vn_phu_nhuan">
+            <field name="description">bds.com.vn Phú Nhuận</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-phu-nhuan</field>
+        </record>
+        
+        <record model="bds.url" id="url_bds_quan_3">
+            <field name="description">bds.com.vn 3</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-quan-3</field>
+        </record>
+        
+          <record model="bds.url" id="url_bds_quan_6">
+            <field name="description">bds.com.vn 6</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-quan-6</field>
+        </record>
+          <record model="bds.url" id="url_bds_quan_8">
+            <field name="description">bds.com.vn 8</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-quan-8</field>
+        </record>
+        
+        
+</odoo>

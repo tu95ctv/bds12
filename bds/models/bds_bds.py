@@ -22,6 +22,9 @@ class bds(models.Model):
     _order = "id desc"
     _rec_name = 'title'
     
+    sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
+    loai_nha = fields.Char()
+    loai_nha_selection = fields.Selection([('Căn hộ/Chung cư','Căn hộ/Chung cư'), ('Nhà ở','Nhà ở')], string='Loại nhà')
     link = fields.Char()
     cate = fields.Selection([('bds','BDS'),('phone','Phone'),('laptop','Laptop')])
     url_id = fields.Many2one('bds.url')

@@ -66,20 +66,6 @@
             </field>
         </record>
         
-        <record id="bdssetread_form" model="ir.ui.view">
-            <field name="name">bds.setread.form</field>
-            <field name="model">bds.setread</field>
-            <field name="arch" type="xml">
-                <form string="Download all model">
-                    <sheet>
-                        <group></group>
-                    </sheet>
-                    <footer>
-                        <button name="set_bdsread" string="Set bds đã đọc" type="object" class="oe_highlight" groups="base.group_user" />
-                    </footer>
-                </form>
-            </field>
-        </record>
-        <act_window id="downloadquants" name="Set read" res_model="bds.setread" src_model="bds.bds" view_mode="form" multi="True" target="new" key2="client_action_multi" />
+        
     </data>
 </odoo>

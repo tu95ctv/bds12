@@ -1,0 +1,11 @@
+<odoo>
+    <record model="bds.url" id="url_chotot_cc">
+        <field name="description">Chợ tốt Chung cư tất cả các quận</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1010&amp;limit=20&amp;o=660&amp;st=s,k&amp;page=34</field>
+    </record>
+
+
+    
+
+
+</odoo>

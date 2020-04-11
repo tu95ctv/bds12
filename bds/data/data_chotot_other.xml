@@ -1,0 +1,24 @@
+<odoo>
+    <record model="bds.url" id="url_laptop_saigon">
+        <field name="description">Laptop Sài Gòn</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=5030&amp;w=1&amp;limit=20&amp;o=20&amp;st=s,k</field>
+        <field name="cate">laptop</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_phone">
+            <field name="description">Phone</field>
+            <field name="cate">phone</field>
+            <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=5010&amp;limit=20&amp;st=s,k</field>
+        </record>
+
+    <record model="bds.url" id="url_xedap">
+            <field name="description">Xe đạp</field>
+            <field name="url">https://gateway.chotot.com/v1/public/ad-listing?o=40&amp;cg=2060&amp;st=s,k&amp;limit=20</field>
+        </record>
+
+    <record model="bds.url" id="url_xehoi">
+            <field name="description">Xe hơi</field>
+            <field name="url">https://gateway.chotot.com/v1/public/ad-listing?o=120&amp;region_v2=13000&amp;cg=2010&amp;st=s,k&amp;w=1&amp;limit=20</field>
+        </record>
+    
+</odoo>

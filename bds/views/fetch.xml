@@ -28,7 +28,6 @@
                             <!-- <field name="quan_id" />
                             <field name="phuong_id" /> -->
                             <field name="current_page" />
-                            <field name="current_page_for_first" />
                             <field name="interval" />
                         </tree>
                     </field>

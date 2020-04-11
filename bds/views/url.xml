@@ -4,17 +4,24 @@
         <field name="model">bds.url</field>
         <field name="arch" type="xml">
             <form>
+                <header>   
+                    <button name="fetch_this" string="fetch this" type="object" class="btn-primary" />
+                    <button name="set_0" string="set_0" type="object" class="btn-primary" />
+
+                </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="url" />
                             <field name="description" />
                             <field name="siteleech_id" />
+                            <field name="priority" />
                         </group>
                         <group>
                             <field name="web_last_page_number" />
                             <field name="current_page" />
-                            <field name="current_page_for_first" />
+                            <field name="update_link_number" />
+                            <field name="create_link_number" />
                         </group>
                     </group>
                     
@@ -27,20 +34,25 @@
         <field name="name">bds.url.tree</field>
         <field name="model">bds.url</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree editable="bottom">
+                <button name="fetch_this" string="fetch this" type="object" class="btn-primary" />
+                <button name="set_0" string="set_0" type="object" class="btn-primary" />
                 <field name="id" />
                 <field name="url" />
                 <field name="description" />
                 <field name="cate" />
                 <field name="siteleech_id" />
+                <field name="write_date" />
+                <field name="minute_change" />
+                <field name="priority" />
+                <field name="current_page" />
+                <field name="create_link_number" />
+                <field name="set_number_of_page_once_fetch" />
                 <field name="existing_link_number" />
                 <field name="update_link_number" />
-                <field name="create_link_number" />
                 <field name="web_last_page_number" />
-                <field name="current_page" />
-                <field name="current_page_for_first" />
                 <field name="link_number" />
-                <field name="interval" />
+                <!-- <field name="interval" /> -->
             </tree>
         </field>
     </record>
@@ -53,13 +65,15 @@
                 <field name="description" string="description hoặc description không dấu" filter_domain="['|',('description','ilike',self), ('description_unidecode','ilike',self)]"/>
                 <field name="description"/>
                 <field name="url"/>
+                <filter name="priority" string="priority 1" domain="[('priority','=',1)]" />
+                <filter name="priority" string="priority 2" domain="[('priority','=',2)]" />
                 <filter name="siteleech_id" string="groupby siteleech_id" domain="[]" context="{'group_by':'siteleech_id'}" />
             </search>
         </field>
     </record>
         
     <record model="ir.actions.act_window" id="url_action">
-        <field name="name">quan action</field>
+        <field name="name">URL</field>
         <field name="res_model">bds.url</field>
         <field name="view_mode">tree,form</field>
     </record>
