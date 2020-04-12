@@ -5,10 +5,10 @@
         <field name="cate">laptop</field>
     </record>
 
-     <record model="bds.url" id="url_may_ban_sai_gon">
+    <record model="bds.url" id="url_may_ban_sai_gon">
         <field name="description">Máy bàn sài gòn</field>
         <field name="cate">may_ban</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=5070&amp;w=1&amp;limit=20&amp;o=40&amp;st=s,k&amp;page=3</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=5070&amp;w=1&amp;limit=20&amp;o=40&amp;st=s,k</field>
     </record>
 
 
