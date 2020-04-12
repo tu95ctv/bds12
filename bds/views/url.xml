@@ -46,6 +46,7 @@
                 <field name="minute_change" />
                 <field name="priority" />
                 <field name="current_page" />
+                <field name="current_page_2" />
                 <field name="create_link_number" />
                 <field name="set_number_of_page_once_fetch" />
                 <field name="existing_link_number" />

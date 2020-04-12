@@ -21,6 +21,7 @@
         <field name= "trich_dia_chi" />
         <field name= "url_id" />
         <field name= "cate" />
+        <field name= "sell_or_rent" />
         <field name="loai_nha_selection" filter_domain="[('loai_nha','=',self)]"/>
         <field name="quan_id_selection" filter_domain="[('quan_id','=',self)]"/>
         <field name="siteleech_id_selection" filter_domain="[('siteleech_id','=',self)]"/>

@@ -1,8 +1,6 @@
 <odoo>
     <data>
         <!-- BDS -->
-       
-
         <record id="bds_form" model="ir.ui.view">
             <field name="name">bds.form</field>
             <field name="model">bds.bds</field>

@@ -25,16 +25,18 @@
                             <field name="update_link_number" />
                             <field name="create_link_number" />
                             <field name="web_last_page_number" />
-                            <!-- <field name="quan_id" />
-                            <field name="phuong_id" /> -->
                             <field name="current_page" />
+                            <field name="current_page_2" />
                             <field name="interval" />
                         </tree>
                     </field>
                 </group>
                 <group>
-                    <field name="last_fetched_url_id" />
                     <field name="name" />
+                    <field name="last_fetched_url_id" />
+                    <field name="max_page" />
+                    <field name="is_current_page_2" />
+
                 </group>
             </form>
         </field>

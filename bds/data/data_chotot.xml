@@ -116,4 +116,20 @@
         <field name="description">Chợ tốt Gò Vấp</field>
         <field name="url"> https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13110&amp;cg=1020&amp;limit=20&amp;o=20&amp;st=s,k</field>
     </record>
+
+    <record model="bds.url" id="url_chotot_bds_hcm_all_sell">
+        <field name="description">BDS HCM tất cả sell</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;o=360&amp;st=s,k&amp;page=19</field>
+    </record>
+    
+    <record model="bds.url" id="url_chotot_bds_hcm_all_rent">
+        <field name="description">BDS HCM tất cả rent</field>
+        <field name="sell_or_rent">rent</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;st=u,h</field>
+    </record>
+    
+
+
+
 </odoo>
+

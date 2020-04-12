@@ -62,10 +62,17 @@ class ChototFetch(models.AbstractModel):
 
 
     def gen_page_number_list(self, url_id ): 
-        current_page = url_id.current_page
+        is_current_page_2 = getattr(self, 'is_current_page_2', False)
+        if is_current_page_2:
+            current_page_field_name = 'current_page_2'
+        else:
+            current_page_field_name = 'current_page'
+        self.current_page_field_name = current_page_field_name
+        current_page = getattr(url_id, current_page_field_name)
+        set_leech_max_page = getattr(self,'max_page',0) or url_id.set_leech_max_page
         web_last_page_number =  self.get_last_page_number(url_id)
-        if url_id.set_leech_max_page and  url_id.set_leech_max_page < web_last_page_number:
-            max_page =  url_id.set_leech_max_page
+        if set_leech_max_page and  set_leech_max_page < web_last_page_number:
+            max_page =  set_leech_max_page
         else:
             max_page = web_last_page_number
         url_id.web_last_page_number = web_last_page_number
@@ -162,7 +169,7 @@ class ChototFetch(models.AbstractModel):
         self.last_fetched_url_id = url_id.id
         interval = (datetime.datetime.now() - begin_time).total_seconds()
         url_id.interval = interval
-        url_id.write({'current_page': end_page_number_in_once_fetch,
+        url_id.write({self.current_page_field_name: end_page_number_in_once_fetch,
                     'create_link_number': number_notice_dict['create_link_number'],
                     'update_link_number': number_notice_dict["update_link_number"],
                     'link_number': number_notice_dict["link_number"],

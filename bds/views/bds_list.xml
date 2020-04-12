@@ -21,7 +21,7 @@
                 <field name="quan_id"/>
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
                 <field name="date_text" />
-                <field name="public_date" />
+                <field name="create_date" />
                 <field name="public_datetime" />
                 <field name="trich_dia_chi" />
                 <field name="cate"/>
@@ -33,14 +33,37 @@
             </tree>
         </field>
     </record>
+
+    <record model="ir.ui.view" id="rent_bds_list">
+        <field name="name">bds list</field>
+        <field name="model">bds.bds</field>
+        <field name="inherit_id" ref="bds_list_main"/>
+        <field name="arch" type="xml">
+            <field name="gia" position="replace">
+                <field name="gia_trieu"/>
+            </field>
+        </field>
+    </record>
+
     <record model="ir.actions.act_window" id="main_bds_action">
         <field name="name">BDS</field>
         <field name="res_model">bds.bds</field>
         <field name="view_mode">tree,form</field>
-        <field name="domain">[('cate','=','bds')]</field>
+        <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','sell')]</field>
         <field name="view_id" ref="bds_list_main"></field>
         <field name="search_id" ref="bds_search"/>
     </record>
+
+    <record model="ir.actions.act_window" id="rent_bds_action">
+        <field name="name">BDS</field>
+        <field name="res_model">bds.bds</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','rent')]</field>
+        <field name="view_id" ref="bds_list_main"></field>
+        <field name="search_id" ref="bds_search"/>
+    </record>
+
+
 
     
 </odoo>

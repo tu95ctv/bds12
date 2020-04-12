@@ -16,7 +16,8 @@ class Fetch(models.Model):
     url_id = fields.Many2one('bds.url')
     url_ids = fields.Many2many('bds.url')
     last_fetched_url_id = fields.Many2one('bds.url')#>0
-
+    max_page = fields.Integer()
+    is_current_page_2 = fields.Boolean()
     @api.depends('url_ids')
     def _compute_name(self):
         for r in self:
