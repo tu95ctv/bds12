@@ -38,6 +38,7 @@
         <field name="name">bds list</field>
         <field name="model">bds.bds</field>
         <field name="inherit_id" ref="bds_list_main"/>
+        <field name="mode">primary</field>
         <field name="arch" type="xml">
             <field name="gia" position="replace">
                 <field name="gia_trieu"/>

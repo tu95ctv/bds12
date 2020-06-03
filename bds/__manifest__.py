@@ -43,7 +43,7 @@
         'views/get_phone_poster.xml',
         'views/ir_actions_server.xml',
         'views/res_config_settings_views.xml',
-
+        'views/user_bds_mark_read.xml',
         'views/menu.xml',
 
     ],

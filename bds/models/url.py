@@ -28,7 +28,7 @@ class URL(models.Model):
         for r in self:
             r.description_unidecode = unidecode(r.description)
     siteleech_id = fields.Many2one('bds.siteleech',compute='siteleech_id_',store=True)
-    web_last_page_number = fields.Integer(readonly=1)
+    web_last_page_number = fields.Integer()
     current_page = fields.Integer()
     current_page_2 = fields.Integer()
     update_link_number = fields.Integer(readonly=1)

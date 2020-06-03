@@ -17,11 +17,17 @@ def skip_if_cate_not_bds(depend_func):
                 depend_func(r)
     return wrapper
 
+class UserReadMark(models.Model):
+    _name = 'user.read.mark'
+
+    user_id = fields.Many2one('res.users')
+    bds_id = fields.Many2one('bds.bds')
 class bds(models.Model):
     _name = 'bds.bds'
     _order = "id desc"
     _rec_name = 'title'
     
+    user_read_mark_ids = fields.One2many('user.read.mark','bds_id')
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
     loai_nha = fields.Char()
     loai_nha_selection = fields.Selection([('Căn hộ/Chung cư','Căn hộ/Chung cư'), ('Nhà ở','Nhà ở')], string='Loại nhà')
@@ -72,7 +78,6 @@ class bds(models.Model):
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
-    after_trich_dia_chi = fields.Char(compute='trich_dia_chi_',store = True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
     thumb_view = fields.Binary(compute='thumb_view_')  
@@ -110,6 +115,14 @@ class bds(models.Model):
     siteleech_id_selection = fields.Selection('siteleech_id_selection_')
     # !for search
     
+    def user_read_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            user_read_mark = self.env['user.read.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            if not user_read_mark:
+                self.env['user.read.mark'].create({'user_id':user.id, 'bds_id':bds_id.id })
+
     @api.multi
     def open_something(self):
         return {
@@ -201,9 +214,9 @@ class bds(models.Model):
                                 is_day = re.search('\d+/\d\d\d\d', trich_dia_chi)
                                 if not is_day:
                                     if 'm2' not in trich_dia_chi:
-                                        r.trich_dia_chi = trich_dia_chi
-                                        r.after_trich_dia_chi= rhtml[rs.span()[1]:rs.span()[1]+30]
+                                        trich_dia_chi = trich_dia_chi
                                         break
+                r.trich_dia_chi = trich_dia_chi
                 if dd_tin_cua_co == False:       
                     kss= ['mmg','mqc','mtg', 'bds', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','land','tư vấn','thông tin chính xác']
                     is_match = False
@@ -394,7 +407,7 @@ class bds(models.Model):
     @api.depends('link')
     def cho_tot_link_fake_(self):
         for r in self:
-            if 'chotot' in r.link:
+            if r.link and 'chotot' in r.link:
                 rs = re.search('/(\d*)$',r.link)
                 id_link = rs.group(1)
                 r.cho_tot_link_fake = 'https://nha.chotot.com/quan-10/mua-ban-nha-dat/' + 'xxx-' + id_link+ '.htm'

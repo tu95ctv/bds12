@@ -130,6 +130,11 @@
             <field name="url">https://muaban.net/can-ho-chung-cu-tap-the-quan-tan-phu-l5923-c3204?cp=6</field>
         </record>
         
+        <record model="bds.url" id="url_muaban_all_hcm">
+            <field name="description">Mua bán HCM all tất cả</field>
+            <field name="url">https://muaban.net/nha-hem-ngo-ho-chi-minh-l59-c3202?cp=2</field>
+        </record>
+
         
         
         

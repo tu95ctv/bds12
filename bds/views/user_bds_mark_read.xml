@@ -1,0 +1,32 @@
+<odoo>
+    <!-- làm gọn lại ngày 23/02 -->
+    <record id="user_read_mark_form" model="ir.ui.view">
+        <field name="name">user_read_mark</field>
+        <field name="model">user.read.mark</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="user_id"/>
+                    <field name="bds_id"/>
+                </group>
+            </form>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="user_read_mark_list">
+        <field name="name">bds list</field>
+        <field name="model">user.read.mark</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="user_id"/>
+                <field name="bds_id"/>
+            </tree>
+        </field>
+    </record>
+    <record model="ir.actions.act_window" id="user_read_mark_action">
+        <field name="name">user_read_mark window</field>
+        <field name="res_model">user.read.mark</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    
+</odoo>

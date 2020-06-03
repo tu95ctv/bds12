@@ -17,7 +17,8 @@
     <menuitem name="Schedule" id="schedule_menu" parent="bds_icon" action="base.ir_cron_act" sequence="5" />
 	<menuitem name="Cron Fetch" id="cron_fetch_menu" parent="bds_icon" action="loop_fetch_cron_action"  sequence="5"/>
     
-
+    
+    <menuitem name="abc" sequence="1" id="user_read_mark_menu" parent="stuff_menu" action="user_read_mark_action" />
     <menuitem name="Error" id="error_menu1" parent="stuff_menu" action="bds.error_action" />
     <menuitem name="Quận" id="quan_menu" parent="stuff_menu" action="quan_action" />
     <menuitem name="Site Leech" id="siteleech_menu" parent="stuff_menu" action="siteleech_action" />

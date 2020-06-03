@@ -270,8 +270,13 @@ class MuabanFetch(models.AbstractModel):
 
     def create_page_link(self, format_page_url, page_int):
         page_url = super(MuabanFetch, self).create_page_link(format_page_url, page_int)
+        repl = '?cp=%s'%page_int
         if self.site_name == 'muaban':
-            page_url =  re.sub('\?cp=(\d*)', '?cp=%s'%page_int, format_page_url)
+            if 'cp=' in format_page_url:
+                page_url =  re.sub('\?cp=(\d*)', repl, format_page_url)
+            else:
+                page_url = format_page_url +  '?' + repl
+
             
         return page_url
 
@@ -300,7 +305,10 @@ class MuabanFetch(models.AbstractModel):
                 try:
                     area = title_and_icon.select('span.list-item__area b')[0].get_text()
                     area = area.split(' ')[0].strip().replace(',','.')
-                    area = float(area)
+                    try:
+                        area = float(area)
+                    except:
+                        area = 0
                 except IndexError:
                     pass
                 topic_data_from_page['area']=area

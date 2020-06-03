@@ -128,6 +128,31 @@
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;st=u,h</field>
     </record>
     
+    <record model="bds.url" id="url_chotot_bds_binh_duong_all_sell">
+        <field name="description">BDS Bình Dương tất cả sell</field>
+        <field name="sell_or_rent">sell</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2011&amp;cg=1000&amp;limit=20&amp;st=s,k</field>
+    </record>
+
+    <record model="bds.url" id="url_chotot_bds_binh_duong_all_rent">
+        <field name="description">BDS Bình Dương tất cả rent</field>
+        <field name="sell_or_rent">rent</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2011&amp;cg=1000&amp;limit=20&amp;st=u,h</field>
+    </record>
+
+<record model="bds.url" id="url_chotot_bds_dni_all_sell">
+        <field name="description">BDS DNI tất cả sell</field>
+        <field name="sell_or_rent">sell</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2013&amp;cg=1000&amp;limit=20&amp;st=s,k</field>
+    </record>
+
+<record model="bds.url" id="url_chotot_bds_dni_all_rent">
+        <field name="description">BDS DNI tất cả rent</field>
+        <field name="sell_or_rent">rent</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2013&amp;cg=1000&amp;limit=20&amp;st=s,k&amp;f=p&amp;page=1
+</field>
+    </record>
+
 
 
 

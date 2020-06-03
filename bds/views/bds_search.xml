@@ -38,11 +38,14 @@
         <filter  name="gia" string="giá từ 0.1 tới 2"  domain="[ ('gia','&gt;=', 0.1), ('gia','&gt;=', 2) ]"/>
         <filter  name="gia" string="giá từ 2 tới 4"  domain="[ ('gia','&gt;=', 2), ('gia','&gt;=', 4) ]"/>
         <filter  name="gia" string="giá từ 4 tới 6"  domain="[ ('gia','&gt;=', 4), ('gia','&gt;=', 6) ]"/>
+        
+        <separator />
+        <filter name="user_read_mark_ids" domain ="[('user_read_mark_ids.user_id','=',uid)]"></filter>
         <separator />
           <filter name="create today" string="Tạo trong ngày" 
         domain="[('create_date','&gt;=', ((context_today()-datetime.timedelta(days=1)).strftime('%Y-%m-%d 17:00:00')))]" />
         <separator />
-        <filter name="tao_cach_day_5_phut" string="Tạo cách đâ 5 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() - datetime.timedelta(minutes=15)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+        <filter name="tao_cach_day_5_phut" string="Tạo cách đâ 5 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
         <separator />
         <filter name="có trích địa chỉ" domain ="[('trich_dia_chi','!=',False)]"></filter>
         <separator />
