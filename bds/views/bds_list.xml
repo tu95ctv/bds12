@@ -10,6 +10,8 @@
                 <field name="quan_tam"></field>
                 <!-- <field name="thumb_view" widget="image"></field> -->
                 <field name="is_read"></field>
+                <field name="is_user_read_mark"></field>
+                <field name="is_user_quantam_mark"></field>
                 <field name="id"></field>
                 <field name="gia"/>
                 <field name="don_gia"></field>
@@ -24,6 +26,7 @@
                 <field name="create_date" />
                 <field name="public_datetime" />
                 <field name="trich_dia_chi" />
+                <field name="mat_tien_address" readonly="0" />
                 <field name="cate"/>
                 <field name="du_doan_cc_or_mg" />
                 <field name="chotot_moi_gioi_hay_chinh_chu" />

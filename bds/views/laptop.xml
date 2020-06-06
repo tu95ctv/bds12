@@ -76,7 +76,7 @@
         <field name="mode">primary</field>
         <field name="inherit_id" ref="bds_search"/>
         <field name="arch" type="xml">
-             <filter name="có trích địa chỉ" position="after">
+             <filter name="Có trích địa chỉ" position="after">
                 <filter name="máy bàn" domain ="[('loai_nha','=','máy tính để bàn')]"></filter>
              </filter>
         </field>

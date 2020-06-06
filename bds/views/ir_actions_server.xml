@@ -32,15 +32,43 @@
         </field>
     </record>
 
-    <!-- <record id="action_set_quan_tam" model="ir.actions.server">
-        <field name="name">Đánh dấu quan tâm</field>
+   
+   <record id="action_set_quantam_newtable" model="ir.actions.server">
+        <field name="name">Đánh dấu quan tâm new table</field>
         <field name="model_id" ref="model_bds_bds"/>
         <field name="binding_model_id" ref="bds.model_bds_bds"/>
         <field name="state">code</field>
         <field name="code">
-            records.set_quan_tam()
+            records.user_quantam_mark()
         </field>
-    </record> -->
+    </record>
+
+
+    <record id="action_test" model="ir.actions.server">
+        <field name="name">test</field>
+        <field name="model_id" ref="model_bds_bds"/>
+        <field name="binding_model_id" ref="bds.model_bds_bds"/>
+        <field name="state">code</field>
+        <field name="code">
+            records.test()
+        </field>
+    </record>
+
+    <record id="action_make_trigger" model="ir.actions.server">
+        <field name="name">make trigger</field>
+        <field name="model_id" ref="model_bds_bds"/>
+        <field name="binding_model_id" ref="bds.model_bds_bds"/>
+        <field name="state">code</field>
+        <field name="code">
+            records.make_trigger()
+        </field>
+    </record>
+
+
+    
+
+
+
 
 
 

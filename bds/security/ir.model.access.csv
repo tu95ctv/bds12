@@ -15,6 +15,6 @@ access_bds_gialines,access_bds_gialines,model_bds_gialines,,1,1,1,1
 access_loop_fetch_cron,access_loop_fetch_cron,model_loop_fetch_cron,,1,1,1,1
 access_bds_getphoneposter,access_bds_getphoneposter,model_bds_getphoneposter,,1,1,1,1
 access_user_read_mark,access_user_read_mark,model_user_read_mark,,1,1,1,1
-
+access_user_quantam_mark,access_user_quantam_mark,model_user_quantam_mark,,1,1,1,1
 
 

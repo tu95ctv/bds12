@@ -75,7 +75,12 @@ class ChototFetch(models.AbstractModel):
             max_page =  set_leech_max_page
         else:
             max_page = web_last_page_number
-        url_id.web_last_page_number = web_last_page_number
+        if url_id.siteleech_id.name !='muaban':
+            url_id.web_last_page_number = web_last_page_number
+        else:
+            if url_id.web_last_page_number == False:
+                url_id.web_last_page_number = web_last_page_number
+
         begin = current_page + 1
         if begin > max_page:
             begin  = 1
@@ -246,7 +251,7 @@ class MuabanFetch(models.AbstractModel):
 
     def get_last_page_number(self, url_id):
         if self.site_name =='muaban':
-            return 100
+            return 300
         return super(MuabanFetch, self).get_last_page_number(url_id)
         
     def request_topic (self, link, url_id):

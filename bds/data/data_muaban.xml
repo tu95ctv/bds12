@@ -131,10 +131,15 @@
         </record>
         
         <record model="bds.url" id="url_muaban_all_hcm">
-            <field name="description">Mua bán HCM all tất cả</field>
-            <field name="url">https://muaban.net/nha-hem-ngo-ho-chi-minh-l59-c3202?cp=2</field>
+            <field name="description">Mua bán HCM all nhà phố, hẻm tất cả</field>
+            <field name="url">https://muaban.net/ban-nha-ho-chi-minh-l59-c32?cp=14</field>
         </record>
 
+
+        <record model="bds.url" id="url_muaban_all_chung_cu_hcm">
+            <field name="description">Mua bán HCM all chung cư tất cả</field>
+            <field name="url">https://muaban.net/ban-can-ho-chung-cu-tap-the-ho-chi-minh-l59-c38?cp=2</field>
+        </record>
         
         
         

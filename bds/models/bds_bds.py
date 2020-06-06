@@ -8,6 +8,48 @@ import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
 from odoo.exceptions import UserError
 
+def detect_street_name(street_name_may_be):
+    pat = '((\S+)[\s\.$,]*){,4}'
+    long_street_name_search_obj = re.search(pat,street_name_may_be, re.I)
+    long_street_name = long_street_name_search_obj.group(0)
+    street_name_obj = re.search(',|\.', long_street_name)
+    if street_name_obj:
+        street_name = long_street_name[:street_name_obj.span()[0]]
+    else:
+        street_name = long_street_name
+    return street_name.strip()
+
+def detech_mat_tien(html):
+    ss = re.findall('(số \d+ )', html, re.I)
+    deal_s = []
+    full_adress_list = []
+    print ('***ss***', ss)
+    for s in ss:
+        if s not in deal_s:
+            deal_s.append(s)
+            s1 = re.search(s, html, re.I)
+            index = s1.span()[1]
+            number = s1.group(0)
+            trim_street = html[index:index + 30]
+            print ('**number**', number)
+            is_tang_cao = re.search('cao tầng|\(', trim_street, re.I)
+            print ('**is_tang_cao**', is_tang_cao)
+            if is_tang_cao:
+                continue
+            pre_index = index - 30
+            if pre_index < 0:
+                pre_index = 0
+            check_hem_string = html[pre_index:index]
+            if check_hem_string:
+                is_hem = re.search('hẻm', check_hem_string, re.I)
+                print ('***is_hem', is_hem)
+                if is_hem:
+                    continue
+            street_name = detect_street_name(trim_street)
+            full_adress =  number + '' + street_name
+            print ('**full_adress**', full_adress)
+            full_adress_list.append(full_adress)
+    return full_adress_list
 
 def skip_if_cate_not_bds(depend_func):
     def wrapper(*args,**kargs):
@@ -22,12 +64,21 @@ class UserReadMark(models.Model):
 
     user_id = fields.Many2one('res.users')
     bds_id = fields.Many2one('bds.bds')
+
+class UserQuanTamMark(models.Model):
+    _name = 'user.quantam.mark'
+
+    user_id = fields.Many2one('res.users')
+    bds_id = fields.Many2one('bds.bds')
+
+
 class bds(models.Model):
     _name = 'bds.bds'
     _order = "id desc"
     _rec_name = 'title'
     
     user_read_mark_ids = fields.One2many('user.read.mark','bds_id')
+    user_quantam_mark_ids = fields.One2many('user.quantam.mark','bds_id')
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
     loai_nha = fields.Char()
     loai_nha_selection = fields.Selection([('Căn hộ/Chung cư','Căn hộ/Chung cư'), ('Nhà ở','Nhà ở')], string='Loại nhà')
@@ -113,6 +164,44 @@ class bds(models.Model):
     quan_id_selection = fields.Selection('get_quan_')
     greater_day = fields.Integer()
     siteleech_id_selection = fields.Selection('siteleech_id_selection_')
+    is_user_read_mark = fields.Boolean(compute='_is_user_read_mark')
+    is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
+    mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
+    trigger = fields.Boolean()
+
+    @api.depends('html','trigger')
+    def _mat_tien_address(self):
+        for r in self:
+            html = r.html
+            if html:
+                full_adress_list = detech_mat_tien(html)
+                print ('***full_adress_list**', full_adress_list)
+                if full_adress_list:
+                    r.mat_tien_address = ','.join(full_adress_list)
+    def make_trigger(self):
+        self.trigger = True
+
+    def test(self):
+        query = "select html from bds_bds where html like 'mặt tiền' limit=2"
+        rs =  self.env.cr.execute(query)
+
+        raise UserError(rs)
+
+
+    def _is_user_quantam_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            is_user_quantam_mark = self.env['user.quantam.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            r.is_user_quantam_mark = bool(is_user_quantam_mark)
+
+    def _is_user_read_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            user_read_mark = self.env['user.read.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            r.is_user_read_mark = bool(user_read_mark)
+
     # !for search
     
     def user_read_mark(self):
@@ -122,6 +211,33 @@ class bds(models.Model):
             user_read_mark = self.env['user.read.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
             if not user_read_mark:
                 self.env['user.read.mark'].create({'user_id':user.id, 'bds_id':bds_id.id })
+    
+    def user_not_read_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            user_read_mark = self.env['user.read.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            user_read_mark.unlink()
+
+    
+    def user_quantam_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            user_read_mark = self.env['user.quantam.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            if not user_read_mark:
+                self.env['user.quantam.mark'].create({'user_id':user.id, 'bds_id':bds_id.id })
+    
+    def user_not_quantam_mark(self):
+        for r in self:
+            user = self.env.user
+            bds_id = r
+            user_read_mark = self.env['user.quantam.mark'].search([('user_id','=',user.id), ('bds_id','=',bds_id.id)])
+            user_read_mark.unlink()
+
+
+
+    
 
     @api.multi
     def open_something(self):
@@ -156,9 +272,9 @@ class bds(models.Model):
     def len_publicdate_ids_(self):
         for r in self:
             r.len_publicdate_ids = len(r.publicdate_ids)
-
-    @skip_if_cate_not_bds
+    
     @api.depends('html')
+    @skip_if_cate_not_bds
     def html_replace_(self):
         for r in self:
             html =  r.html
@@ -167,9 +283,8 @@ class bds(models.Model):
                 html_replace = html_replace.replace(r.trich_dia_chi,'')
             r.html_replace = html_replace
             
-
-    @skip_if_cate_not_bds
     @api.depends('html')
+    @skip_if_cate_not_bds
     def mien_tiep_mg_(self):
         for r in self:
             rs = re.search('(miễn|không)[\w ]{0,15}(môi giới|mg|trung gian|tg|cò)|mtg|mmg',r.html,re.I)
@@ -177,57 +292,91 @@ class bds(models.Model):
                 r.mien_tiep_mg = rs.group(0)
                 r.mtg = True
     
-    @api.depends('html')
+    def detect_hem_address_list(self, ad_list):
+
+        def detect_hem_address(address):
+            posible_address = re.findall('(\d+\w{0,2}/\d+\w{0,2}(?:/\d+\w{0,2})*)', address)
+            keys_street_has_numbers = ['3/2','30/4','19/5','3/2.','3/2,','23/9']
+            keys_24_7 = ['24/24','24/7','24/24h', '24/24H','24/24/7']
+            pat = '24h*/7|24h*/24'
+            result_keys = []
+            trust_address_result_keys = []
+            only_number_trust_address_result_keys = []
+            black_list = '23/23 Nguyễn Hữu Tiến|5 Độc Lập'
+            black_list_rs = re.search(black_list, address, re.I)
+            if not black_list_rs:
+                co_date_result_keys=[]
+                street_result_keys=[]
+                
+                for adress_number in posible_address:
+    #                 adress_number = adress_number[0]
+                    print ('**adress_number**', adress_number)
+                    rs = re.search(pat, adress_number, re.I)
+                    if rs:
+                        co_date_result_keys.append(adress_number)
+                        continue
+                    if adress_number in keys_street_has_numbers:
+                        street_result_keys.append(adress_number)
+                        continue
+                    is_day = re.search('\d+/\d\d\d\d', adress_number)
+                    if is_day:
+                        continue
+                    is_ty_m2 =  re.search('tỷ|tr|m2', adress_number)
+                    if is_ty_m2:
+                        continue
+                    if adress_number not in only_number_trust_address_result_keys:
+                        index = re.search(adress_number, address).span()[1]
+                        trim_street = address[index+1:index+100]
+                        street_name = detect_street_name(trim_street)
+                        full_adress = adress_number + ' ' + street_name
+                        trust_address_result_keys.append((adress_number, full_adress))
+                        only_number_trust_address_result_keys.append(adress_number)
+            return trust_address_result_keys, co_date_result_keys
+        
+        sum_trust_address_result_keys = [] 
+        is_co_date_result_keys = False
+        for ad in ad_list:
+            trust_address_result_keys, co_date_result_keys = detect_hem_address(ad)
+            is_co_date_result_keys = is_co_date_result_keys or bool(co_date_result_keys)
+            for i in trust_address_result_keys:
+                if i not in sum_trust_address_result_keys:
+                    sum_trust_address_result_keys.append(i)
+        return sum_trust_address_result_keys, is_co_date_result_keys
+
+    @api.depends('html', 'trigger')
+    @skip_if_cate_not_bds 
     def trich_dia_chi_(self):
         for r in self:
-            black_list = ['11/21 Nguyễn Hữu Tiến']
             title = r.title
             html =  r.html
             address = r.address
-            trich_dia_chi = False
+            ad_list = []
+            if title:
+                ad_list.append(title)
+            if html: 
+                ad_list.append(html)
             if address:
-                rs = re.search('^(\d+\w{0,2}(/\d+\w{0,2})+)[^\w/]',address)
-                if rs:
-                    trich_dia_chi = rs.group(1)
-            adict = {'title':title, 'html':html}
-            if address:
-                adict.update({'address':address})
-            if html:
-                dd_tin_cua_co = False
-                for key,rhtml in adict.items():
-                    if key =='html':
-                        for bl in black_list:
-                            black_list_re = re.search(bl,rhtml,re.I)
-                            if black_list_re:
-                                r.dd_tin_cua_co = True
-                                return True
-                    
-                    if not trich_dia_chi:
-                        rs = re.search('(?<!hẻm) (\d+\w{0,2}(/\d+\w{0,1})+)[^\w/]',rhtml)
-                        if rs:
-                            trich_dia_chi = rs.group(1)
-                            trich_dia_chi = trich_dia_chi.replace('.','').replace(',','').replace('(','').replace(')','')
-                            trich_dia_chi = trich_dia_chi.strip()
-                            if trich_dia_chi in ['24/24','24/7','24/24h', '24/24H','24/24/7']:
-                                dd_tin_cua_co = True
-                            elif trich_dia_chi not in ['3/2','30/4','19/5','3/2.','3/2,','23/9']:
-                                is_day = re.search('\d+/\d\d\d\d', trich_dia_chi)
-                                if not is_day:
-                                    if 'm2' not in trich_dia_chi:
-                                        trich_dia_chi = trich_dia_chi
-                                        break
+                ad_list.append(address)
+            sum_trust_address_result_keys, dd_tin_cua_co = self.detect_hem_address_list(ad_list)
+            print ('***sum_trust_address_result_keys***', sum_trust_address_result_keys)
+            if sum_trust_address_result_keys:
+                trich_dia_chi = ','.join(map(lambda i:i[1], sum_trust_address_result_keys))
+                print ('***trich_dia_chi***', trich_dia_chi)
                 r.trich_dia_chi = trich_dia_chi
-                if dd_tin_cua_co == False:       
-                    kss= ['mmg','mqc','mtg', 'bds', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','land','tư vấn','thông tin chính xác']
-                    is_match = False
-                    for ks in kss:
-                        rs = re.search(ks,html, re.I)
-                        if rs:
-                            is_match = True
-                            break
-                    if is_match:
-                        dd_tin_cua_co = True
-                r.dd_tin_cua_co = dd_tin_cua_co
+            if dd_tin_cua_co == False:       
+                kss= ['mmg','mqc','mtg', 'bds', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','land','tư vấn','thông tin chính xác']
+                is_match = False
+                for ks in kss:
+                    rs = re.search(ks,html, re.I)
+                    if rs:
+                        is_match = True
+                        break
+                if is_match:
+                    dd_tin_cua_co = True
+            r.dd_tin_cua_co = dd_tin_cua_co
+
+
+
         
     @api.depends('trich_dia_chi')
     def same_address_bds_ids_(self):
@@ -235,9 +384,9 @@ class bds(models.Model):
             if r.trich_dia_chi:
                 same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi),('id','!=',r.id)])
                 r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
-                
-    @skip_if_cate_not_bds            
+
     @api.depends('html','cate')
+    @skip_if_cate_not_bds            
     def auto_ngang_doc_(self):
         for r in self:
             pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}x {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
@@ -254,9 +403,9 @@ class bds(models.Model):
                 rarea = r.area
                 ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
                 r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich = auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
-                
-    @skip_if_cate_not_bds   
+    
     @api.depends('html')
+    @skip_if_cate_not_bds   
     def subtitle_html_for_agency_(self):
         for r in self:
             pt ='(liên hệ|lh|dt)([: ]{0,3})(.{1,20}[\d. -]{8,14})+'
@@ -266,18 +415,17 @@ class bds(models.Model):
             r.subtitle_html_for_agency = rs
     
     
-    
-    @skip_if_cate_not_bds
     @api.depends('subtitle_html_for_agency')
+    @skip_if_cate_not_bds
     def hoahongsearch_(self):
         for r in self:
             pt= '(hoa hồng|huê hồng|hh).+?(\d[\.\d]{0,2}%|\d{2,3}\s{0,1}(triệu|tr))'
             rs = re.search(pt, r.subtitle_html_for_agency,flags = re.I)
             if rs:
                 r.hoahongsearch = rs.group(0)
-    
-    @skip_if_cate_not_bds
+
     @api.depends('html')
+    @skip_if_cate_not_bds
     def mqc_(self):
         kss= ['quảng cáo','mqc','miễn qc','miễn tiếp báo']
         for r in self:
@@ -290,8 +438,8 @@ class bds(models.Model):
             if is_match:
                 r.mqc = True
 
-    @skip_if_cate_not_bds               
     @api.depends('html')
+    @skip_if_cate_not_bds               
     def dd_tin_cua_dau_tu_(self):
         kss= ['hoa hồng','hh 1%', 'hh 0.5%','hh .{1,3}tr','1%','1 %','huê hồng','phí môi giới',]
         for r in self:

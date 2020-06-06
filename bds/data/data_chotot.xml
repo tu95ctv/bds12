@@ -118,7 +118,7 @@
     </record>
 
     <record model="bds.url" id="url_chotot_bds_hcm_all_sell">
-        <field name="description">BDS HCM tất cả sell</field>
+        <field name="description">BDS HCM tất cả nhà phố, chung cư sell</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;o=360&amp;st=s,k&amp;page=19</field>
     </record>
     
