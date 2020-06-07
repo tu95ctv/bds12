@@ -23,7 +23,6 @@ def detech_mat_tien(html):
     ss = re.findall('(số \d+ )', html, re.I)
     deal_s = []
     full_adress_list = []
-    print ('***ss***', ss)
     for s in ss:
         if s not in deal_s:
             deal_s.append(s)
@@ -31,9 +30,7 @@ def detech_mat_tien(html):
             index = s1.span()[1]
             number = s1.group(0)
             trim_street = html[index:index + 30]
-            print ('**number**', number)
             is_tang_cao = re.search('cao tầng|\(', trim_street, re.I)
-            print ('**is_tang_cao**', is_tang_cao)
             if is_tang_cao:
                 continue
             pre_index = index - 30
@@ -42,12 +39,10 @@ def detech_mat_tien(html):
             check_hem_string = html[pre_index:index]
             if check_hem_string:
                 is_hem = re.search('hẻm', check_hem_string, re.I)
-                print ('***is_hem', is_hem)
                 if is_hem:
                     continue
             street_name = detect_street_name(trim_street)
             full_adress =  number + '' + street_name
-            print ('**full_adress**', full_adress)
             full_adress_list.append(full_adress)
     return full_adress_list
 
@@ -175,7 +170,6 @@ class bds(models.Model):
             html = r.html
             if html:
                 full_adress_list = detech_mat_tien(html)
-                print ('***full_adress_list**', full_adress_list)
                 if full_adress_list:
                     r.mat_tien_address = ','.join(full_adress_list)
     def make_trigger(self):
@@ -310,7 +304,6 @@ class bds(models.Model):
                 
                 for adress_number in posible_address:
     #                 adress_number = adress_number[0]
-                    print ('**adress_number**', adress_number)
                     rs = re.search(pat, adress_number, re.I)
                     if rs:
                         co_date_result_keys.append(adress_number)
@@ -358,10 +351,8 @@ class bds(models.Model):
             if address:
                 ad_list.append(address)
             sum_trust_address_result_keys, dd_tin_cua_co = self.detect_hem_address_list(ad_list)
-            print ('***sum_trust_address_result_keys***', sum_trust_address_result_keys)
             if sum_trust_address_result_keys:
                 trich_dia_chi = ','.join(map(lambda i:i[1], sum_trust_address_result_keys))
-                print ('***trich_dia_chi***', trich_dia_chi)
                 r.trich_dia_chi = trich_dia_chi
             if dd_tin_cua_co == False:       
                 kss= ['mmg','mqc','mtg', 'bds', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','land','tư vấn','thông tin chính xác']

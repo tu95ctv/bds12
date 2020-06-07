@@ -75,7 +75,6 @@ class GetPhonePoster(models.Model):
 
             if poster_ids:
                 domain = [('id','!=', r.id)] if isinstance(r.id, int) else []
-                print ('***domain***', domain,'***poster_ids**', poster_ids)
                 send_poster_ids = self.search(domain)
                 filter_poster_ids = send_poster_ids.mapped('poster_ids')
                 rs_poster_ids = self.env['bds.poster']

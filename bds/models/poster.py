@@ -310,7 +310,6 @@ class Poster(models.Model):
                  '''select count(quan_id),quan_id,min(gia),avg(gia),max(gia) from bds_bds where poster_id = %s group by quan_id'''%r.id
                 self.env.cr.execute(product_category_query)
                 product_category = self.env.cr.fetchall()
-                #print product_category
                 for  tuple_count_quan in product_category:
                     quan_id = int(tuple_count_quan[1])
                     quan = self.env['bds.quan'].browse(quan_id)

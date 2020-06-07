@@ -46,7 +46,6 @@ class URL(models.Model):
 
     def _minute_change(self):
         for r in self:
-            print ('**r.write_date',r.write_date,type(r.write_date), datetime.datetime.now())
             r.minute_change = (r.write_date - datetime.datetime.now()).seconds/60
 
     def get_last_page_number(self):
@@ -55,7 +54,6 @@ class URL(models.Model):
             html = request_html(page_1st_url)
             html = json.loads(html)
             total = int(html["total"])
-            print ('***total***', total)
             web_last_page_number = int(math.ceil(total/20.0))
             self.web_last_page_number = web_last_page_number
 

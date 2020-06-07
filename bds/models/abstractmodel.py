@@ -257,13 +257,11 @@ class MuabanFetch(models.AbstractModel):
     def request_topic (self, link, url_id):
         topic_dict = super(MuabanFetch, self).request_topic(link, url_id)
         if self.site_name =='muaban':
-            print ('***link**', link)
             topic_html_or_json = request_html(link)
             # path = os.path.dirname(os.path.abspath(__file__))
             # f = open(os.path.join(path,'muaban.html'), 'w')
             # f.write(topic_html_or_json)
             # f.close()
-            # print 
             topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json, self.siteleech_id_id)
         return topic_dict
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
@@ -302,8 +300,6 @@ class MuabanFetch(models.AbstractModel):
                 href = image_soups['href']
                 img = image_soups.select('img')[0]
                 src_img = img.get('data-src',False)
-                # if src_img:
-                #     print ('8***src_img', src_img)
                 topic_data_from_page['list_id'] = href
                 topic_data_from_page['thumb'] = src_img
                 area = 0

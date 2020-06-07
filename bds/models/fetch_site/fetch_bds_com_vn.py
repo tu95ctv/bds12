@@ -7,13 +7,11 @@ import datetime
 ################### BDS ###################
 
 def get_last_page_from_bdsvn_website(url_input):
-    ##print '***url_input**',url_input
     html = request_html(url_input)
     soup = BeautifulSoup(html, 'html.parser')
     range_pages = soup.select('div.background-pager-right-controls > a')
     if range_pages:
         last_page_href =  range_pages[-1]['href']
-        #end_page = int(last_page_href[-1])
         kq= re.search('\d+$',last_page_href)
         last_page_from_website =  int(kq.group(0))
     else:
@@ -52,7 +50,6 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     if images:
         object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
         m2m_ids = list(map(lambda x:x.id, object_m2m_list))
-        ###print '**m2m_ids**',m2m_ids
         if m2m_ids:
             val = [(6, False, m2m_ids)]
             update_dict['images_ids'] = val
@@ -63,10 +60,8 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     quan_id= g_or_c_bds_quan(self,soup)
     update_dict['quan_id'] = quan_id
     update_dict['phuong_id'] = get_phuong_xa_from_topic(self,soup,quan_id)
-    #get_all_phuong_xa_of_quan_from_topic(self,soup,quan_id)
     title = soup.select('div.pm-title > h1')[0].contents[0] 
     update_dict['title']=title
-    ####print 'title',title
     mobile,name = get_mobile_name_for_batdongsan(soup)
     user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
     update_dict['phone_poster']=mobile

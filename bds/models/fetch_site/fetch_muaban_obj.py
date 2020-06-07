@@ -76,7 +76,6 @@ class MuabanObject():
             mobile = None
         mobile = mobile or 'No Mobile'
         name = name or mobile
-        print ('***mobile',mobile,'**name', name)
 
 
         user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
