@@ -182,7 +182,6 @@ class Poster(models.Model):
             else:
                 if chotot_mg_or_cc =='chinh_chu':
                     du_doan_cc_or_mg= 'dd_cc'
-#                     detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3'
                     if count_post_all_site > 3:
                         if address_rate > 0:
                             detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'

@@ -182,7 +182,7 @@ class bds(models.Model):
         self.trigger = True
 
     def test(self):
-        query = "select html from bds_bds where html like 'mặt tiền' limit=2"
+        query = "select html from bds_bds where html like 'mặt tiền' limit 2"
         rs =  self.env.cr.execute(query)
 
         raise UserError(rs)
@@ -278,7 +278,7 @@ class bds(models.Model):
     def html_replace_(self):
         for r in self:
             html =  r.html
-            html_replace = re.sub('[\d. ]{10,11}','',html)
+            html_replace = re.sub('[\d. ]{10,11}','',html)# replace số điện thoại
             if r.trich_dia_chi:
                 html_replace = html_replace.replace(r.trich_dia_chi,'')
             r.html_replace = html_replace

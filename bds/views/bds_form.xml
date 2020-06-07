@@ -6,8 +6,8 @@
             <field name="model">bds.bds</field>
             <field name="arch" type="xml">
                 <form>
-                    <notebook>
-                        <page string="From Web">
+                    <!-- <notebook>
+                        <page string="From Web"> -->
                             <group>
                                 <group>
                                     <field name="thumb_view" widget="image" />
@@ -41,25 +41,30 @@
                                     <field name="html" />
                                 </group>
                             </group>
-                            <field name="images_ids"/>
-                            <field name="gialines_ids">
-                                <tree>
-                                    <field name="gia"></field>
-                                    <field name="gia_cu"></field>
-                                    <field name="diff_gia"></field>
-                                    <field name="create_date"></field>
-                                </tree>
-                            </field>
-                            <field name="publicdate_ids">
-                                <tree>
-                                    <field name="public_date"></field>
-                                    <field name="public_date_cu"></field>
-                                </tree>
-                            </field>
-                            <field name="same_address_bds_ids" />
-                            <field name="post_ids_of_user" />
-                        </page>
-                    </notebook>
+                            <group>
+                                <field name="images_ids"/>
+
+                                <field name="gialines_ids">
+                                    <tree>
+                                        <field name="gia"></field>
+                                        <field name="gia_cu"></field>
+                                        <field name="diff_gia"></field>
+                                        <field name="create_date"></field>
+                                    </tree>
+                                </field>
+                                
+                                <field name="publicdate_ids">
+                                    <tree>
+                                        <field name="public_date"></field>
+                                        <field name="public_date_cu"></field>
+                                    </tree>
+                                </field>
+                                <!-- <field name="same_address_bds_ids" /> -->
+
+                                <field name="post_ids_of_user" />
+                            </group>
+                        <!-- </page>
+                    </notebook> -->
                 </form>
             </field>
         </record>
