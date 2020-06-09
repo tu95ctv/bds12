@@ -27,6 +27,21 @@
         <field name="code">model.get_last_page_all_url()</field>
     </record>
 
+    <record id="cronjob_set_quan_trung_tam" model="ir.cron">
+        <field name="name">Set quận trung tâm</field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.quan'" name="model"/>
+        <field ref="model_bds_quan" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.set_cron_quan_trung_tam()</field>
+    </record>
+
+
 
             
 </odoo>

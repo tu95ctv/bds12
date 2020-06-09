@@ -25,6 +25,7 @@
                 <field name="date_text" />
                 <field name="create_date" />
                 <field name="public_datetime" />
+                <field name="diff_public_days_from_now" />
                 <field name="trich_dia_chi" />
                 <field name="mat_tien_address" readonly="0" />
                 <field name="cate"/>

@@ -163,6 +163,14 @@ class bds(models.Model):
     is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
     mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
     trigger = fields.Boolean()
+    diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
+
+    @api.depends('public_date')
+    def _compute_diff_public_days_from_now(self):
+        for r in self:
+            if r.public_date:
+                r.diff_public_days_from_now = (fields.Date.today() - r.public_date).days
+
 
     @api.depends('html','trigger')
     def _mat_tien_address(self):

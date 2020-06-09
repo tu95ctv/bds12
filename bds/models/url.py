@@ -10,6 +10,7 @@ from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
 import datetime
+
 class URL(models.Model):
     _name = 'bds.url'
     _sql_constraints = [
@@ -17,8 +18,15 @@ class URL(models.Model):
          'UNIQUE(url)',
          "The url must be unique"),
     ]
-    _rec_name = 'description'
+    # _rec_name = 'description'
     _order = 'priority asc'
+
+    name = fields.Char(compute='_compute_name', store=True)
+    
+    @api.depends('description','siteleech_id')
+    def _compute_name(self):
+        for r in self:
+            r.name = '%s-%s'%(r.siteleech_id.name, r.description)
 
     url = fields.Char()
     description = fields.Char()
@@ -43,7 +51,6 @@ class URL(models.Model):
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
     priority = fields.Integer()
     minute_change =  fields.Integer(compute='_minute_change')
-
     def _minute_change(self):
         for r in self:
             r.minute_change = (r.write_date - datetime.datetime.now()).seconds/60
@@ -82,3 +89,5 @@ class URL(models.Model):
                 else:
                     name = re.search('\.(.*?)\.', r.url).group(1)
                 r.siteleech_id = g_or_c_ss(self.env['bds.siteleech'], {'name':name})
+
+    

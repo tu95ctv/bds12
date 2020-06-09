@@ -18,11 +18,25 @@ class Fetch(models.Model):
     last_fetched_url_id = fields.Many2one('bds.url')#>0
     max_page = fields.Integer()
     is_current_page_2 = fields.Boolean()
-    @api.depends('url_ids')
+    des = fields.Char()
+
+    def name_get(self):
+        result = []
+        for r in self:
+            result.append((r.id, "id:%s-%s"%(r.id, r.name)))
+        return result
+        
+    @api.depends('url_ids','des')
     def _compute_name(self):
         for r in self:
             if r.url_ids:
-                r.name = ','.join(r.url_ids.mapped('description'))
+                descriptions = ','.join(r.url_ids.mapped('name'))
+                des = r.des
+                if des:
+                    name = '%s-%s'%(des, descriptions)
+                else:
+                    name = descriptions
+                r.name = name
 
     @api.multi
     def set_0(self):

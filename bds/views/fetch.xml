@@ -33,6 +33,7 @@
                 </group>
                 <group>
                     <field name="name" />
+                    <field name="des" />
                     <field name="last_fetched_url_id" />
                     <field name="max_page" />
                     <field name="is_current_page_2" />

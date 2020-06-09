@@ -54,6 +54,8 @@ class QuanHuyen(models.Model):
     post_ids = fields.One2many('bds.bds','quan_id')
     muc_gia_quan = fields.Float(digit=(6,2),compute='muc_gia_quan_',store=True,string=u'Mức Đơn Giá(triệu/m2)')
     len_post_ids = fields.Integer(compute='len_post_ids_')
+    level = fields.Selection([('trung_tam','Trung Tâm'), ('kha_trung_tam','Khá Trung Tâm'), ('vung_ven','Vùng ven')])
+
     @api.depends('post_ids')
     def len_post_ids_(self):
         for r in self:
@@ -71,6 +73,15 @@ class QuanHuyen(models.Model):
             self.env.cr.execute(sql_cmd)
             rsul = self.env.cr.fetchall()
             r.muc_gia_quan = rsul[0][0]
+
+    
+    def set_cron_quan_trung_tam(self):
+        trung_tams = ['quận 1', 'quận 3', 'quận 5', 'quận 10', 'quận tân bình', 'quận phú nhuận', 'quận tân bình', 'quận tân phú']
+       
+        for quan_name in trung_tams:
+            match_quan = self.search([('name','=ilike',quan_name)])
+            if match_quan:
+                match_quan.level = 'trung_tam'
             
 class Phuong(models.Model):
     _name = 'bds.phuong'
