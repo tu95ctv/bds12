@@ -81,6 +81,11 @@ class MuabanObject():
         user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
         return {'poster_id':user.id}
 
+    def get_loai_nha(self, soup):
+        loai_nha_soup = soup.select('div.breadcrumb li:last-child')
+        loai_nha = loai_nha_soup[0].get_text()
+        print ('***loai_nha', loai_nha)
+        return {'loai_nha':loai_nha}
 
     def get_topic(self, html, siteleech_id_id):
         update_dict  = {}
@@ -94,6 +99,7 @@ class MuabanObject():
         update_dict.update(self.write_images(soup))
         update_dict.update(self.write_gia(soup))
         update_dict.update(self.write_quan_phuong(soup))
+        update_dict.update(self.get_loai_nha(soup))
         update_dict.update(self.write_poster(soup, siteleech_id_id))
 
         title = soup.select('h1.title')[0].get_text()

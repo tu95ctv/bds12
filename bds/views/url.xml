@@ -41,6 +41,7 @@
                 <field name="url" />
                 <field name="description" />
                 <field name="cate" />
+                <field name="sell_or_rent" />
                 <field name="siteleech_id" />
                 <field name="write_date" />
                 <field name="minute_change" />

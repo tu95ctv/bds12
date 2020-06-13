@@ -44,6 +44,7 @@
         'views/ir_actions_server.xml',
         'views/res_config_settings_views.xml',
         'views/user_bds_mark_read.xml',
+        'wizard/trigger_form.xml',
         'views/menu.xml',
 
     ],

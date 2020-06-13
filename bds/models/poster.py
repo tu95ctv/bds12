@@ -31,8 +31,8 @@ class Poster(models.Model):
     chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
             ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
             compute ='count_post_of_poster_', store  = True)
-    mqc_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
-    mtg_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
+    # mqc_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
+    # mtg_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
    
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
@@ -44,9 +44,9 @@ class Poster(models.Model):
     count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_',store=True)
     count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
     count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_',store=True) 
-    rate_chinh_chu = fields.Float(compute='count_post_of_poster_', store=True)
-    rate_moi_gioi = fields.Float(compute='count_post_of_poster_', store=True)
-    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)#,compute='quanofposter_ids_',store = True
+    # rate_chinh_chu = fields.Float(compute='count_post_of_poster_', store=True)
+    # rate_moi_gioi = fields.Float(compute='count_post_of_poster_', store=True)
+    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)
     quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
     quan_chuyen_2 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_', store = True)
     quan_chuyen_1_id = fields.Many2one('bds.quan', related ='quan_chuyen_1.quan_id' , store = True)
@@ -57,21 +57,20 @@ class Poster(models.Model):
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
                                                    ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
-                                                   ('dd_mg_b_kw_co_n_address_rate_lte_1','dd_mg_b_kw_co_n_address_rate_lte_1'),
-                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3','dd_cc_b_chinh_chu_n_cpas_lte_3'),
-                                                  
+                                                   ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
                                                    
                                                    ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
                                                    ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
-                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0'),
-                                                   ('dd_mg_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0'),
+                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
+                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
 
                                                    
                                                    
                                                    ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
-                                                   ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
                                                    ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
-                                                   ('dd_kb','dd_kb')
+                                                   ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
+                                                   ('dd_kb','dd_kb'),
+                                                   ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
                                                    ], compute = 'count_post_of_poster_' , store = True)
     @api.multi
     def open_something(self):
@@ -88,7 +87,7 @@ class Poster(models.Model):
     def number_post_of_quan_(self):
         for r in self:
             qops = self.env['bds.quanofposter'].search([('poster_id','=',r.id), ('siteleech_id','!=',False)], order = 'quantity desc')
-            alist = map(lambda i:u'%s_%s:%s'%(i.siteleech_id.name_viet_tat, i.quan_id.name_viet_tat,i.quantity), qops)
+            alist = map(lambda i:u'%s_%s:%s'%(i.siteleech_id.name, i.quan_id.name_viet_tat, i.quantity), qops)
             rs = u', '.join(alist)
             r.number_post_of_quan = rs
 
@@ -124,7 +123,6 @@ class Poster(models.Model):
         for r in self:
             count_chotot_post_of_poster = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
             r.count_chotot_post_of_poster = count_chotot_post_of_poster
-            
             count_bds_post_of_poster = self.env['bds.bds'].search_count([('poster_id','=',r.id),('link','like','batdongsan')])
             r.count_bds_post_of_poster = count_bds_post_of_poster
             
@@ -134,16 +132,17 @@ class Poster(models.Model):
             r.count_post_all_site_in_month = count_post_all_site_in_month
             address_topic_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
             r.address_topic_number= address_topic_number
-            
             address_rate = 0
             if count_post_all_site:
                 address_rate = address_topic_number/count_post_all_site
                 r.address_rate = address_rate
-            mtg_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mtg','=',True)])
-            r.mtg_number = mtg_number
+
+
+            # mtg_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mtg','=',True)])
+            # r.mtg_number = mtg_number
             
-            mqc_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mqc','=',True)])
-            r.mqc_number = mqc_number
+            # mqc_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mqc','=',True)])
+            # r.mqc_number = mqc_number
             count_chotot_moi_gioi = self.env['bds.bds'].search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
             if count_chotot_moi_gioi:
                 chotot_mg_or_cc = 'moi_gioi'
@@ -152,19 +151,17 @@ class Poster(models.Model):
                     chotot_mg_or_cc = 'chinh_chu'
                 else:
                     chotot_mg_or_cc = 'khong_biet'
-            if count_chotot_post_of_poster:
-                rate_moi_gioi = count_chotot_moi_gioi/count_chotot_post_of_poster
-                rate_chinh_chu =   1 - rate_moi_gioi
-                r.rate_chinh_chu = rate_chinh_chu
-                r.rate_moi_gioi = rate_moi_gioi
+            # if count_chotot_post_of_poster:
+            #     rate_moi_gioi = count_chotot_moi_gioi/count_chotot_post_of_poster
+            #     rate_chinh_chu =   1 - rate_moi_gioi
+            #     r.rate_chinh_chu = rate_chinh_chu
+            #     r.rate_moi_gioi = rate_moi_gioi
             r.chotot_mg_or_cc = chotot_mg_or_cc
                     
             dd_tin_cua_co = self.env['bds.bds'].search_count([('poster_id','=',r.id),('dd_tin_cua_co','!=', False)])
             dd_tin_cua_dau_tu = self.env['bds.bds'].search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
             
-            
-            
-            
+
             if chotot_mg_or_cc =='moi_gioi' :
                 if address_rate > 0.5:
                     du_doan_cc_or_mg= 'dd_cc'
@@ -178,24 +175,24 @@ class Poster(models.Model):
                     detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
                 else:
                     du_doan_cc_or_mg= 'dd_mg'
-                    detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_1'
+                    detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
             else:
                 if chotot_mg_or_cc =='chinh_chu':
-                    du_doan_cc_or_mg= 'dd_cc'
+                    
                     if count_post_all_site > 3:
                         if address_rate > 0:
+                            du_doan_cc_or_mg= 'dd_cc'
                             detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
                         else:
                             du_doan_cc_or_mg= 'dd_mg'
                             detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'
                     else:
+                        du_doan_cc_or_mg= 'dd_cc'
                         if address_rate > 0:
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0'
+                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'
                         else:
-                            detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0' 
-                            
-
-                else:#khong_biet
+                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
+                else:#khong_biet, muaban
                     if count_post_all_site  > 3:
                         if address_rate >= 0.3:
                             du_doan_cc_or_mg= 'dd_cc'
@@ -204,13 +201,14 @@ class Poster(models.Model):
                             du_doan_cc_or_mg= 'dd_mg'
                             detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
                             
-                    else:
+                    else: #count_post_all_site  <= 3
                         if address_rate: 
                             du_doan_cc_or_mg= 'dd_cc'
                             detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'
                         else:
                             du_doan_cc_or_mg= 'dd_kb'
-                            detail_du_doan_cc_or_mg = 'dd_kb'
+                            detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
+
             if du_doan_cc_or_mg !='dd_mg':
                 if  dd_tin_cua_dau_tu:
                     du_doan_cc_or_mg= 'dd_dt'
@@ -219,10 +217,9 @@ class Poster(models.Model):
             r.du_doan_cc_or_mg = du_doan_cc_or_mg
             r.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
 
-
     
     @api.depends('post_ids','post_ids.gia')
-    def quanofposter_ids_(self):
+    def quanofposter_ids_(self):#tạo sitequanofposter
         for r in self:
             if r.id:
                 quanofposter_ids_lists= []
@@ -265,8 +262,6 @@ class Poster(models.Model):
                                 'max_price':tuple_count_quan[4-offset],
                                 }
                         quanofposter = g_or_c_ss(self.env['bds.quanofposter'], quanofposter_search_dict, quanofposter_update_dict,update_no_need_check_change = True)
-                            
-
                         quanofposter_ids_lists.append(quanofposter[0].id)
                         
                         if siteleech_id ==False:

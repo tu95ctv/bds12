@@ -41,7 +41,35 @@
         <field name="code">model.set_cron_quan_trung_tam()</field>
     </record>
 
+    <record id="cronjob_bds_test" model="ir.cron">
+        <field name="name">BDS test</field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.bds'" name="model"/>
+        <field ref="model_bds_bds" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.test()</field>
+    </record>
 
+    <record id="cronjob_bds_test2" model="ir.cron">
+        <field name="name">BDS test2</field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.bds'" name="model"/>
+        <field ref="model_bds_bds" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.test2()</field>
+    </record>
+
+    
 
             
 </odoo>

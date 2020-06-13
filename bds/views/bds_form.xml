@@ -14,6 +14,7 @@
                                     <field name="thumb" />
                                     <field name="title" />
                                     <field name="quan_tam"></field>
+                                    <field name="loai_nha_selection"></field>
                                     <field name="mqc"></field>
                                     <field name="link" />
                                     <field name="gia" />

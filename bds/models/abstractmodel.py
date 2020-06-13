@@ -48,8 +48,8 @@ def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         return gio_bat_dau_vn
 
 
-class ChototFetch(models.AbstractModel):
-    _name = 'abstract.fetch'
+class ChototMainFetch(models.AbstractModel):
+    _name = 'abstract.main.fetch'
 
     def get_last_page_number(self, url_id):
         if self.site_name =='chotot':
@@ -227,7 +227,7 @@ class ChototFetch(models.AbstractModel):
             print (u'+++++++++Create topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
                                                                             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
             # lấy dữ liệu 1 topic về từ link
-            rq_topic_dict = self.request_topic(link, url_id)
+            rq_topic_dict = self.request_topic(link, url_id)# quan trong nhất
             copy_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
             write_dict.update(rq_topic_dict)
             write_dict.update(copy_topic_dict)
@@ -240,8 +240,10 @@ class ChototFetch(models.AbstractModel):
         
         link_number = number_notice_dict.get("link_number", 0) + 1
         number_notice_dict["link_number"] = link_number
+
+
 class MuabanFetch(models.AbstractModel):
-    _inherit = 'abstract.fetch'
+    _inherit = 'abstract.main.fetch'
 
     def save_to_disk(self, ct, name_file ):
         path = os.path.dirname(os.path.abspath(__file__))
@@ -264,6 +266,7 @@ class MuabanFetch(models.AbstractModel):
             # f.close()
             topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json, self.siteleech_id_id)
         return topic_dict
+
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
         copy_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
         if self.site_name =='muaban':
@@ -333,7 +336,7 @@ class MuabanFetch(models.AbstractModel):
     
 
 class BDSFetch(models.AbstractModel):
-    _inherit = 'abstract.fetch'
+    _inherit = 'abstract.main.fetch'
 
     def get_last_page_number(self, url_id):
         if self.site_name =='batdongsan':
@@ -393,7 +396,7 @@ class BDSFetch(models.AbstractModel):
 
 
 # class Fetch(models.AbstracModeltModel):
-#     _name = 'abstract.fetch'
+#     _name = 'abstract.main.fetch'
 
 #     def get_last_page_number_ct(self, url_id):
 #         page_1_url = create_cho_tot_page_link(url_id.url, 1)

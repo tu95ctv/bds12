@@ -69,11 +69,13 @@ class QuanHuyen(models.Model):
     @api.depends('post_ids')
     def muc_gia_quan_(self):
         for r in self:
-            sql_cmd = "select AVG(don_gia),count(id) from bds_bds where  quan_id = %s and  don_gia >= 20 and don_gia <300"%r.id
-            self.env.cr.execute(sql_cmd)
-            rsul = self.env.cr.fetchall()
-            r.muc_gia_quan = rsul[0][0]
-
+            # sql_cmd = "select AVG(don_gia),count(id) from bds_bds where  quan_id = %s and  don_gia >= 20 and don_gia <300"%r.id
+            # self.env.cr.execute(sql_cmd)
+            # rsul = self.env.cr.fetchall()
+            # r.muc_gia_quan = rsul[0][0]
+            readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('quan_id','=',r.id)],['don_gia:avg(don_gia)'],[])
+            rs = readgroup_rs[0]['don_gia']
+            r.muc_gia_quan = rs
     
     def set_cron_quan_trung_tam(self):
         trung_tams = ['quận 1', 'quận 3', 'quận 5', 'quận 10', 'quận tân bình', 'quận phú nhuận', 'quận tân bình', 'quận tân phú']

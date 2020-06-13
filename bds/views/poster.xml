@@ -50,6 +50,9 @@
                                 <field name="count_bds_post_of_poster" />
                                 <field name="count_post_all_site" />
                                 <field name="address_topic_number" />
+                                <field name="du_doan_cc_or_mg" />
+                                <field name="detail_du_doan_cc_or_mg" />
+
                             </group>
                             <group>
                                 <field name="cong_ty" />
@@ -101,8 +104,8 @@
                      <field name="quan_chuyen_1" />
                      <field name="quan_chuyen_2" />
                      <field name="number_post_of_quan" />
-                     <field name="rate_chinh_chu" />
-                     <field name="rate_moi_gioi" />
+                     <!-- <field name="rate_chinh_chu" />
+                     <field name="rate_moi_gioi" /> -->
                      <field name="username" />
                     <field name="count_post_all_site" />
                     <field name="address_topic_number" />
@@ -113,8 +116,8 @@
                      <field name="count_chotot_post_of_poster" />
                     <field name="count_post_all_site_in_month" />
                     <field name="count_bds_post_of_poster" />
-                    <field name="mtg_number" />
-                    <field name="mqc_number" />
+                    <!-- <field name="mtg_number" />
+                    <field name="mqc_number" /> -->
                     <field name="quanofposter_ids_show" />
                     <field name="create_date" />
                     <field name="write_date" />

@@ -141,6 +141,10 @@
             <field name="url">https://muaban.net/ban-can-ho-chung-cu-tap-the-ho-chi-minh-l59-c38?cp=2</field>
         </record>
         
+        <record model="bds.url" id="url_muaban_mat_tien_tan_binh">
+            <field name="description">Mặt tiền tân bình</field>
+            <field name="url">https://muaban.net/nha-mat-tien-quan-tan-binh-l5922-c3201?cp=2</field>
+        </record>
         
         
         

@@ -23,7 +23,7 @@ class QuanOfPoster(models.Model):
     max_price = fields.Float(digits=(32,1))
     poster_id = fields.Many2one('bds.poster')
 
-    @api.depends('quan_id','quantity') 
+    @api.depends('siteleech_id', 'quan_id','quantity') 
     def name_(self):
         for r in self:
             if r.siteleech_id or  r.quan_id:

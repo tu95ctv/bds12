@@ -2,7 +2,7 @@
     <record model="ir.ui.view" id="bds_list_main">
         <field name="name">bds list</field>
         <field name="model">bds.bds</field>
-        <field name ="priority">16</field>
+        <field name ="priority">1</field>
         <field name="arch" type="xml">
             <tree default_order="public_datetime DESC" editable="bottom" decoration-info="quan_tam!=False"
             decoration-danger="ko_quan_tam!=False" >
@@ -14,6 +14,7 @@
                 <field name="is_user_quantam_mark"></field>
                 <field name="id"></field>
                 <field name="gia"/>
+                <field name="trigger"/>
                 <field name="don_gia"></field>
                 <field name="ti_le_don_gia" />
                 <field name="area"/>
@@ -29,9 +30,14 @@
                 <field name="trich_dia_chi" />
                 <field name="mat_tien_address" readonly="0" />
                 <field name="cate"/>
+                <field name="kw_hoa_hong"/>
+                <field name="kw_so_tien_hoa_hong"/>
+                <field name="dd_tin_cua_co"/>
+                <field name="kw_mg"/>
+
                 <field name="du_doan_cc_or_mg" />
                 <field name="chotot_moi_gioi_hay_chinh_chu" />
-                <field name="detail_du_doan_cc_or_mg" groups="bds.detail_guest" />
+                <field name="detail_du_doan_cc_or_mg" /><!-- groups="bds.detail_guest"-->
                 <field name="ko_quan_tam"/>
                 <field name="count_post_all_site" />
             </tree>

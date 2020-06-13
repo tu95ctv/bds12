@@ -70,7 +70,7 @@ class URL(models.Model):
             r.get_last_page_number()
 
     def fetch_this(self):
-        self.env['abstract.fetch'].fetch_a_url_id (self)
+        self.env['abstract.main.fetch'].fetch_a_url_id (self)
 
     @api.multi
     def set_0(self):
