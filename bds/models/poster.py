@@ -53,6 +53,7 @@ class Poster(models.Model):
    
     number_post_of_quan = fields.Char(compute='number_post_of_quan_')
     created_by_site_id = fields.Many2one('bds.siteleech')
+    block = fields.Boolean()
     detail_du_doan_cc_or_mg = fields.Selection(
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 

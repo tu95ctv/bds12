@@ -125,21 +125,20 @@
         </record>
         
         
-        <record model="bds.url" id="url_muaban_can_ho_tan_phu">
+        <!-- <record model="bds.url" id="url_muaban_can_ho_tan_phu">
             <field name="description">Căn hộ tân phú</field>
             <field name="url">https://muaban.net/can-ho-chung-cu-tap-the-quan-tan-phu-l5923-c3204?cp=6</field>
-        </record>
+        </record> -->
         
         <record model="bds.url" id="url_muaban_all_hcm">
-            <field name="description">Mua bán HCM all nhà phố, hẻm, chung cư tất cả</field>
+            <field name="description">Mua bán HCM all nhà phố, hẻm, vila tất cả</field>
             <field name="url">https://muaban.net/ban-nha-ho-chi-minh-l59-c32?cp=14</field>
         </record>
-
-
+<!--         
         <record model="bds.url" id="url_muaban_all_chung_cu_hcm">
             <field name="description">Mua bán HCM all chung cư tất cả</field>
             <field name="url">https://muaban.net/ban-can-ho-chung-cu-tap-the-ho-chi-minh-l59-c38?cp=2</field>
-        </record>
+        </record> -->
         
         <record model="bds.url" id="url_muaban_mat_tien_tan_binh">
             <field name="description">Mặt tiền tân bình</field>

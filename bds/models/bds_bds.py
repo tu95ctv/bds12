@@ -604,12 +604,14 @@ class bds(models.Model):
             ('\nPhone: ' + (r.poster_id.name or '')) +\
             ('\n' +r.link_show if  r.link_show else '')+ \
             ('\n Giá: %s tỷ'%r.gia if r.gia else '') +\
-            ('\n Area: %s m2'%r.area if r.area else '')+\
+            ('\n Area: %s'%('%s m2'%r.area if r.area else ''))+\
             ('\nSite: %s'%r.siteleech_id.name) +\
             ('\nĐơn giá:%.2f'%r.don_gia) + \
             ('Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
             ('\nCount post all site:%s'%r.count_post_all_site) +\
-            ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)
+            ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)+\
+            ('\ndu_doan_cc_or_mg: %s'%r.poster_id.du_doan_cc_or_mg)+\
+            ('\ndetail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg)
 
     @api.depends('link')
     def cho_tot_link_fake_(self):
