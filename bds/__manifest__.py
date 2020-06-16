@@ -28,7 +28,8 @@
         'data/data_chotot.xml',
         'data/data_muaban.xml',
         'data/cronjob_data.xml',
-
+        'data/email.xml',
+        
         'views/bds_images.xml',
         'views/cron.xml',
         'views/fetch.xml',

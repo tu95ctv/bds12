@@ -10,7 +10,6 @@
         <field name="gia"  string="giá bé hơn" filter_domain="[('gia','&lt;',self)]"/>
         <field name="gia"  string="giá  lớn hơn" filter_domain="[('gia','&gt;',self)]"/>
         <field name="count_post_all_site"  string="count_post_all_site  bé hơn" filter_domain="[('count_post_all_site','&lt;',self)]"/>
-        <field name="du_doan_cc_or_mg" />
         <field name="link" />
         <field name="html" />
         <field name="html_khong_dau" />
@@ -22,6 +21,7 @@
         <field name= "url_id" />
         <field name= "cate" />
         <field name= "sell_or_rent" />
+        <field name="du_doan_cc_or_mg" />
         <field name= "detail_du_doan_cc_or_mg" />
         <field name="loai_nha_selection" filter_domain="[('loai_nha','ilike',self)]"/>
         <field name="quan_id_selection" filter_domain="[('quan_id','=',self)]"/>
@@ -32,14 +32,20 @@
         <separator />
         <filter  name="quan_trung_tam" string="Quận Trung Tâm"  domain="[('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh'])]"/>
         <separator />
-        <filter  name="ti_le_don_gia_lon_hon_0" string="Tỉ lệ đơn giá lớn hơn 0"  domain="[('ti_le_don_gia', '&gt;', 0)]"/>
-        <filter name="chinh_chu" string="Cá nhân" domain ="[('chotot_moi_gioi_hay_chinh_chu','=','chinh_chu')]"/>
+        <filter name="Có trích địa chỉ" domain ="[('trich_dia_chi','!=',False)]"></filter>
         <separator />
-        <filter  name="gia" string="giá từ 0.1 tới 2"  domain="[ ('gia','&gt;=', 0.1), ('gia','&gt;=', 2) ]"/>
+        <filter name="kw đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
+        <separator />
+        <filter name="dự đoán đầu tư" domain ="[('du_doan_cc_or_mg','=','dd_dt')]"></filter>
+        <separator />
+        <filter name="dự đoán chính chủ" domain ="[('du_doan_cc_or_mg','=','dd_cc')]"></filter>
+        <separator />
+        <filter name="chotot_moi_gioi_hay_chinh_chu" string="chợt tốt Cá nhân" domain ="[('chotot_moi_gioi_hay_chinh_chu','=','chinh_chu')]"/>
+        <separator />
+        <!-- <filter  name="gia" string="giá từ 0.1 tới 2"  domain="[ ('gia','&gt;=', 0.1), ('gia','&gt;=', 2) ]"/>
         <filter  name="gia" string="giá từ 2 tới 4"  domain="[ ('gia','&gt;=', 2), ('gia','&gt;=', 4) ]"/>
         <filter  name="gia" string="giá từ 4 tới 6"  domain="[ ('gia','&gt;=', 4), ('gia','&gt;=', 6) ]"/>
-        
-        <separator />
+        <separator /> -->
         <filter name="user_read_mark_ids" string="đánh dấu đọc của user hiện tại" domain ="[('user_read_mark_ids.user_id','=',uid)]"></filter>
         <filter name="user_quantam_mark_ids" string="đánh dấu quan tâm của user hiện tại" domain ="[('user_quantam_mark_ids.user_id','=',uid)]"></filter>
         <separator />
@@ -48,11 +54,8 @@
         <separator />
         <filter name="tao_cach_day_5_phut" string="Tạo cách đâ 5 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
         <separator />
-        <filter name="dự đoán tin của đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
-        <filter name="dự đoán tin của cò" domain ="[('dd_tin_cua_co','!=',False)]"></filter>
-        <separator />
-        <filter name="Có trích địa chỉ" domain ="[('trich_dia_chi','!=',False)]"></filter>
-        <separator />
+        <!-- <filter name="dự đoán tin của cò" domain ="[('dd_tin_cua_co','!=',False)]"></filter>
+        <separator /> -->
         <filter name="today" string="Đăng trong ngày" domain="[('public_datetime','&gt;=', ((context_today()-datetime.timedelta(days=1)).strftime('%Y-%m-%d 17:00:00')))]"  />
         <separator />
         <filter name="chưa đọc" string="Chưa đọc" domain="[('is_read','=',False)]"></filter>

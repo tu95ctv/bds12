@@ -210,12 +210,20 @@ class ChototMainFetch(models.AbstractModel):
         if search_bds_obj:
             number_notice_dict["existing_link_number"] = number_notice_dict["existing_link_number"] + 1
             public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
-            if self.allow_write_public_datetime and  public_date != public_date_cu and public_date_cu and public_date:
+            public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
+
+
+            # if self.allow_write_public_datetime and  public_date != public_date_cu and public_date_cu and public_date:
+            if public_datetime_cu != public_datetime:
                 diff_public_date = (public_date - public_date_cu).days
-                update_dict.update({'public_date':public_date})
-                update_dict.update({'ngay_update_gia':datetime.datetime.now(),'diff_public_date':diff_public_date, 'public_date':public_date, 'publicdate_ids':[(0,False,{'diff_public_date':diff_public_date,'public_date':public_date,'public_date_cu':public_date_cu})]})
+                diff_public_datetime = (public_datetime - public_datetime_cu).seconds
+                update_dict.update({'public_datetime': public_datetime, 
+                    'diff_public_datetime':diff_public_datetime,
+                    'public_date':public_date, 
+                    'ngay_update_gia':datetime.datetime.now(),
+                    'diff_public_date':diff_public_date, 
+                    'publicdate_ids':[(0,False,{'diff_public_date':diff_public_date, 'public_date':public_date, 'public_date_cu':public_date_cu})]})
             
-            # self.request_topic(link, update_dict, url_id, topic_data_from_page)
             if update_dict:
                 print (u'-----------Update giá topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
                                                                             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))

@@ -23,6 +23,34 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="interval_mail_chinh_chu_minutes"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="interval_mail_chinh_chu_minutes"/>
+                                <div class="text-muted">
+                                    interval_mail_chinh_chu_minutes
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="gia"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="gia"/>
+                                <div class="text-muted">
+                                    gia
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
                     </div>
                 </xpath>
             </field>

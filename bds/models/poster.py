@@ -27,13 +27,14 @@ class Poster(models.Model):
     quan_id_for_search = fields.Many2one('bds.quan',related = 'quanofposter_ids.quan_id')
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
     address_topic_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
-    address_rate = fields.Float(compute ='count_post_of_poster_', store  = True)
     chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
             ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
             compute ='count_post_of_poster_', store  = True)
     # mqc_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
     # mtg_number = fields.Integer(compute ='count_post_of_poster_', store  = True)
-   
+    dd_tin_cua_co_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_', store  = True)
+    dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_', store  = True)
+    address_rate = fields.Float(digits=(6,2),compute ='count_post_of_poster_', store  = True)
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
                                          ('dd_cc','CC'),
@@ -134,9 +135,17 @@ class Poster(models.Model):
             address_topic_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
             r.address_topic_number= address_topic_number
             address_rate = 0
+
             if count_post_all_site:
                 address_rate = address_topic_number/count_post_all_site
                 r.address_rate = address_rate
+                dd_tin_cua_co_count = self.env['bds.bds'].search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
+                r.dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
+
+                dd_tin_cua_dau_tu_count = self.env['bds.bds'].search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
+                r.dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
+
+
 
 
             # mtg_number = self.env['bds.bds'].search_count([('poster_id','=',r.id),('mtg','=',True)])

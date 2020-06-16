@@ -18,6 +18,7 @@ class loop_fetch_cron(models.Model):
                         index_of_last_fetched_url_id = fetch_ids.ids.index( loop_fetch_cron_id.fetch_current_id.id)
                         new_index =  index_of_last_fetched_url_id+1
                     except ValueError:
+                        print ('index error')
                         new_index = 0
                 else:
                     new_index =0

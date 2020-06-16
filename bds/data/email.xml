@@ -1,0 +1,11 @@
+<odoo>
+    <record id="ir_mail_server_google" model="ir.mail_server" forcecreate="0">
+            <field name="name">google outgoing mail</field>
+            <field name="smtp_host">smtp.gmail.com</field>
+            <field eval="465" name="smtp_port"/>
+            <field eval="1" name="sequence"/>
+            <field name="smtp_encryption">ssl</field>
+            <field name="smtp_user">ductu8711@gmail.com</field>
+            <field name="smtp_pass">qmucilbqjhmfbyqa</field>
+        </record>
+</odoo>

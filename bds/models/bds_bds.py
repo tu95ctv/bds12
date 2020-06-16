@@ -20,7 +20,8 @@ def detech_mat_tien(html):
     full_adress_list = []
     while mat_tien_full_address_possibles:
         html = html [before_index:]
-        mat_tien_full_address_possibles = re.search('(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})\s+(?:đường)*\s*(?P<ten_duong>(?:[A-Z0-9][\w|/]+\s*){1,4})(?:\.|\s|,|$)', html)  #((\S+(?:\s|\.|$|,)+){1,4})
+        p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})\s+(?:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]+\s*){1,4})(?:\.|\s|\,|$)'
+        mat_tien_full_address_possibles = re.search(p, html)  #((\S+(?:\s|\.|$|,)+){1,4})
         if mat_tien_full_address_possibles:
             before_index = mat_tien_full_address_possibles.span()[1] + 1
             number = mat_tien_full_address_possibles.group(1)
@@ -33,7 +34,7 @@ def detech_mat_tien(html):
                 check_co_word = re.search('\D', full_address)
                 if not check_co_word:
                     continue
-                pt = 'MT|Lầu|tấm|PN|WC|mặt'
+                pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc'
                 pt = unidecode(pt)
                 is_mt = re.search(pt, full_address_unidecode, re.I)
                 if is_mt:
@@ -165,6 +166,7 @@ class bds(models.Model):
     date_text = fields.Char()
     public_datetime = fields.Datetime()
     ngay_update_gia = fields.Datetime()
+    diff_public_datetime = fields.Integer()
     #set field (field mà mình điền vào)
     is_read = fields.Boolean()
     quan_tam = fields.Datetime(string=u'Quan Tâm')
@@ -229,6 +231,10 @@ class bds(models.Model):
     diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
     kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
     kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+
+    dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
+    dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
+
 
     @api.depends('public_date')
     def _compute_diff_public_days_from_now(self):
@@ -492,7 +498,7 @@ class bds(models.Model):
     @skip_if_cate_not_bds               
     def _compute_dd_tin_cua_dau_tu(self):
         print ('***du doan dau tu***, bds id', self.id)
-        p = '(?<=\s)(?:hoa hồng|hh(?!t)|phí|huê hồng|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*(?:\s+|$|<|\.|)'
+        p = '((?<=\W)(?:hoa hồng|hh(?!t)|phí(?! hh| hoa hồng| huê hồng)|huê hồng|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
         for r in self:
             rs = re.search(p, r.html, re.I)
             if rs:
@@ -501,11 +507,11 @@ class bds(models.Model):
                 khong_cho_mg = re.search('không', pre_str, re.I)
                 if khong_cho_mg:
                     continue
-                kw_hoa_hong = rs.group(0)
+                kw_hoa_hong = rs.group(1)
                 if kw_hoa_hong.strip().lower() in  ['phí', 'chấp nhận']:
                     continue
                 r.kw_hoa_hong = kw_hoa_hong
-                r.kw_so_tien_hoa_hong = rs.group(1)
+                r.kw_so_tien_hoa_hong = rs.group(2)
                 r.dd_tin_cua_dau_tu = True
                 break
            
@@ -608,10 +614,16 @@ class bds(models.Model):
             ('\nSite: %s'%r.siteleech_id.name) +\
             ('\nĐơn giá:%.2f'%r.don_gia) + \
             ('Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
-            ('\nCount post all site:%s'%r.count_post_all_site) +\
+            ('\nCount post all site: %s'%r.count_post_all_site) +\
             ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)+\
-            ('\ndu_doan_cc_or_mg: %s'%r.poster_id.du_doan_cc_or_mg)+\
-            ('\ndetail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg)
+            ('\ndu_doan_cc_or_mg: %s'%dict(self.env['bds.poster']._fields['du_doan_cc_or_mg'].selection).get(r.poster_id.du_doan_cc_or_mg))+\
+            ('\ndetail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
+            ('\n address_rate: %s'%r.poster_id.address_rate) +\
+            ('\n dd_tin_cua_co_rate: %s'%r.poster_id.dd_tin_cua_co_rate) +\
+            ('\n dd_tin_cua_dau_tu_rate: %s'%r.poster_id.dd_tin_cua_dau_tu_rate)
+
+            
+
 
     @api.depends('link')
     def cho_tot_link_fake_(self):
@@ -621,6 +633,7 @@ class bds(models.Model):
                 id_link = rs.group(1)
                 r.cho_tot_link_fake = 'https://nha.chotot.com/quan-10/mua-ban-nha-dat/' + 'xxx-' + id_link+ '.htm'
                 
+
     @api.depends('thumb')
     def thumb_view_(self):
         for r in self:
@@ -628,6 +641,34 @@ class bds(models.Model):
                 if 'nophoto' not in r.thumb:
                     photo = base64.encodestring(request_html(r.thumb, False, is_decode_utf8 = False))
                     r.thumb_view = photo 
+
+    def send_mail_chinh_chu(self):
+        print ('***send_mail_chinh_chu***')
+        body_html = ''
+        minutes = int(self.env['ir.config_parameter'].sudo().get_param('bds.interval_mail_chinh_chu_minutes',default=0))
+        if minutes ==0:
+            minutes=5
+        gia = float(self.env['ir.config_parameter'].sudo().get_param('bds.gia',default=0))
+        if gia ==0:
+            gia =100
+        minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes)
+        cr = self.search([('create_date','<', minutes_5_last), ('trich_dia_chi','!=',False),
+            ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
+        if cr:
+            for r in cr:
+                # one_mail_html = one_mail_template%(r.title, r.html_show)
+                one_mail_html = r.html_show
+                body_html += '<br>' + one_mail_html
+            # raise UserError(str(cr))
+            # recipient_ids = [(6,0,self.hcm_department_id.manager_ids.ids)] if self.hcm_department_id.manager_ids.ids else False
+            mail_id = self.env['mail.mail'].create({
+                'subject':'%s topic chính chủ trong 5 phút qua'%(len(cr)),
+                # 'recipient_ids':recipient_ids,
+                # 'mail_message_id':mme_id.id,
+                'email_to':'nguyenductu@gmail.com',
+                'body_html': body_html,
+                })
+            mail_id.send()
 
 
     

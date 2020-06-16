@@ -34,12 +34,15 @@
                 <field name="kw_so_tien_hoa_hong"/>
                 <field name="dd_tin_cua_co"/>
                 <field name="kw_mg"/>
-
+                <field name="dd_tin_cua_co_rate"/>
+                <field name="dd_tin_cua_dau_tu_rate"/>
                 <field name="du_doan_cc_or_mg" />
                 <field name="chotot_moi_gioi_hay_chinh_chu" />
                 <field name="detail_du_doan_cc_or_mg" /><!-- groups="bds.detail_guest"-->
                 <field name="ko_quan_tam"/>
                 <field name="count_post_all_site" />
+                <field name="ngay_update_gia" />
+                <field name="diff_public_datetime" />
             </tree>
         </field>
     </record>
