@@ -652,7 +652,7 @@ class bds(models.Model):
         if gia ==0:
             gia =100
         minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes)
-        cr = self.search([('create_date','<', minutes_5_last), ('trich_dia_chi','!=',False),
+        cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
             ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
         if cr:
             for r in cr:
