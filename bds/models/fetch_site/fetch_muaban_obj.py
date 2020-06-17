@@ -84,7 +84,6 @@ class MuabanObject():
     def get_loai_nha(self, soup):
         loai_nha_soup = soup.select('div.breadcrumb li:last-child')
         loai_nha = loai_nha_soup[0].get_text()
-        print ('***loai_nha', loai_nha)
         return {'loai_nha':loai_nha}
 
     def get_topic(self, html, siteleech_id_id):

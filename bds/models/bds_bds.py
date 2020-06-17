@@ -268,13 +268,10 @@ class bds(models.Model):
         rs = map(lambda i: (i,i), rs)
         rs = list(rs)
         self.env['ir.config_parameter'].set_param("bds.loai_nha", rs)
-        print ('rs',rs)
-        # raise UserError(str(rs))
 
     def test2(self):
         rs = self.env['ir.config_parameter'].get_param("bds.loai_nha")
         rs = eval(rs)
-        print ('type(rs)',type(rs))
         raise UserError('%s-%s'%(type(rs),str(rs)))
     
         
@@ -497,7 +494,6 @@ class bds(models.Model):
     @api.depends('html','trigger')
     @skip_if_cate_not_bds               
     def _compute_dd_tin_cua_dau_tu(self):
-        print ('***du doan dau tu***, bds id', self.id)
         p = '((?<=\W)(?:hoa hồng|hh(?!t)|phí(?! hh| hoa hồng| huê hồng)|huê hồng|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
         for r in self:
             rs = re.search(p, r.html, re.I)
@@ -654,7 +650,6 @@ class bds(models.Model):
         minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes, seconds=1)
         cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
             ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
-        print ('***send_mail_chinh_chu***, số lượng mail chính chủ %s'%len(cr))
         if cr:
             for r in cr:
                 # one_mail_html = one_mail_template%(r.title, r.html_show)

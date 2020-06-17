@@ -10,7 +10,6 @@ class loop_fetch_cron(models.Model):
     
     def fetch_cron(self):
         loop_fetch_cron_id =  self.search([], limit=1, order='id desc')
-        print ('***loop_fetch_cron_id**', loop_fetch_cron_id)
         if loop_fetch_cron_id:
             fetch_ids = loop_fetch_cron_id.fetch_ids
             if fetch_ids:
@@ -32,10 +31,8 @@ class loop_fetch_cron(models.Model):
                 # print ('end fetch trong loop')
 
                 try:
-                    print ('fetch trong loop')
                     fetch_id.fetch_all_url()
                     loop_fetch_cron_id.fetch_current_id = fetch_id.id
-                    print ('end fetch trong loop')
                 except Exception as e:
                     print ('co 1 loi')
                     try:
