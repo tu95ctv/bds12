@@ -657,7 +657,7 @@ class bds(models.Model):
                 images = r.images_ids
                 image_tags = map(lambda i: '<img src="%s" style="width:300px" alt="Girl in a jacket">'%i, list(images.mapped('url')) + [r.thumb])
                 image_html = '<br>'.join(image_tags)
-                print ('***image_html**', image_html)
+                # print ('***image_html**', image_html)
                 one_mail_html += '<br>' + image_html
 
                 body_html += '<br><br><br>' + one_mail_html

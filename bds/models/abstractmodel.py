@@ -240,15 +240,15 @@ class ChototMainFetch(models.AbstractModel):
             
             if update_dict:
                 # print (u'-----------Update gia topic_index %s/%s- page_int %s - page_index %s/so_page %s'
-                    %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
-                    number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
+                    # %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
+                    # number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
                 search_bds_obj.write(update_dict)
                 number_notice_dict['update_link_number'] = number_notice_dict['update_link_number'] + 1
         else:
             write_dict = {}
             write_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
             # print (u'+++++++++Create topic_index %s/%s- page_int %s - page_index %s/so_page %s'%(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
-                                                                            number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
+                                                                            # number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
             # lấy dữ liệu 1 topic về từ link
             rq_topic_dict = self.request_topic(link, url_id)# quan trong nhất
             copy_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
