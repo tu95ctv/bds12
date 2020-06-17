@@ -651,7 +651,7 @@ class bds(models.Model):
         if gia ==0:
             gia =100
 
-        minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes)
+        minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes, seconds=1)
         cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
             ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
         print ('***send_mail_chinh_chu***, số lượng mail chính chủ %s'%len(cr))

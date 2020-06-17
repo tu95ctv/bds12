@@ -10,6 +10,7 @@ class loop_fetch_cron(models.Model):
     
     def fetch_cron(self):
         loop_fetch_cron_id =  self.search([], limit=1, order='id desc')
+        print ('***loop_fetch_cron_id**', loop_fetch_cron_id)
         if loop_fetch_cron_id:
             fetch_ids = loop_fetch_cron_id.fetch_ids
             if fetch_ids:
