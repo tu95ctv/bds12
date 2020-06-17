@@ -169,11 +169,11 @@ class ChototMainFetch(models.AbstractModel):
             page_index +=1
             number_notice_dict['page_int'] = page_int
             number_notice_dict['page_index'] = page_index
-            
+
             try:
                 self.page_handle( page_int, url_id, number_notice_dict)
             except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':e.url})
+                self.env['bds.error'].create({'name':str(e),'des':str(e)})
 
     
         self.last_fetched_url_id = url_id.id
@@ -206,7 +206,7 @@ class ChototMainFetch(models.AbstractModel):
             try:
                 self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
             except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':e.url})
+                self.env['bds.error'].create({'name':str(e),'des':str(e)})
 
 
 
