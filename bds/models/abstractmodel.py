@@ -212,7 +212,7 @@ class ChototMainFetch(models.AbstractModel):
 
 
     def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}):
-        print ('link trong deal_a_topic')
+        # print ('link trong deal_a_topic')
         # print (u'~~~~~~~~dealtopic_index %s/%s- page_int %s - page_index %s/so_page %s'
         #             %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
         #             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
