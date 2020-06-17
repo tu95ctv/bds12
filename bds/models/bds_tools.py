@@ -33,7 +33,7 @@ def request_html(url, try_again=True, is_decode_utf8 = True):
             count_fail +=1
             sleep(5)
             if count_fail ==5:
-                raise ValueError(u'Lỗi get html')
+                raise FetchError(u'Lỗi get html')
 
 def g_or_c_ss(self_env_class_name,search_dict,
                 create_write_dict ={},

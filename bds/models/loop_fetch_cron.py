@@ -18,17 +18,17 @@ class loop_fetch_cron(models.Model):
                         index_of_last_fetched_url_id = fetch_ids.ids.index( loop_fetch_cron_id.fetch_current_id.id)
                         new_index =  index_of_last_fetched_url_id+1
                     except ValueError:
-                        print ('index error')
                         new_index = 0
                 else:
                     new_index =0
                 if new_index > len(fetch_ids)-1:
                     new_index = 0    
                 fetch_id = fetch_ids[new_index]
-                print ('fetch trong loop')
-                fetch_id.fetch_all_url()
-                loop_fetch_cron_id.fetch_current_id = fetch_id.id
-                print ('end fetch trong loop')
+
+                # print ('fetch trong loop')
+                # fetch_id.fetch_all_url()
+                # loop_fetch_cron_id.fetch_current_id = fetch_id.id
+                # print ('end fetch trong loop')
 
                 # try:
                 #     print ('fetch trong loop')
@@ -38,7 +38,7 @@ class loop_fetch_cron(models.Model):
                 # except Exception as e:
                 #     print ('co 1 loi')
                 #     try:
-                #         self.env['bds.error'].create({'name':e, 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
+                #         self.env['bds.error'].create({'n`ame':e, 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
                 #     except Exception as e:
                 #         self.env['bds.error'].create({'name':'có một lỗi khi fetch', 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
                 #     print ('end co 1 loi')

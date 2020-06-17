@@ -604,23 +604,23 @@ class bds(models.Model):
     @api.depends('html')
     def html_show_(self):
         for r in self:
-            r.html_show = '<b>%s</b>'%((r.title) if r.title else '') + \
-            ('\n' + r.quan_id.name if r.quan_id.name  else '') +\
-            ('\n' + r.html if r.html else '') +\
-            ('\nPhone: ' + (r.poster_id.name or '')) +\
-            ('\n' +r.link_show if  r.link_show else '')+ \
-            ('\n Giá: %s tỷ'%r.gia if r.gia else '') +\
-            ('\n Area: %s'%('%s m2'%r.area if r.area else ''))+\
-            ('\nSite: %s'%r.siteleech_id.name) +\
-            ('\nĐơn giá:%.2f'%r.don_gia) + \
-            ('Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
-            ('\nCount post all site: %s'%r.count_post_all_site) +\
-            ('\nChợ tốt CC or MG: %s'%r.chotot_moi_gioi_hay_chinh_chu)+\
-            ('\ndu_doan_cc_or_mg: %s'%dict(self.env['bds.poster']._fields['du_doan_cc_or_mg'].selection).get(r.poster_id.du_doan_cc_or_mg))+\
-            ('\ndetail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
-            ('\n address_rate: %s'%r.poster_id.address_rate) +\
-            ('\n dd_tin_cua_co_rate: %s'%r.poster_id.dd_tin_cua_co_rate) +\
-            ('\n dd_tin_cua_dau_tu_rate: %s'%r.poster_id.dd_tin_cua_dau_tu_rate)
+            r.html_show = 'id:%s <b>%s</b>'%(r.id, r.title if r.title else '') + \
+            ('\n' + '<b>%s</b>'%r.quan_id.name if r.quan_id.name  else '') +\
+            ('\n<br>' + r.html if r.html else '') +\
+            ('\n<br>Phone: ' + (r.poster_id.name or '')) +\
+            ('\n<br>' +r.link_show if  r.link_show else '')+ \
+            ('\n<br> Giá: <b>%s tỷ</b>'%(r.gia if r.gia else '')) +\
+            ('\n<br> Area: %s'%('<b>%s m2</b>'%r.area if r.area else ''))+\
+            ('\n<br>Site: %s'%r.siteleech_id.name) +\
+            ('\n<br>Đơn giá: %.2f'%r.don_gia) + \
+            ('\n<br>Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
+            ('\n<br>Tổng số bài của người này: <b>%s</b>'%r.count_post_all_site) +\
+            ('\n<br>Chợ tốt CC or MG: %s' %dict(self.env['bds.bds']._fields['chotot_moi_gioi_hay_chinh_chu'].selection).get(r.chotot_moi_gioi_hay_chinh_chu))+\
+            ('\n<br>du_doan_cc_or_mg: <b>%s </b>'%dict(self.env['bds.poster']._fields['du_doan_cc_or_mg'].selection).get(r.poster_id.du_doan_cc_or_mg))+\
+            ('\n<br>detail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
+            ('\n<br> address_rate: %s'%r.poster_id.address_rate) +\
+            ('\n<br>tỉ lệ keyword cò : %s'%r.poster_id.dd_tin_cua_co_rate) +\
+            ('\n<br>tỉ lệ keyword đầu tư: %s'%r.poster_id.dd_tin_cua_dau_tu_rate)
 
             
 
@@ -643,7 +643,6 @@ class bds(models.Model):
                     r.thumb_view = photo 
 
     def send_mail_chinh_chu(self):
-        print ('***send_mail_chinh_chu***')
         body_html = ''
         minutes = int(self.env['ir.config_parameter'].sudo().get_param('bds.interval_mail_chinh_chu_minutes',default=0))
         if minutes ==0:
@@ -651,21 +650,36 @@ class bds(models.Model):
         gia = float(self.env['ir.config_parameter'].sudo().get_param('bds.gia',default=0))
         if gia ==0:
             gia =100
+
         minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes)
         cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
             ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
+        print ('***send_mail_chinh_chu***, số lượng mail chính chủ %s'%len(cr))
         if cr:
             for r in cr:
                 # one_mail_html = one_mail_template%(r.title, r.html_show)
                 one_mail_html = r.html_show
-                body_html += '<br>' + one_mail_html
+                images = r.images_ids
+                image_tags = map(lambda i: '<img src="%s" style="width:300px" alt="Girl in a jacket">'%i, list(images.mapped('url')) + [r.thumb])
+                image_html = '<br>'.join(image_tags)
+                print ('***image_html**', image_html)
+                one_mail_html += '<br>' + image_html
+
+                body_html += '<br><br><br>' + one_mail_html
             # raise UserError(str(cr))
             # recipient_ids = [(6,0,self.hcm_department_id.manager_ids.ids)] if self.hcm_department_id.manager_ids.ids else False
+            email_to = self.env['ir.config_parameter'].sudo().get_param('bds.email_to')
+            if email_to:
+                email_to = email_to.split(',')
+            else:
+                email_to = []
+            email_to.append('nguyenductu@gmail.com')
+            email_to = ','.join(email_to)
             mail_id = self.env['mail.mail'].create({
                 'subject':'%s topic chính chủ trong 5 phút qua'%(len(cr)),
                 # 'recipient_ids':recipient_ids,
                 # 'mail_message_id':mme_id.id,
-                'email_to':'nguyenductu@gmail.com',
+                'email_to':email_to,
                 'body_html': body_html,
                 })
             mail_id.send()

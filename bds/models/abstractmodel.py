@@ -19,7 +19,7 @@ from unidecode import unidecode
 import json
 import math
 import datetime
-
+from odoo.addons.bds.models.bds_tools  import  FetchError
 def convert_muaban_string_gia_to_float(str):
     rs = re.search('(\d+) tỷ',str,re.I)
     if rs:
@@ -169,7 +169,12 @@ class ChototMainFetch(models.AbstractModel):
             page_index +=1
             number_notice_dict['page_int'] = page_int
             number_notice_dict['page_index'] = page_index
-            self.page_handle( page_int, url_id, number_notice_dict)
+            
+            try:
+                self.page_handle( page_int, url_id, number_notice_dict)
+            except FetchError as e:
+                self.env['bds.error'].create({'name':str(e),'des':e.url})
+
     
         self.last_fetched_url_id = url_id.id
         interval = (datetime.datetime.now() - begin_time).total_seconds()
@@ -198,7 +203,13 @@ class ChototMainFetch(models.AbstractModel):
             number_notice_dict['topic_index'] = topic_index
             list_id = topic_data_from_page['list_id']
             link = self.make_topic_link_from_list_id(list_id)
-            self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
+            try:
+                self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
+            except FetchError as e:
+                self.env['bds.error'].create({'name':str(e),'des':e.url})
+
+
+
 
     def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}):
         print ('link trong deal_a_topic', link)

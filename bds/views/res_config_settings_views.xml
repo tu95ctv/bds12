@@ -49,6 +49,21 @@
                         </div>
 
 
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="email_to"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="email_to"/>
+                                <div class="text-muted">
+                                    email_to
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
 
 
                     </div>
