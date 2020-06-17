@@ -328,7 +328,10 @@ class MuabanFetch(models.AbstractModel):
                 gia_soup = title_and_icon.select('span.list-item__price')
                 if gia_soup:
                     gia = gia_soup[0].get_text()
-                    gia = convert_muaban_string_gia_to_float(gia)
+                    try:
+                        gia = convert_muaban_string_gia_to_float(gia)
+                    except:
+                        gia = 0
                 else:
                     gia = 0
                 topic_data_from_page['gia'] = gia  
