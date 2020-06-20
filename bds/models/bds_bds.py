@@ -262,7 +262,6 @@ class bds(models.Model):
     # @api.depends('poster_id','dd_tin_cua_co','dd_tin_cua_dau_tu' )
     def count_post_of_poster_(self):
         for r in self:
-            print ('kakakak trong bds_bds, count_post_of_poster_ ')
             bds_id = r
             r = bds_id.poster_id    
             poster_dict = {}
@@ -381,7 +380,6 @@ class bds(models.Model):
 
     @api.model
     def create(self, vals):
-        print ('in create...')
         r = super(bds,self).create(vals)
         r.count_post_of_poster_()
 
