@@ -72,7 +72,7 @@
 
     <record id="cronjob_bds_send_mail" model="ir.cron">
         <field name="name">BDS Send Mail</field>
-        <field name="active">False</field> 
+        <field name="active">True</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">5</field>
         <field name="interval_type">minutes</field>

@@ -156,8 +156,8 @@ class Poster(models.Model):
 
 
 
-    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)
-    # quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id')
+    # quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id', compute='quanofposter_ids_', store = True)
+    quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id')
     quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_')
     quan_chuyen_2 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_')
     quan_chuyen_1_id = fields.Many2one('bds.quan', related ='quan_chuyen_1.quan_id' )
