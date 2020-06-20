@@ -248,7 +248,7 @@ class bds(models.Model):
                                          ('dd_cc','CC'),
                                          ('dd_kb', 'KB')],
                                         string="Dự đoán CC hay MG",
-                                        compute='count_post_of_poster_', store=True
+                                        compute='count_post_of_poster_'
                                         )
     
     count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
