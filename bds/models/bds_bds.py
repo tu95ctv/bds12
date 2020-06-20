@@ -188,6 +188,7 @@ class bds(models.Model):
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
+    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
@@ -234,6 +235,24 @@ class bds(models.Model):
 
     dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
     dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
+    so_lau = fields.Integer(compute ='_compute_so_lau')
+    # so_tang = fields.Integer(compute ='_compute_so_lau', store=True)
+    # is_co_lung = fields.Boolean(compute ='_compute_so_lau', store=True)
+
+    @api.depends('html')
+    def _compute_so_lau(self):
+        for r in self:
+            pt = '(\d{1,2})\s*lầu'
+            rs = re.search(pt, r.html, re.I)
+            if rs:
+                so_lau = rs.group(1)
+                try:
+                    so_lau = int(so_lau)
+                except:
+                    so_lau = 0
+                r.so_lau = so_lau
+
+
 
 
     @api.depends('public_date')
@@ -448,14 +467,14 @@ class bds(models.Model):
                 r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
 
 
-    @api.depends('html','cate')
+    @api.depends('html','cate','area')
     @skip_if_cate_not_bds            
     def auto_ngang_doc_(self):
         for r in self:
             pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}x {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
             rs = re.search(pt, r.html,flags = re.I)
             if rs:
-                auto_ngang,auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
+                auto_ngang, auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
             elif not rs:
                 pt= '(dài|rộng|chiều dài|chiều rộng)[: ]{1,2}(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(([, ]{1,3}(dài|rộng|chiều dài|chiều rộng)[: ]{1,2}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
                 rs = re.search(pt, r.html,flags = re.I)
@@ -466,7 +485,25 @@ class bds(models.Model):
                 rarea = r.area
                 ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
                 r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich = auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
+               
+                if rarea ==0:
+                    r.choose_area = auto_dien_tich
+                elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.8:
+                    r.choose_area = auto_dien_tich
+                else:
+                    r.choose_area = rarea
+            else:
+                r.choose_area = r.area
+
     
+
+                
+
+
+
+
+
+
 
     @api.depends('html')
     @skip_if_cate_not_bds
@@ -606,7 +643,9 @@ class bds(models.Model):
             ('\n<br>Phone: ' + (r.poster_id.name or '')) +\
             ('\n<br>' +r.link_show if  r.link_show else '')+ \
             ('\n<br> Giá: <b>%s tỷ</b>'%(r.gia if r.gia else '')) +\
+            ('\n<br> kích thước: %s'%('<b>%sm x %sm</b>'%(r.auto_ngang, r.auto_doc) if (r.auto_ngang or r.auto_doc) else ''))+\
             ('\n<br> Area: %s'%('<b>%s m2</b>'%r.area if r.area else ''))+\
+            ('\n<br> Chọn lại diện tích: %s'%('<b>%s m2</b>'%r.choose_area if r.choose_area else ''))+\
             ('\n<br>Site: %s'%r.siteleech_id.name) +\
             ('\n<br>Đơn giá: %.2f'%r.don_gia) + \
             ('\n<br>Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \
