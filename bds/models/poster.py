@@ -177,7 +177,7 @@ class Poster(models.Model):
             print ('***count_post_of_poster_***', r.id)
             count_post_all_site = bds_obj.search_count([('poster_id','=',r.id)])
             r.count_post_all_site = count_post_all_site
-            return count_post_all_site
+            # return count_post_all_site
             count_chotot_post_of_poster = bds_obj.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
             r.count_chotot_post_of_poster = count_chotot_post_of_poster
             count_bds_post_of_poster = bds_obj.search_count([('poster_id','=',r.id),('link','like','batdongsan')])
