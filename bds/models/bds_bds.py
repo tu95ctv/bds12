@@ -241,14 +241,14 @@ class bds(models.Model):
                                                    ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
                                                    ('dd_kb','dd_kb'),
                                                    ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
-                                                   ], compute='count_post_of_poster_')
+                                                   ], compute='count_post_of_poster_',  store=True)
 
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
                                          ('dd_cc','CC'),
                                          ('dd_kb', 'KB')],
                                         string="Dự đoán CC hay MG",
-                                        compute='count_post_of_poster_'
+                                        compute='count_post_of_poster_', store=True
                                         )
     
     count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
@@ -285,7 +285,7 @@ class bds(models.Model):
                 dd_tin_cua_co_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
                 r.dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
 
-                dd_tin_cua_dau_tu_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
+                dd_tin_cua_dau_tu_count = self.search_count([('posetr_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
                 r.dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
 
 
