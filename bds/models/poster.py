@@ -31,7 +31,7 @@ class Poster(models.Model):
 
 
 
-    # site_count_of_poster = fields.Integer(compute='site_count_of_poster_', store=True)
+    # site_count_of_poster = fields.Integer(, store=True)
     # address_topic_number = fields.Integer(compute ='count_post_of_poster_', store=True)
     # chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
     #         ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
@@ -71,23 +71,63 @@ class Poster(models.Model):
 
 
 
-    site_count_of_poster = fields.Integer(compute='site_count_of_poster_')
-    address_topic_number = fields.Integer(compute ='count_post_of_poster_')
+    # site_count_of_poster = fields.Integer()
+    # address_topic_number = fields.Integer(compute ='count_post_of_poster_')
+    # chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
+    #         ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
+    #         compute ='count_post_of_poster_')
+    # dd_tin_cua_co_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
+    # dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
+    # address_rate = fields.Float(digits=(6,2),compute ='count_post_of_poster_')
+    # du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
+    #                                      ('dd_dt','ĐT'),
+    #                                      ('dd_cc','CC'),
+    #                                      ('dd_kb', 'KB')],
+    #                                     compute = 'count_post_of_poster_', string="Dự đoán CC hay MG")
+    # count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',string=u'chotot count')
+    # count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_')
+    # count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
+    # count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_') 
+    # detail_du_doan_cc_or_mg = fields.Selection(
+    #                                               [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
+    #                                                ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
+    #                                                ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
+    #                                                ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
+                                                   
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
+    #                                                ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
+
+                                                   
+                                                   
+    #                                                ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
+    #                                                ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
+    #                                                ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
+    #                                                ('dd_kb','dd_kb'),
+    #                                                ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
+    #                                                ]
+    #                                                )
+
+
+
+    site_count_of_poster = fields.Integer()
+    address_topic_number = fields.Integer()
     chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
             ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
-            compute ='count_post_of_poster_')
-    dd_tin_cua_co_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
-    dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
-    address_rate = fields.Float(digits=(6,2),compute ='count_post_of_poster_')
+            )
+    dd_tin_cua_co_rate = fields.Float(digits=(6,2))
+    dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2) )
+    address_rate = fields.Float(digits=(6,2))
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
                                          ('dd_cc','CC'),
                                          ('dd_kb', 'KB')],
-                                        compute = 'count_post_of_poster_', string="Dự đoán CC hay MG")
-    count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',string=u'chotot count')
-    count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_')
-    count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
-    count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_') 
+                                         string="Dự đoán CC hay MG")
+    count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
+    count_bds_post_of_poster = fields.Integer()
+    count_post_all_site = fields.Integer(store=True)
+    count_post_all_site_in_month = fields.Integer() 
     detail_du_doan_cc_or_mg = fields.Selection(
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
@@ -108,6 +148,9 @@ class Poster(models.Model):
                                                    ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
                                                    ]
                                                    )
+
+
+
 
 
 

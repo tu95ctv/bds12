@@ -16,6 +16,7 @@
                     <field name="login" />
                     <field name="post_ids" />
                     <field name="du_doan_cc_or_mg" />
+                    <filter name="tao_cach_day_1_phut" string="Tạo cách đâ 1 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
                     <group expand="0" string="Group By">
                         <filter name="nha_mang" string="groupby nha mang" domain="[]" context="{'group_by':'nha_mang'}" />
                         <filter name="quan_chuyen_1_id" string="quan_chuyen_1_id" domain="[]" context="{'group_by':'quan_chuyen_1_id'}" />

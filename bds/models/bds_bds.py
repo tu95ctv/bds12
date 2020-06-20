@@ -214,88 +214,80 @@ class bds(models.Model):
 
 
 
-    # detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
-    # du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
-    # count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
-    # count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
-    # count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
-    # dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
-    # dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
+    detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
+    du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
+    count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
+    count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
+    count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
+    dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
+    dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
 
 
-    detail_du_doan_cc_or_mg = fields.Selection(
-                                                  [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
-                                                   ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
-                                                   ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
-                                                   ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
+    # detail_du_doan_cc_or_mg = fields.Selection(
+    #                                               [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
+    #                                                ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
+    #                                                ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
+    #                                                ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
                                                    
-                                                   ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
-                                                   ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
-                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
-                                                   ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
+    #                                                ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
+    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
 
                                                    
                                                    
-                                                   ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
-                                                   ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
-                                                   ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
-                                                   ('dd_kb','dd_kb'),
-                                                   ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
-                                                   ], compute='count_post_of_poster_',  store=True)
+    #                                                ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
+    #                                                ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
+    #                                                ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
+    #                                                ('dd_kb','dd_kb'),
+    #                                                ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
+    #                                                ], compute='count_post_of_poster_',  store=True)
 
-    du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
-                                         ('dd_dt','ĐT'),
-                                         ('dd_cc','CC'),
-                                         ('dd_kb', 'KB')],
-                                        string="Dự đoán CC hay MG",
-                                        compute='count_post_of_poster_'
-                                        )
+    # du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
+    #                                      ('dd_dt','ĐT'),
+    #                                      ('dd_cc','CC'),
+    #                                      ('dd_kb', 'KB')],
+    #                                     string="Dự đoán CC hay MG",
+    #                                     compute='count_post_of_poster_',store=True
+    #                                     )
     
-    count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
-    count_bds_post_of_poster = fields.Integer()
-    count_post_all_site = fields.Integer()
-    dd_tin_cua_co_rate = fields.Float()
-    dd_tin_cua_dau_tu_rate = fields.Float()
+    # count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
+    # count_bds_post_of_poster = fields.Integer()
+    # count_post_all_site = fields.Integer()
+    # dd_tin_cua_co_rate = fields.Float()
+    # dd_tin_cua_dau_tu_rate = fields.Float()
 
 
 
-    @api.depends('poster_id')
+    # @api.depends('poster_id','dd_tin_cua_co','dd_tin_cua_dau_tu' )
     def count_post_of_poster_(self):
         for r in self:
             print ('kakakak trong bds_bds, count_post_of_poster_ ')
             bds_id = r
             r = bds_id.poster_id    
-
+            poster_dict = {}
             count_chotot_post_of_poster = self.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
-            r.count_chotot_post_of_poster = count_chotot_post_of_poster
+            poster_dict['count_chotot_post_of_poster'] = count_chotot_post_of_poster
             count_bds_post_of_poster = self.search_count([('poster_id','=',r.id),('link','like','batdongsan')])
-            r.count_bds_post_of_poster = count_bds_post_of_poster
+            poster_dict['count_bds_post_of_poster'] = count_bds_post_of_poster
             
             count_post_all_site = self.search_count([('poster_id','=',r.id)])
-            r.count_post_all_site = count_post_all_site
+            poster_dict['count_post_all_site'] = count_post_all_site
             count_post_all_site_in_month = self.search_count([('poster_id','=',r.id),('public_datetime','>',fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))])
-            r.count_post_all_site_in_month = count_post_all_site_in_month
+            poster_dict['count_post_all_site_in_month'] = count_post_all_site_in_month
             address_topic_number = self.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
-            r.address_topic_number= address_topic_number
+            poster_dict['address_topic_number'] = address_topic_number
             address_rate = 0
 
             if count_post_all_site:
                 address_rate = address_topic_number/count_post_all_site
-                r.address_rate = address_rate
+                poster_dict['address_rate'] = address_rate
                 dd_tin_cua_co_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
-                r.dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
+                poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_count/count_post_all_site
 
                 dd_tin_cua_dau_tu_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
-                r.dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
+                poster_dict['dd_tin_cua_dau_tu_rate'] = dd_tin_cua_dau_tu_count/count_post_all_site
 
-
-
-
-            # mtg_number = self.search_count([('poster_id','=',r.id),('mtg','=',True)])
-            # r.mtg_number = mtg_number
-            
-            # mqc_number = self.search_count([('poster_id','=',r.id),('mqc','=',True)])
-            # r.mqc_number = mqc_number
             count_chotot_moi_gioi = self.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
             if count_chotot_moi_gioi:
                 chotot_mg_or_cc = 'moi_gioi'
@@ -304,17 +296,9 @@ class bds(models.Model):
                     chotot_mg_or_cc = 'chinh_chu'
                 else:
                     chotot_mg_or_cc = 'khong_biet'
-            # if count_chotot_post_of_poster:
-            #     rate_moi_gioi = count_chotot_moi_gioi/count_chotot_post_of_poster
-            #     rate_chinh_chu =   1 - rate_moi_gioi
-            #     r.rate_chinh_chu = rate_chinh_chu
-            #     r.rate_moi_gioi = rate_moi_gioi
-            r.chotot_mg_or_cc = chotot_mg_or_cc
-                    
+            poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
             dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','!=', False)])
             dd_tin_cua_dau_tu = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
-            
-
             if chotot_mg_or_cc =='moi_gioi' :
                 if address_rate > 0.5:
                     du_doan_cc_or_mg= 'dd_cc'
@@ -366,9 +350,12 @@ class bds(models.Model):
                 if  dd_tin_cua_dau_tu:
                     du_doan_cc_or_mg= 'dd_dt'
                     
-                    
-            r.du_doan_cc_or_mg = du_doan_cc_or_mg
-            r.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
+                  
+            poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
+            poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
+            r.write(poster_dict)
+            # bds_id.du_doan_cc_or_mg = du_doan_cc_or_mg
+            # bds_id.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
 
 
 
@@ -391,6 +378,13 @@ class bds(models.Model):
     so_lau = fields.Integer(compute ='_compute_so_lau')
     # so_tang = fields.Integer(compute ='_compute_so_lau', store=True)
     # is_co_lung = fields.Boolean(compute ='_compute_so_lau', store=True)
+
+    @api.model
+    def create(self, vals):
+        print ('in create...')
+        r = super(bds,self).create(vals)
+        r.count_post_of_poster_()
+
 
     @api.depends('html')
     def _compute_so_lau(self):
