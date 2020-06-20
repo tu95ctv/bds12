@@ -188,7 +188,7 @@ class bds(models.Model):
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
+    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_')#,store=True
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
