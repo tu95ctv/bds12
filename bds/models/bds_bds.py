@@ -800,7 +800,8 @@ class bds(models.Model):
             ('\n<br>detail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
             ('\n<br> address_rate: %s'%r.poster_id.address_rate) +\
             ('\n<br>tỉ lệ keyword cò : %s'%r.poster_id.dd_tin_cua_co_rate) +\
-            ('\n<br>tỉ lệ keyword đầu tư: %s'%r.poster_id.dd_tin_cua_dau_tu_rate)
+            ('\n<br>tỉ lệ keyword đầu tư: %s'%r.poster_id.dd_tin_cua_dau_tu_rate) +\
+            ('\n<br>public_date %s'%r.public_date)
 
             
 
