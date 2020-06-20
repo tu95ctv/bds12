@@ -688,7 +688,9 @@ class bds(models.Model):
 
         minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes, seconds=1)
         cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
-            ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia)])
+            ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia), 
+            ('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh'])
+            ])
         if cr:
             for r in cr:
                 # one_mail_html = one_mail_template%(r.title, r.html_show)

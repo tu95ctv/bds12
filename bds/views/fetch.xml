@@ -19,6 +19,7 @@
                             <field name="description" />
                             <field name="cate" />
                             <field name="siteleech_id" />
+                            <field name="write_date" />
                             <field name="set_number_of_page_once_fetch" />
                             <field name="link_number" />
                             <field name="existing_link_number" />
