@@ -285,7 +285,7 @@ class bds(models.Model):
                 dd_tin_cua_co_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
                 r.dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
 
-                dd_tin_cua_dau_tu_count = self.search_count([('posetr_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
+                dd_tin_cua_dau_tu_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
                 r.dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
 
 
