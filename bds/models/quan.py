@@ -52,7 +52,7 @@ class QuanHuyen(models.Model):
     name_unidecode = fields.Char()
     name_without_quan = fields.Char()
     post_ids = fields.One2many('bds.bds','quan_id')
-    muc_gia_quan = fields.Float(digit=(6,2),compute='muc_gia_quan_',store=True,string=u'Mức Đơn Giá(triệu/m2)')
+    muc_gia_quan = fields.Float(digit=(6,2),string=u'Mức Đơn Giá(triệu/m2)',compute='muc_gia_quan_',store=True)
     len_post_ids = fields.Integer(compute='len_post_ids_')
     level = fields.Selection([('trung_tam','Trung Tâm'), ('kha_trung_tam','Khá Trung Tâm'), ('vung_ven','Vùng ven')])
 
@@ -69,10 +69,6 @@ class QuanHuyen(models.Model):
     @api.depends('post_ids')
     def muc_gia_quan_(self):
         for r in self:
-            # sql_cmd = "select AVG(don_gia),count(id) from bds_bds where  quan_id = %s and  don_gia >= 20 and don_gia <300"%r.id
-            # self.env.cr.execute(sql_cmd)
-            # rsul = self.env.cr.fetchall()
-            # r.muc_gia_quan = rsul[0][0]
             readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('quan_id','=',r.id)],['don_gia:avg(don_gia)'],[])
             rs = readgroup_rs[0]['don_gia']
             r.muc_gia_quan = rs

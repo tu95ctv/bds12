@@ -23,6 +23,7 @@ class Poster(models.Model):
     nha_mang = fields.Selection([('vina','vina'),('mobi','mobi'),('viettel','viettel'),('khac','khac')],compute='nha_mang_',store=True)
     username_in_site_ids = fields.One2many('bds.posternamelines','poster_id')
     username_in_site_ids_show = fields.Char(compute='username_in_site_ids_show_')
+    
     quan_id_for_search = fields.Many2one('bds.quan',related = 'quanofposter_ids.quan_id')
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
 
@@ -307,7 +308,7 @@ class Poster(models.Model):
             r.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
 
     
-    @api.depends('post_ids','post_ids.gia')
+    # @api.depends('post_ids','post_ids.gia')
     def quanofposter_ids_(self):#tạo sitequanofposter
         for r in self:
             if r.id:

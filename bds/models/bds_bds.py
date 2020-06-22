@@ -20,12 +20,15 @@ def detech_mat_tien(html):
     full_adress_list = []
     while mat_tien_full_address_possibles:
         html = html [before_index:]
-        p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})\s+(?:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]+\s*){1,4})(?:\.|\s|\,|$)'
+        p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})\s+(?:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
         mat_tien_full_address_possibles = re.search(p, html)  #((\S+(?:\s|\.|$|,)+){1,4})
         if mat_tien_full_address_possibles:
             before_index = mat_tien_full_address_possibles.span()[1] + 1
             number = mat_tien_full_address_possibles.group(1)
             ten_duong = mat_tien_full_address_possibles.group('ten_duong')
+            is_check_word = re.search('[a-zđ]',ten_duong, re.I)
+            if not is_check_word:
+                continue
             full_address = number + ' ' +  ten_duong
             full_address_unidecode = unidecode (full_address)
             if number not in deal_s:
@@ -49,10 +52,10 @@ def detech_mat_tien(html):
                     pre_index = 0
                 check_hem_string = html[pre_index:index]
                 if check_hem_string:
-                    is_hem = re.search('hẻm|hxt|đường', check_hem_string, re.I)
+                    is_hem = re.search('hẻm|hxt|đường|bđs|cty|nhà đất|vp| văn phòng', check_hem_string, re.I)
                     if is_hem:
                         continue
-                full_adress_list.append(full_address)
+                full_adress_list.append((number, full_address))
     return full_adress_list
 
 def detect_hem_address(address):
@@ -98,7 +101,7 @@ def detect_hem_address(address):
                 if before_index < 0:
                     before_index = 0
                 before_string = address[before_index: index]
-                is_van_phong = re.search('văn phòng|vp', before_string, re.I)
+                is_van_phong = re.search('văn phòng|vp|bđs|nhà đất', before_string, re.I)
                 if is_van_phong:
                     continue
                 trust_address_result_keys.append((adress_number, full_adress))
@@ -382,6 +385,8 @@ class bds(models.Model):
     def create(self, vals):
         r = super(bds,self).create(vals)
         r.count_post_of_poster_()
+        r.poster_id.quanofposter_ids_()
+        # r.quan_id.muc_gia_quan_()
 
 
     @api.depends('html')
@@ -410,11 +415,22 @@ class bds(models.Model):
     @api.depends('html','trigger')
     def _mat_tien_address(self):
         for r in self:
+            full_adress_list_sum =  []
+            number_list_sum = []
             html = r.html
-            if html:
-                full_adress_list = detech_mat_tien(html)
-                if full_adress_list:
-                    r.mat_tien_address = ','.join(full_adress_list)
+            title = r.title
+            address = r.address
+            addresses = [title, html, address]
+            for html in addresses:
+                if html:
+                    full_adress_list = detech_mat_tien(html)
+                    if full_adress_list:
+                        for number, full_address in full_adress_list:
+                            if number not in number_list_sum:
+                                full_adress_list_sum.append(full_address)
+                                number_list_sum.append(number)
+            if full_adress_list_sum:
+                r.mat_tien_address = ','.join(full_adress_list_sum)
 
     def make_trigger(self):
         self.trigger = True
@@ -592,7 +608,7 @@ class bds(models.Model):
                 r.trich_dia_chi = trich_dia_chi
             
             found_kw_mgs = co_date_247_result_keys_sum
-            kw_mgs= ['nhà đất', 'uy tín', 'real','mmg','mqc','mtg', 'bds', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','(?<!nova)land','tư vấn','thông tin chính xác']
+            kw_mgs= ['nhà đất', 'uy tín', 'real','mmg','mqc','mtg', 'bds','bđs', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','(?<!nova)land','tư vấn','thông tin chính xác']
             for key in kw_mgs:
                 rs = re.search(key, html, re.I)
                 if rs:
@@ -812,7 +828,7 @@ class bds(models.Model):
             if r.link and 'chotot' in r.link:
                 rs = re.search('/(\d*)$',r.link)
                 id_link = rs.group(1)
-                r.cho_tot_link_fake = 'https://nha.chotot.com/quan-10/mua-ban-nha-dat/' + 'xxx-' + id_link+ '.htm'
+                r.cho_tot_link_fake = 'https://nha.chotot.com/mua-ban-nha-dat/' + 'nha-' + id_link+ '.htm'
                 
 
     @api.depends('thumb')
@@ -828,15 +844,20 @@ class bds(models.Model):
         minutes = int(self.env['ir.config_parameter'].sudo().get_param('bds.interval_mail_chinh_chu_minutes',default=0))
         if minutes ==0:
             minutes=5
+        # minutes =25
         gia = float(self.env['ir.config_parameter'].sudo().get_param('bds.gia',default=0))
         if gia ==0:
             gia =100
-
+            
+        #mat_tien_address
+        # gia = 100
         minutes_5_last = fields.Datetime.now() -   datetime.timedelta(minutes=minutes, seconds=1)
-        cr = self.search([('create_date','>', minutes_5_last), ('trich_dia_chi','!=',False),
-            ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']), ('gia','<', gia), 
-            ('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh'])
+        cr = self.search([('create_date','>', minutes_5_last),
+            # ('du_doan_cc_or_mg','in', ['dd_cc', 'dd_dt']),
+            ('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh']),
+            '|', '&', ('trich_dia_chi','!=',False), ('gia','<', gia), '&', ('mat_tien_address','!=',False), ('gia','<', 13)
             ])
+        # raise UserError(str(cr))
         if cr:
             for r in cr:
                 # one_mail_html = one_mail_template%(r.title, r.html_show)

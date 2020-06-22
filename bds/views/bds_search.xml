@@ -33,6 +33,7 @@
         <filter  name="quan_trung_tam" string="Quận Trung Tâm"  domain="[('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh'])]"/>
         <separator />
         <filter name="Có trích địa chỉ" domain ="[('trich_dia_chi','!=',False)]"></filter>
+        <filter name="Có địa chỉ mặt tiền" domain ="[('mat_tien_address','!=',False)]"></filter>
         <separator />
         <filter name="kw đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
         <separator />
