@@ -37,7 +37,7 @@ def detech_mat_tien(html):
                 check_co_word = re.search('\D', full_address)
                 if not check_co_word:
                     continue
-                pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc'
+                pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc|xẹt|lửng|lững|trục đường'
                 pt = unidecode(pt)
                 is_mt = re.search(pt, full_address_unidecode, re.I)
                 if is_mt:
@@ -118,6 +118,17 @@ def skip_if_cate_not_bds(depend_func):
                 depend_func(r)
     return wrapper
 
+def skip_depends(depend_func):
+    def wrapper(*args,**kargs):
+        self = args[0]
+        for r in self:
+            return 
+            # if r.cate ==u'bds':
+            #     depend_func(r)
+    return wrapper
+
+
+
 class UserReadMark(models.Model):
     _name = 'user.read.mark'
 
@@ -180,18 +191,16 @@ class bds(models.Model):
     html_replace = fields.Html(compute='html_replace_')
     html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
     link_show =  fields.Char(compute='link_show_')
-    mtg = fields.Boolean(compute = 'mien_tiep_mg_', store = True,string='Miễn trung gian')
-    mqc = fields.Boolean(compute = 'mqc_', store = True)
+
     trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
-    dd_tin_cua_co = fields.Boolean(compute='trich_dia_chi_', store = True, string='is có kw môi giới')
-    kw_mg= fields.Char(compute='trich_dia_chi_', store = True, string='kw môi giới')
-    dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
+    
     # subtitle_html_for_agency = fields.Html(compute='subtitle_html_for_agency_',store=True, string="Để làm cò")
     auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_')#,store=True
+  
+
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
@@ -224,45 +233,141 @@ class bds(models.Model):
     count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
     dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
     dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
-
-
-    # detail_du_doan_cc_or_mg = fields.Selection(
-    #                                               [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
-    #                                                ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
-                                                   
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
-    #                                                ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
-
-                                                   
-                                                   
-    #                                                ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
-    #                                                ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
-    #                                                ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
-    #                                                ('dd_kb','dd_kb'),
-    #                                                ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
-    #                                                ], compute='count_post_of_poster_',  store=True)
-
-    # du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
-    #                                      ('dd_dt','ĐT'),
-    #                                      ('dd_cc','CC'),
-    #                                      ('dd_kb', 'KB')],
-    #                                     string="Dự đoán CC hay MG",
-    #                                     compute='count_post_of_poster_',store=True
-    #                                     )
     
-    # count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
-    # count_bds_post_of_poster = fields.Integer()
-    # count_post_all_site = fields.Integer()
-    # dd_tin_cua_co_rate = fields.Float()
-    # dd_tin_cua_dau_tu_rate = fields.Float()
+    
+    #!related
+    # for filter field
+    quan_id_selection = fields.Selection('get_quan_')
+    greater_day = fields.Integer()
+    siteleech_id_selection = fields.Selection('siteleech_id_selection_')
+    is_user_read_mark = fields.Boolean(compute='_is_user_read_mark')
+    is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
+    mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
+    trigger = fields.Boolean()
+    diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
+
+    dd_tin_cua_co = fields.Boolean(compute='trich_dia_chi_', store = True, string='is có kw môi giới')
+    kw_mg= fields.Char(compute='trich_dia_chi_', store = True, string='kw môi giới')
+    dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
+    kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+    kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+    
+    so_lau = fields.Float()
+    so_lau_char = fields.Char()
+    hem_rong = fields.Float()
+    hem_rong_char = fields.Char()
+    choose_area = fields.Float(digits=(6,2))#,store=True
+    
+    # choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
+    # so_lau = fields.Float(compute ='_compute_so_lau',store=True)
+    # so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
+    # hem_rong = fields.Float(compute='_compute_hem_rong', store=True)
+    # hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
+
+
+    @api.depends('html')
+    @skip_depends
+    def _compute_hem_rong(self):
+        for r in self:
+            pt = '(?<!cách )(?:hẻm|hẽm|đường)\s+(?:trước nhà)*\s*(?:xh|xe hơi|xe máy|kia|ba gác|ba gát)*\s*(?:nhỏ)*\s*(?:rộng)*\s*(\d+\.*\d*)\s*(?:m|mét)(?:\W|$)'
+            rs = re.search(pt, r.html, re.I)
+            if rs:
+                r.hem_rong_char, r.hem_rong = rs.group(0), rs.group(1)
+    
+  
+    @api.depends('html')
+    @skip_depends
+    def _compute_so_lau(self):
+        for r in self:
+            pt = '(\d{1,2})\s*(?:lầu|l)\W'
+            rs = re.search(pt, r.html, re.I)
+            so_lau = 0
+            so_lau_char = False
+            if rs:
+                so_lau = rs.group(1)
+                try:
+                    so_lau = int(so_lau)
+                except:
+                    so_lau = 0
+                so_lau_char = rs.group(0)
+            else:
+                pt = '(?:cấp 4|c4|c4)\W'
+                rs = re.search(pt, r.html, re.I)
+                if rs:
+                    so_lau = 0.1
+                    so_lau_char = rs.group(0)
+            pt = 'lửng|lững'
+            rs = re.search(pt, r.html, re.I)
+            if rs:
+                so_lau +=0.5
+            r.so_lau = so_lau
+            r.so_lau_char = so_lau_char
+
+    
+    @api.model
+    def create(self, vals):
+        r = super(bds,self).create(vals)
+        r.count_post_of_poster_()
+        r.poster_id.quanofposter_ids_()
+        # r.quan_id.muc_gia_quan_()
 
 
 
-    # @api.depends('poster_id','dd_tin_cua_co','dd_tin_cua_dau_tu' )
+
+
+
+    @api.depends('public_date')
+    def _compute_diff_public_days_from_now(self):
+        for r in self:
+            if r.public_date:
+                r.diff_public_days_from_now = (fields.Date.today() - r.public_date).days
+
+
+    @api.depends('html','trigger')
+    def _mat_tien_address(self):
+        for r in self:
+            full_adress_list_sum =  []
+            number_list_sum = []
+            html = r.html
+            title = r.title
+            address = r.address
+            addresses = [title, html, address]
+            for html in addresses:
+                if html:
+                    full_adress_list = detech_mat_tien(html)
+                    if full_adress_list:
+                        for number, full_address in full_adress_list:
+                            if number not in number_list_sum:
+                                full_adress_list_sum.append(full_address)
+                                number_list_sum.append(number)
+            if full_adress_list_sum:
+                r.mat_tien_address = ','.join(full_adress_list_sum)
+
+    def make_trigger(self):
+        self.trigger = True
+
+    # def test(self):
+    #     query = "select html from bds_bds where html like 'mặt tiền' limit 2"
+    #     rs =  self.env.cr.execute(query)
+
+    #     raise UserError(rs)
+
+    def test(self):
+        # rs = self.env['bds.bds'].read_group([],['loai_nha'],['loai_nha'])
+        # rs = map(lambda i: i['loai_nha'].replace('\n','') if i['loai_nha'] else i['loai_nha'], rs)
+        # rs = filter(lambda i: i != False, rs)
+        # rs = map(lambda i: (i,i), rs)
+        # rs = list(rs)
+        # self.env['ir.config_parameter'].set_param("bds.loai_nha", rs)
+        readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('poster_id','=',18)],['quan_id','siteleech_id','avg_gia:avg(gia)','count(quan_id)'],['quan_id','siteleech_id'], lazy=False)
+        # rs = readgroup_rs[0]['don_gia']
+        # r.muc_gia_quan = rs
+        raise UserError(str(readgroup_rs))
+
+    def test2(self):
+        rs = self.env['ir.config_parameter'].get_param("bds.loai_nha")
+        rs = eval(rs)
+        raise UserError('%s-%s'%(type(rs),str(rs)))
     def count_post_of_poster_(self):
         for r in self:
             bds_id = r
@@ -359,101 +464,6 @@ class bds(models.Model):
             # bds_id.du_doan_cc_or_mg = du_doan_cc_or_mg
             # bds_id.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
 
-
-
-
-
-    #!related
-    # for filter field
-    quan_id_selection = fields.Selection('get_quan_')
-    greater_day = fields.Integer()
-    siteleech_id_selection = fields.Selection('siteleech_id_selection_')
-    is_user_read_mark = fields.Boolean(compute='_is_user_read_mark')
-    is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
-    mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
-    trigger = fields.Boolean()
-    diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
-    kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
-    kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
-
- 
-    so_lau = fields.Integer(compute ='_compute_so_lau')
-    # so_tang = fields.Integer(compute ='_compute_so_lau', store=True)
-    # is_co_lung = fields.Boolean(compute ='_compute_so_lau', store=True)
-
-    @api.model
-    def create(self, vals):
-        r = super(bds,self).create(vals)
-        r.count_post_of_poster_()
-        r.poster_id.quanofposter_ids_()
-        # r.quan_id.muc_gia_quan_()
-
-
-    @api.depends('html')
-    def _compute_so_lau(self):
-        for r in self:
-            pt = '(\d{1,2})\s*lầu'
-            rs = re.search(pt, r.html, re.I)
-            if rs:
-                so_lau = rs.group(1)
-                try:
-                    so_lau = int(so_lau)
-                except:
-                    so_lau = 0
-                r.so_lau = so_lau
-
-
-
-
-    @api.depends('public_date')
-    def _compute_diff_public_days_from_now(self):
-        for r in self:
-            if r.public_date:
-                r.diff_public_days_from_now = (fields.Date.today() - r.public_date).days
-
-
-    @api.depends('html','trigger')
-    def _mat_tien_address(self):
-        for r in self:
-            full_adress_list_sum =  []
-            number_list_sum = []
-            html = r.html
-            title = r.title
-            address = r.address
-            addresses = [title, html, address]
-            for html in addresses:
-                if html:
-                    full_adress_list = detech_mat_tien(html)
-                    if full_adress_list:
-                        for number, full_address in full_adress_list:
-                            if number not in number_list_sum:
-                                full_adress_list_sum.append(full_address)
-                                number_list_sum.append(number)
-            if full_adress_list_sum:
-                r.mat_tien_address = ','.join(full_adress_list_sum)
-
-    def make_trigger(self):
-        self.trigger = True
-
-    # def test(self):
-    #     query = "select html from bds_bds where html like 'mặt tiền' limit 2"
-    #     rs =  self.env.cr.execute(query)
-
-    #     raise UserError(rs)
-
-    def test(self):
-        rs = self.env['bds.bds'].read_group([],['loai_nha'],['loai_nha'])
-        rs = map(lambda i: i['loai_nha'].replace('\n','') if i['loai_nha'] else i['loai_nha'], rs)
-        rs = filter(lambda i: i != False, rs)
-        rs = map(lambda i: (i,i), rs)
-        rs = list(rs)
-        self.env['ir.config_parameter'].set_param("bds.loai_nha", rs)
-
-    def test2(self):
-        rs = self.env['ir.config_parameter'].get_param("bds.loai_nha")
-        rs = eval(rs)
-        raise UserError('%s-%s'%(type(rs),str(rs)))
-    
         
 
 
@@ -562,15 +572,6 @@ class bds(models.Model):
             if r.trich_dia_chi:
                 html_replace = html_replace.replace(r.trich_dia_chi,'')
             r.html_replace = html_replace
-            
-    @api.depends('html')
-    @skip_if_cate_not_bds
-    def mien_tiep_mg_(self):
-        for r in self:
-            rs = re.search('(miễn|không)[\w ]{0,15}(môi giới|mg|trung gian|tg|cò)|mtg|mmg',r.html,re.I)
-            if rs:
-                r.mien_tiep_mg = rs.group(0)
-                r.mtg = True
 
 
     def detect_hem_address_list(self, address_list):
@@ -666,20 +667,6 @@ class bds(models.Model):
 
 
 
-    @api.depends('html')
-    @skip_if_cate_not_bds
-    def mqc_(self):
-        kss= ['quảng cáo','mqc','miễn qc','miễn tiếp báo']
-        for r in self:
-            is_match = False
-            for ks in kss:
-                rs = re.search(ks,r.html, re.I)
-                if rs:
-                    is_match = True
-                    break
-            if is_match:
-                r.mqc = True
-
 
     def str_before_index(self, index, input_str):
         pre_index = index - 30
@@ -748,7 +735,7 @@ class bds(models.Model):
             except:
                 pass
                 
-    @api.depends('gia','area')
+    @api.depends('gia','choose_area')
     def don_gia_(self):
         for r in self:
             if r.gia and r.area:
@@ -768,7 +755,7 @@ class bds(models.Model):
             if not selection:
                 r.muc_don_gia = '>210'
 
-    @api.depends('area')
+    @api.depends('choose_area')
     def muc_dt_(self):
         muc_dt_list = [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')]
         for r in self:
@@ -828,7 +815,7 @@ class bds(models.Model):
             if r.link and 'chotot' in r.link:
                 rs = re.search('/(\d*)$',r.link)
                 id_link = rs.group(1)
-                r.cho_tot_link_fake = 'https://nha.chotot.com/mua-ban-nha-dat/' + 'nha-' + id_link+ '.htm'
+                r.cho_tot_link_fake = 'https://nha.chotot.com/nhadat/mua-ban-nha-dat/'  + id_link+ '.htm'
                 
 
     @api.depends('thumb')

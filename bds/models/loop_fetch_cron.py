@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 # from odoo.addons.bds.models.fetch import fetch
+from odoo.addons.bds.models.bds_tools  import  FetchError
 
 class loop_fetch_cron(models.Model):
     _name = 'loop.fetch.cron'
@@ -33,7 +34,7 @@ class loop_fetch_cron(models.Model):
                 try:
                     fetch_id.fetch_all_url()
                     
-                except Exception as e:
+                except FetchError as e:
                     # print ('co 1 loi')
                     try:
                         self.env['bds.error'].create({'name':'lỗi: %s trong fetch_cron'%e, 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})

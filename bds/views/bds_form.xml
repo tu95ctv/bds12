@@ -15,7 +15,6 @@
                                     <field name="title" />
                                     <field name="quan_tam"></field>
                                     <field name="loai_nha_selection"></field>
-                                    <field name="mqc"></field>
                                     <field name="link" />
                                     <field name="gia" />
                                     <field name="gia_trieu" />

@@ -11,7 +11,6 @@
         <field name="gia"  string="giá  lớn hơn" filter_domain="[('gia','&gt;',self)]"/>
         <field name="count_post_all_site"  string="count_post_all_site  bé hơn" filter_domain="[('count_post_all_site','&lt;',self)]"/>
         <field name="link" />
-        <field name="html" />
         <field name="html_khong_dau" />
         <field name="siteleech_id" />
         <field name="quan_id" />
@@ -29,13 +28,19 @@
         <field  name="greater_day" string="số ngày đăng bé hơn"  filter_domain="[ ('public_datetime','&gt;=', ((context_today()-datetime.timedelta(days=self)).strftime('%Y-%m-%d'))) ]"/>
         <field  name="greater_day" string="số ngày tạo bé hơn"  filter_domain="[ ('create_date','&gt;=', ((context_today()-datetime.timedelta(days=self)).strftime('%Y-%m-%d'))) ]"/>
         <field name="chotot_moi_gioi_hay_chinh_chu" />
+        <field name="trich_dia_chi" filter_domain ="['|',('trich_dia_chi','ilike',self), ('mat_tien_address','ilike',self)]"/>
+        <field name="html" filter_domain ="['|','|', ('html','ilike',self), ('html_khong_dau','ilike',self), ('title','ilike',self)]"/>
         <separator />
         <filter  name="quan_trung_tam" string="Quận Trung Tâm"  domain="[('quan_id.name', 'in',['Quận 1','Quận 3', 'Quận 5', 'Quận 10', 'Quận Tân Bình', 'Quận Tân Phú', 'Quận Phú Nhuận', 'Quận Bình Thạnh'])]"/>
         <separator />
         <filter name="Có trích địa chỉ" domain ="[('trich_dia_chi','!=',False)]"></filter>
         <filter name="Có địa chỉ mặt tiền" domain ="[('mat_tien_address','!=',False)]"></filter>
         <separator />
-        <filter name="kw đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
+        <filter name="Có trích địa chỉ hẻm hoặc mặt tiền" domain ="['|',('trich_dia_chi','!=',False), ('mat_tien_address','!=',False)]"></filter>
+        <separator />
+        <filter name="Dự đoán tin của cò" domain ="[('dd_tin_cua_co','!=',False)]"></filter>
+        <separator />
+        <filter name="Có keyword đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
         <separator />
         <filter name="dự đoán đầu tư" domain ="[('du_doan_cc_or_mg','=','dd_dt')]"></filter>
         <separator />
@@ -67,7 +72,6 @@
         <filter name="len_publicdate_ids" string="co len_publicdate_ids" domain="[('len_publicdate_ids','>',0)]" help="Pickings that are late on scheduled time" />
         <filter name="thismonth" string="public  Month" domain="[('public_datetime','&lt;',(context_today()+ datetime.timedelta(days=1)).strftime('%Y-%m-%d')), ('public_datetime','&gt;=',time.strftime('%Y-%m-01'))]"  />
         <filter name="thisyear" string="public Year" domain="[('public_datetime','&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-%m-01')), ('public_datetime','&gt;=',time.strftime('%Y-%m-01'))]" />
-        <filter name="co mtg" string="co miễn trung gian" domain="[('mtg','!=',False)]" help="Pickings that are late on scheduled time" />
         <separator />
         
         <group expand="0" string="Group By">
@@ -86,7 +90,10 @@
             <filter name="quan_id" string="group_quan" domain="[]" context="{'group_by':'quan_id'}" />
             <filter name="dd_tin_cua_dau_tu" string="dự đoán tin của đầu tư group" domain="[]" context="{'group_by':'dd_tin_cua_dau_tu'}" />
             <filter name="dd_tin_cua_co" string="dự đoán tin của cò" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
-            <filter name="kw_mg" string="kw_mg" domain="[]" context="{'group_by':'kw_mg'}" />
+            <filter name="dd_tin_cua_co" string="dự đoán tin của cò" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
+            <filter name="kw_mg" string="key word môi giới" domain="[]" context="{'group_by':'kw_mg'}" />
+            <filter name="so_lau" string="số lầu" domain="[]" context="{'group_by':'so_lau'}" />
+            <filter name="hem_rong" string="hẻm rộng" domain="[]" context="{'group_by':'hem_rong'}" />
         </group>
         
       </search>
