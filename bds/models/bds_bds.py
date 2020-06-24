@@ -252,17 +252,17 @@ class bds(models.Model):
     kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
     kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
     
-    so_lau = fields.Float()
-    so_lau_char = fields.Char()
-    hem_rong = fields.Float()
-    hem_rong_char = fields.Char()
-    choose_area = fields.Float(digits=(6,2))#,store=True
+    # so_lau = fields.Float()
+    # so_lau_char = fields.Char()
+    # hem_rong = fields.Float()
+    # hem_rong_char = fields.Char()
+    # choose_area = fields.Float(digits=(6,2))#,store=True
     
-    # choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
-    # so_lau = fields.Float(compute ='_compute_so_lau',store=True)
-    # so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
-    # hem_rong = fields.Float(compute='_compute_hem_rong', store=True)
-    # hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
+    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
+    so_lau = fields.Float(compute ='_compute_so_lau',store=True)
+    so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
+    hem_rong = fields.Float(compute='_compute_hem_rong', store=True)
+    hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
 
 
     @api.depends('html')
