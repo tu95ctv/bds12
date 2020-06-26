@@ -122,6 +122,13 @@ class ChototGetTopic():
         user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
         return {'poster_id': user.id }
 
+    def write_address(self,ad_params):
+        address = ad_params.get('address',{}).get('value',False)
+        if address:
+            return {'address':address}
+        else:
+            return {}
+
 
     def get_topic(self, topic_html_or_json, siteleech_id_id):
         update_dict = {}
@@ -137,12 +144,12 @@ class ChototGetTopic():
         update_dict.update(self.write_quan_phuong(ad_params))
         update_dict.update(self.write_gia(ad))
         update_dict.update(self.write_poster(ad, siteleech_id_id))
-
-        try:
-            address = ad['address']
-            update_dict['address'] = address
-        except KeyError:
-            pass
+        update_dict.update(self.write_address(ad_params))
+        # try:
+        #     address = ad['address']
+        #     update_dict['address'] = address
+        # except KeyError:
+        #     pass
 
         
 

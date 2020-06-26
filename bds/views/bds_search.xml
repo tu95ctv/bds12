@@ -39,6 +39,18 @@
         <filter name="Có trích địa chỉ hẻm hoặc mặt tiền" domain ="['|',('trich_dia_chi','!=',False), ('mat_tien_address','!=',False)]"></filter>
         <separator />
         <filter name="Dự đoán tin của cò" domain ="[('dd_tin_cua_co','!=',False)]"></filter>
+        
+
+        <separator />
+        <filter name="kw_co_date" domain ="[('kw_co_date','!=',False)]"></filter>
+        <separator />
+        <filter name="kw_co_break" domain ="[('kw_co_break','!=',False)]"></filter>
+        <separator />
+        <filter name="kw_co_real" domain ="[('kw_co_real','!=',False)]"></filter>
+        <separator />
+        <filter name="kw_co_mtg" domain ="[('kw_co_mtg','!=',False)]"></filter>
+
+
         <separator />
         <filter name="Có keyword đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
         <separator />
@@ -94,6 +106,11 @@
             <filter name="kw_mg" string="key word môi giới" domain="[]" context="{'group_by':'kw_mg'}" />
             <filter name="so_lau" string="số lầu" domain="[]" context="{'group_by':'so_lau'}" />
             <filter name="hem_rong" string="hẻm rộng" domain="[]" context="{'group_by':'hem_rong'}" />
+
+            <filter name="kw_co_break" string="kw_co_break" domain="[]" context="{'group_by':'kw_co_break'}" />
+            <filter name="kw_co_special_break" string="kw_co_special_break" domain="[]" context="{'group_by':'kw_co_special_break'}" />
+            <filter name="dd_tin_cua_co" string="dd_tin_cua_co" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
+            <filter name="hoa_la_canh" string="hoa_la_canh" domain="[]" context="{'group_by':'hoa_la_canh'}" />
         </group>
         
       </search>

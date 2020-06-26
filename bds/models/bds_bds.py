@@ -13,15 +13,15 @@ def trim_street_name(street_name_may_be):
     rs = rs.strip()
     return rs
 
-def detech_mat_tien(html):
+def detech_mat_tien(html, p = None):
     mat_tien_full_address_possibles = True
     before_index = 0
     deal_s = []
     full_adress_list = []
     while mat_tien_full_address_possibles:
         html = html [before_index:]
-        p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})\s+(?:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-        mat_tien_full_address_possibles = re.search(p, html)  #((\S+(?:\s|\.|$|,)+){1,4})
+        # p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+        mat_tien_full_address_possibles = re.search(p, html, re.I)  #((\S+(?:\s|\.|$|,)+){1,4})
         if mat_tien_full_address_possibles:
             before_index = mat_tien_full_address_possibles.span()[1] + 1
             number = mat_tien_full_address_possibles.group(1)
@@ -37,7 +37,7 @@ def detech_mat_tien(html):
                 check_co_word = re.search('\D', full_address)
                 if not check_co_word:
                     continue
-                pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc|xẹt|lửng|lững|trục đường'
+                pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc|xẹt|lửng|lững|trục đường|\dt\s*\dl'
                 pt = unidecode(pt)
                 is_mt = re.search(pt, full_address_unidecode, re.I)
                 if is_mt:
@@ -47,12 +47,12 @@ def detech_mat_tien(html):
                     continue
 
                 index = mat_tien_full_address_possibles.span()[0]
-                pre_index = index - 30
+                pre_index = index - 12
                 if pre_index < 0:
                     pre_index = 0
                 check_hem_string = html[pre_index:index]
                 if check_hem_string:
-                    is_hem = re.search('hẻm|hxt|đường|bđs|cty|nhà đất|vp| văn phòng', check_hem_string, re.I)
+                    is_hem = re.search('hẻm|hxt|đường|bđs|cty|nhà đất|vp|văn phòng|phường|quận', check_hem_string, re.I)
                     if is_hem:
                         continue
                 full_adress_list.append((number, full_address))
@@ -61,7 +61,7 @@ def detech_mat_tien(html):
 def detect_hem_address(address):
     posible_address_search = True
     keys_street_has_numbers = ['3/2','30/4','19/5','3/2.','3/2,','23/9']
-    keys_24_7 = ['24/24','24/7','24/24h', '24/24H','24/24/7']
+    # keys_24_7 = ['24/24','24/7','24/24h', '24/24H','24/24/7']
     pat_247 = '24h*/7|24h*/24|1/500'
     trust_address_result_keys = []
     only_number_trust_address_result_keys = []
@@ -69,7 +69,7 @@ def detect_hem_address(address):
     index_before = 0
     while posible_address_search:
         address = address[index_before:]
-        posible_address_search = re.search('(?P<adress_number>\d+\w{0,2}/\d+\w{0,2}(?:/\d+\w{0,2})*)\s+(?P<ten_duong>(?:[\w|/]+\s*){1,4})(?:\.|\s|,|$)', address)
+        posible_address_search = re.search('(?P<adress_number>\d+\w{0,2}/\d+\w{0,2}(?:/\d+\w{0,2})*)[\s,]+(?P<ten_duong>(?:[\w|/]+\s*){1,4})(?:\.|\s|,|$)', address)
         if posible_address_search:
             index_before = posible_address_search.span()[1]
             adress_number = posible_address_search.group('adress_number')
@@ -82,9 +82,11 @@ def detect_hem_address(address):
                 if black_list_rs:
                     only_number_trust_address_result_keys.append(adress_number)
                     continue
+                if adress_number in ['1/2','50/100','100/100']:
+                    continue
                 rs = re.search(pat_247, adress_number, re.I)
                 if rs:
-                    co_date_247_result_keys.append(adress_number)
+                    co_date_247_result_keys.append(rs.group(0))
                     continue
                 if adress_number in keys_street_has_numbers:
                     # street_result_keys.append(adress_number)
@@ -263,6 +265,13 @@ class bds(models.Model):
     so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
     hem_rong = fields.Float(compute='_compute_hem_rong', store=True)
     hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
+    kw_co_date = fields.Char(compute='trich_dia_chi_',store=True)
+    kw_co_break = fields.Integer(compute='trich_dia_chi_',store=True)
+    kw_co_special_break = fields.Integer(compute='trich_dia_chi_',store=True)
+    kw_co_real = fields.Char(compute='trich_dia_chi_',store=True)
+    kw_co_mtg = fields.Char(compute='trich_dia_chi_',store=True)
+    number_char = fields.Integer(compute='trich_dia_chi_',store=True)
+    hoa_la_canh = fields.Char(compute='trich_dia_chi_',store=True)
 
 
     @api.depends('html')
@@ -323,7 +332,7 @@ class bds(models.Model):
                 r.diff_public_days_from_now = (fields.Date.today() - r.public_date).days
 
 
-    @api.depends('html','trigger')
+    @api.depends('html','title','address','trigger')
     def _mat_tien_address(self):
         for r in self:
             full_adress_list_sum =  []
@@ -331,10 +340,20 @@ class bds(models.Model):
             html = r.html
             title = r.title
             address = r.address
-            addresses = [title, html, address]
-            for html in addresses:
+            p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            
+            addresses = {'title':{'value':title},
+            'html':{'value':title,
+                'p':'(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+                }, 
+            'address':{'value':address,
+                'p':'^(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            }}
+            for key,val in addresses.items():
+                html = val['value']
+                p = val.get('p',p)
                 if html:
-                    full_adress_list = detech_mat_tien(html)
+                    full_adress_list = detech_mat_tien(html, p)
                     if full_adress_list:
                         for number, full_address in full_adress_list:
                             if number not in number_list_sum:
@@ -368,6 +387,7 @@ class bds(models.Model):
         rs = self.env['ir.config_parameter'].get_param("bds.loai_nha")
         rs = eval(rs)
         raise UserError('%s-%s'%(type(rs),str(rs)))
+    
     def count_post_of_poster_(self):
         for r in self:
             bds_id = r
@@ -608,19 +628,70 @@ class bds(models.Model):
                 trich_dia_chi = ','.join(map(lambda i:i[1], sum_trust_address_result_keys))
                 r.trich_dia_chi = trich_dia_chi
             
-            found_kw_mgs = co_date_247_result_keys_sum
-            kw_mgs= ['nhà đất', 'uy tín', 'real','mmg','mqc','mtg', 'bds','bđs', 'cần tuyển','tuyển sale', 'tuyển dụng', 'bất động sản','bđs','ký gửi','(?<!nova)land','tư vấn','thông tin chính xác']
-            for key in kw_mgs:
-                rs = re.search(key, html, re.I)
-                if rs:
-                    found_kw_mgs.append(rs.group(0))
+      
+    
+            found_kw_mgs = []
+            pat_247 = '24h*/7|24h*/24|1/500'
+            rs = re.search(pat_247, html, re.I)
+            if rs:
+                found_kw_mgs.append(rs.group(0))
+                r.kw_co_date = rs.group(0)
+           
+           
+            nha_dat_kws = 'nhà đất|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
+            '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|shr|(?:cc|công chứng) sang tên|' +\
+            '(?:lh|liên hệ)[\w\s]{0,20}xem nhà|xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|gọi ngay|giá tốt'
+            nha_dat_list_rs = re.findall(nha_dat_kws, html, re.I)
+            if nha_dat_list_rs:
+                found_kw_mgs.extend(nha_dat_list_rs)
+                r.kw_co_real = ','.join(nha_dat_list_rs)
+
+
+            break_kw = '(\n-|\n\+)'
+            break_rs = re.findall(break_kw, html, re.I)
+            if break_rs:
+                len_break_rs = len(break_rs)
+                r.kw_co_special_break = len_break_rs
+                if len_break_rs > 8:
+                    found_kw_mgs.append('len_special_break_rs > 8')
+
+
+            break_kw = '(\n)'
+            break_rs = re.findall(break_kw, html, re.I)
+            if break_rs:
+                # found_kw_mgs.extend(nha_dat_list_rs)
+                len_break_rs = len(break_rs)
+                r.kw_co_break = len_break_rs
+
+                if len_break_rs > 10:
+                    found_kw_mgs.append('len_break_rs > 10')
+
+
+
+            r.number_char = len(html)
+
+
+
+
+            mtg_kws = 'mmg|mqc|mtg'
+            nha_dat_list_rs = re.findall(mtg_kws, html, re.I)
+            if nha_dat_list_rs:
+                found_kw_mgs.extend(nha_dat_list_rs)
+                r.kw_co_mtg = ','.join(nha_dat_list_rs)
+
+            hoa_la_canh_pt = '🏠|💥|✅|👉🏻|⭐️|💵|💰|☎️|⚡|📲|💎|🌹|☎|🌈|🍎|🍏|🏦|📣|🆘|☎️|🤝|👍|👉'
+            nha_dat_list_rs = re.findall(hoa_la_canh_pt, html, re.I)
+            
+            if nha_dat_list_rs:
+                r.hoa_la_canh = len(nha_dat_list_rs)
+                found_kw_mgs.append(nha_dat_list_rs[0])
 
             if found_kw_mgs:
                 dd_tin_cua_co = True
                 r.kw_mg = ','.join(found_kw_mgs)
                 r.dd_tin_cua_co = dd_tin_cua_co
 
-
+            
     @api.depends('trich_dia_chi')
     def same_address_bds_ids_(self):
         for r in self:
@@ -683,18 +754,26 @@ class bds(models.Model):
         for r in self:
             rs = re.search(p, r.html, re.I)
             if rs:
-                index = rs.span()[0]
-                pre_str = self.str_before_index(index, r.html)
-                khong_cho_mg = re.search('không', pre_str, re.I)
-                if khong_cho_mg:
-                    continue
-                kw_hoa_hong = rs.group(1)
-                if kw_hoa_hong.strip().lower() in  ['phí', 'chấp nhận']:
-                    continue
-                r.kw_hoa_hong = kw_hoa_hong
-                r.kw_so_tien_hoa_hong = rs.group(2)
-                r.dd_tin_cua_dau_tu = True
-                break
+                for i in [1]:
+                    index = rs.span()[0]
+                    pre_str = self.str_before_index(index, r.html)
+                    khong_cho_mg = re.search('không', pre_str, re.I)
+                    if khong_cho_mg:
+                        continue
+                    kw_hoa_hong = rs.group(1)
+                    if kw_hoa_hong.strip().lower() in  ['phí', 'chấp nhận']:
+                        continue
+                    r.kw_hoa_hong = kw_hoa_hong
+                    r.kw_so_tien_hoa_hong = rs.group(2)
+                    r.dd_tin_cua_dau_tu = True
+            else:
+                rs = re.search('((1)%)', r.html, re.I)
+                if rs:
+                    r.kw_hoa_hong = rs.group(1)
+                    r.kw_so_tien_hoa_hong = rs.group(2)
+                    r.dd_tin_cua_dau_tu = True
+
+                
            
 
                     

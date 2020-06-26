@@ -23,12 +23,14 @@
                 <field name="phuong_id"/>
                 <field name="quan_id"/>
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
+                <field name="hoa_la_canh" />
                 <field name="so_lau" />
                 <field name="so_lau_char" />
                 <field name="hem_rong" />
                 <field name="hem_rong_char" />
                 <field name="auto_ngang" />
                 <field name="auto_doc" />
+                <field name="address" />
                 <field name="ti_le_dien_tich_web_vs_auto_dien_tich" />
                 <field name="date_text" />
                 <field name="create_date" />
@@ -36,7 +38,13 @@
                 <field name="diff_public_days_from_now" />
                 <field name="trich_dia_chi" />
                 <field name="mat_tien_address" readonly="0" />
-                <field name="cate"/>
+                <!-- <field name="cate"/> -->
+                <field name="number_char"/>
+                <field name="kw_co_date"/>
+                <field name="kw_co_special_break"/>
+                <field name="kw_co_break"/>
+                <field name="kw_co_real"/>
+                <field name="kw_co_mtg"/>
                 <field name="kw_hoa_hong"/>
                 <field name="kw_so_tien_hoa_hong"/>
                 <field name="dd_tin_cua_co"/>
