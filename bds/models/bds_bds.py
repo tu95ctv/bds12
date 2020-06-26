@@ -37,6 +37,9 @@ def detech_mat_tien(html, p = None):
                 check_co_word = re.search('\D', full_address)
                 if not check_co_word:
                     continue
+                ten_duong_lower = ten_duong.strip().lower() 
+                if ten_duong_lower in ['căn']:
+                    continue
                 pt = 'MT|Lầu|tấm|PN|WC|mặt|trệt|tầng|sẹc|xẹt|lửng|lững|trục đường|\dt\s*\dl'
                 pt = unidecode(pt)
                 is_mt = re.search(pt, full_address_unidecode, re.I)
@@ -94,7 +97,10 @@ def detect_hem_address(address):
                 is_day = re.search('\d+/\d\d\d\d', adress_number)
                 if is_day:
                     continue
-                is_ty_m2 =  re.search('tỷ|tr|m2', adress_number, re.I)
+                pnwc = re.search('(?:pn|wc|x)', adress_number, re.I)
+                if pnwc:
+                    continue
+                is_ty_m2 =  re.search('tỷ|tr|m2', full_adress, re.I)
                 if is_ty_m2:
                     continue
                 
@@ -272,10 +278,72 @@ class bds(models.Model):
     kw_co_mtg = fields.Char(compute='trich_dia_chi_',store=True)
     number_char = fields.Integer(compute='trich_dia_chi_',store=True)
     hoa_la_canh = fields.Char(compute='trich_dia_chi_',store=True)
+    t1l1 = fields.Char(compute='trich_dia_chi_', store=True)
+    so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
+    mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    is_mat_tien_or_trich_dia_chi = fields.Boolean(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+
+
+    @api.depends('trich_dia_chi','mat_tien_address')
+    def _compute_mat_tien_or_trich_dia_chi(self):
+        for r in self:
+            r.mat_tien_or_trich_dia_chi = r.mat_tien_address or r.trich_dia_chi
+            r.is_mat_tien_or_trich_dia_chi = bool(r.mat_tien_or_trich_dia_chi)
+
+
+    def _so_phong_ngu_detect(self, html):
+        so_phong_ngu = 0
+        pt = '(\d{1,2})\s*(?:pn|phòng ngủ)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            so_phong_ngu = rs.group(1)
+            try:
+                so_phong_ngu = int(so_phong_ngu)
+            except: 
+                so_phong_ngu = 0
+        return so_phong_ngu
+
+    @api.depends('html')
+    def _compute_so_phong_ngu(self):
+
+        for r in self:
+            html = (r.title or '' ) + ' ' + (r.html or '')
+            so_phong_ngu = self._so_phong_ngu_detect(html)
+            r.so_phong_ngu = so_phong_ngu
+            
+
+
+
+    def _compute_t1l1_detect(self, html):
+        t1l1_list = []
+        pt = '(1t[,\s]*(\d{1,2})l)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            t1l1_list.append(rs.group(1))
+        pt = '((\d{1,2})\s*pn)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            t1l1_list.append(rs.group(1))
+        pt = '(?:\W|^)(st)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            t1l1_list.append(rs.group(1))
+            
+        # t1l1 = ','.join(t1l1_list)
+        return t1l1_list
+        
+
+    # @api.depends('html')
+    # def _compute_t1l1(self):
+    #     for r in self:
+    #         html = r.html
+    #         t1l1_list = self._compute_t1l1_detect(html)
+    #         r.t1l1 = ','.join(t1l1_list)
+            
+
 
 
     @api.depends('html')
-    @skip_depends
     def _compute_hem_rong(self):
         for r in self:
             pt = '(?<!cách )(?:hẻm|hẽm|đường)\s+(?:trước nhà)*\s*(?:xh|xe hơi|xe máy|kia|ba gác|ba gát)*\s*(?:nhỏ)*\s*(?:rộng)*\s*(\d+\.*\d*)\s*(?:m|mét)(?:\W|$)'
@@ -283,32 +351,42 @@ class bds(models.Model):
             if rs:
                 r.hem_rong_char, r.hem_rong = rs.group(0), rs.group(1)
     
-  
+    
+    def detect_lau(self, html):
+        pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        so_lau = 0
+        so_lau_char = False
+        
+        # if not rs:
+        #     pt = '1t[,\s]*(\d)l(?:\W|$)'
+        #     rs = re.search(pt, html, re.I)
+        #     print (rs)
+        if rs:
+            so_lau = rs.group(1)
+            so_lau_char = rs.group(0)
+            try:
+                so_lau = int(so_lau)
+            except:
+                so_lau = 0
+        else:
+            pt = '(?:cấp 4|c4|c4)\W'
+            rs = re.search(pt, html, re.I)
+            if rs:
+                so_lau = 0.1
+                so_lau_char = rs.group(0)
+        pt = 'lửng|lững'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            so_lau +=0.5
+        return so_lau, so_lau_char
+
+
+
     @api.depends('html')
-    @skip_depends
     def _compute_so_lau(self):
         for r in self:
-            pt = '(\d{1,2})\s*(?:lầu|l)\W'
-            rs = re.search(pt, r.html, re.I)
-            so_lau = 0
-            so_lau_char = False
-            if rs:
-                so_lau = rs.group(1)
-                try:
-                    so_lau = int(so_lau)
-                except:
-                    so_lau = 0
-                so_lau_char = rs.group(0)
-            else:
-                pt = '(?:cấp 4|c4|c4)\W'
-                rs = re.search(pt, r.html, re.I)
-                if rs:
-                    so_lau = 0.1
-                    so_lau_char = rs.group(0)
-            pt = 'lửng|lững'
-            rs = re.search(pt, r.html, re.I)
-            if rs:
-                so_lau +=0.5
+            so_lau, so_lau_char =  self.detect_lau(r.html)
             r.so_lau = so_lau
             r.so_lau_char = so_lau_char
 
@@ -340,6 +418,7 @@ class bds(models.Model):
             html = r.html
             title = r.title
             address = r.address
+            # address = (r.address or '').replace(',',' ')
             p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
             
             addresses = {'title':{'value':title},
@@ -629,7 +708,7 @@ class bds(models.Model):
                 r.trich_dia_chi = trich_dia_chi
             
       
-    
+            html = title + ' ' + html
             found_kw_mgs = []
             pat_247 = '24h*/7|24h*/24|1/500'
             rs = re.search(pat_247, html, re.I)
@@ -637,10 +716,13 @@ class bds(models.Model):
                 found_kw_mgs.append(rs.group(0))
                 r.kw_co_date = rs.group(0)
            
-           
+            #(?:hẻm|h) {0,1}xh|(?<!phòng )khách(?! sạn)
             nha_dat_kws = 'nhà đất|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
-            '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|shr|(?:cc|công chứng) sang tên|' +\
-            '(?:lh|liên hệ)[\w\s]{0,20}xem nhà|xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|gọi ngay|giá tốt'
+            '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|' +\
+            '(?:lh|liên hệ).{0,20}xem nhà|xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|gọi ngay|giá tốt|' +\
+            'hổ trợ[\w\s]{0,20}ngân hàng|hợp.{1,20}đầu tư|tin thật|cn đủ|hình thật|csht|tttm|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|'+\
+            '(?:quý|quí) khách|cho khách|chưa qua đầu tư|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|mong gặp khách thiện chí|'+\
+            'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|không lỗi phong thủy|xuất cảnh|nợ ngân hàng'
             nha_dat_list_rs = re.findall(nha_dat_kws, html, re.I)
             if nha_dat_list_rs:
                 found_kw_mgs.extend(nha_dat_list_rs)
@@ -652,8 +734,8 @@ class bds(models.Model):
             if break_rs:
                 len_break_rs = len(break_rs)
                 r.kw_co_special_break = len_break_rs
-                if len_break_rs > 8:
-                    found_kw_mgs.append('len_special_break_rs > 8')
+                if len_break_rs > 6:
+                    found_kw_mgs.append('len_special_break_rs > 6')
 
 
             break_kw = '(\n)'
@@ -663,34 +745,27 @@ class bds(models.Model):
                 len_break_rs = len(break_rs)
                 r.kw_co_break = len_break_rs
 
-                if len_break_rs > 10:
-                    found_kw_mgs.append('len_break_rs > 10')
-
-
-
+                if len_break_rs > 8:
+                    found_kw_mgs.append('len_break_rs > 8')
             r.number_char = len(html)
-
-
-
-
             mtg_kws = 'mmg|mqc|mtg'
             nha_dat_list_rs = re.findall(mtg_kws, html, re.I)
             if nha_dat_list_rs:
                 found_kw_mgs.extend(nha_dat_list_rs)
                 r.kw_co_mtg = ','.join(nha_dat_list_rs)
-
             hoa_la_canh_pt = '🏠|💥|✅|👉🏻|⭐️|💵|💰|☎️|⚡|📲|💎|🌹|☎|🌈|🍎|🍏|🏦|📣|🆘|☎️|🤝|👍|👉'
             nha_dat_list_rs = re.findall(hoa_la_canh_pt, html, re.I)
-            
             if nha_dat_list_rs:
                 r.hoa_la_canh = len(nha_dat_list_rs)
                 found_kw_mgs.append(nha_dat_list_rs[0])
-
+            t1l1_list = self._compute_t1l1_detect(html)
+            if t1l1_list:
+                r.t1l1 = ','.join(t1l1_list)
+                if len (t1l1_list)> 1:
+                    found_kw_mgs.append('len (t1l1_list)> 1')
             if found_kw_mgs:
-                dd_tin_cua_co = True
                 r.kw_mg = ','.join(found_kw_mgs)
-                r.dd_tin_cua_co = dd_tin_cua_co
-
+                r.dd_tin_cua_co = True
             
     @api.depends('trich_dia_chi')
     def same_address_bds_ids_(self):
@@ -698,7 +773,6 @@ class bds(models.Model):
             if r.trich_dia_chi:
                 same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi),('id','!=',r.id)])
                 r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
-
 
     @api.depends('html','cate','area')
     @skip_if_cate_not_bds            
@@ -718,7 +792,6 @@ class bds(models.Model):
                 rarea = r.area
                 ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
                 r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich = auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
-               
                 if rarea ==0:
                     r.choose_area = auto_dien_tich
                 elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.8:
@@ -727,25 +800,12 @@ class bds(models.Model):
                     r.choose_area = rarea
             else:
                 r.choose_area = r.area
-
-    
-
-                
-
-
-
-
-
-
-
-
     def str_before_index(self, index, input_str):
         pre_index = index - 30
         if pre_index < 0:
             pre_index = 0
         pre_str = input_str[pre_index:index]
         return pre_str
-
 
     @api.depends('html','trigger')
     @skip_if_cate_not_bds               
@@ -873,6 +933,7 @@ class bds(models.Model):
             ('\n<br> kích thước: %s'%('<b>%sm x %sm</b>'%(r.auto_ngang, r.auto_doc) if (r.auto_ngang or r.auto_doc) else ''))+\
             ('\n<br> Area: %s'%('<b>%s m2</b>'%r.area if r.area else ''))+\
             ('\n<br> Chọn lại diện tích: %s'%('<b>%s m2</b>'%r.choose_area if r.choose_area else ''))+\
+            ('\n<br>địa chỉ: %s'%(r.trich_dia_chi or r.mat_tien_address)) +\
             ('\n<br>Site: %s'%r.siteleech_id.name) +\
             ('\n<br>Đơn giá: %.2f'%r.don_gia) + \
             ('\n<br>Tỉ lệ đơn giá: %.2f'%r.ti_le_don_gia)  + \

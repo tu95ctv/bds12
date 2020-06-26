@@ -33,7 +33,9 @@
        
         <record model="bds.url" id="url_muaban_quan_1">
             <field name="description">Mua bán 1</field>
-            <field name="url">https://muaban.net/nha-hem-ngo-quan-1-l5906-c3202?cp=2</field>
+            <!-- <field name="url">https://muaban.net/nha-hem-ngo-quan-1-l5906-c3202?cp=2</field> -->
+            <field name="url">https://muaban.net/ban-nha-quan-1-l5906-c32?cp=4</field>
+            
         </record>
         
      <record model="bds.url" id="url_muaban_quan_5">
@@ -49,7 +51,8 @@
         
          <record model="bds.url" id="url_muaban_binh_thanh">
             <field name="description">Mua bán Bình Thạnh</field>
-            <field name="url">https://muaban.net/nha-hem-ngo-quan-binh-thanh-l5919-c3202?cp=3</field>
+            <!-- <field name="url">https://muaban.net/nha-hem-ngo-quan-binh-thanh-l5919-c3202?cp=3</field> -->
+            <field name="url">https://muaban.net/ban-nha-quan-binh-thanh-l5919-c32?cp=2</field>
         </record>
         
         <record model="bds.url" id="url_muaban_quan11">

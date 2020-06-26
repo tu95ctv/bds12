@@ -13,7 +13,7 @@
 
     <record model="bds.url" id="url_chotot_tan_phu">
         <field name="description">Chợ tốt Tân phú</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region=13&amp;area=113&amp;cg=1000&amp;limit=20&amp;o=0&amp;st=s,k</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=1020&amp;limit=20&amp;o=60&amp;st=s,k</field>
     </record>
 <!-- 
     <record model="bds.url" id="url_chotot_tan_phu_chung_cu">
