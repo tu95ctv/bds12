@@ -58,7 +58,7 @@ class Fetch(models.Model):
         url_id = self.url_ids[new_index]
         try:
             self.fetch_a_url_id (url_id)
-        except Exception as e:
+        except FetchError as e:
             self.env['bds.error'].create({'name':str(e),'des':'type of error:%s'%type(e)})
 
     def fetch_all_url(self):

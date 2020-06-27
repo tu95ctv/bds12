@@ -8,10 +8,9 @@ from unidecode import unidecode
 
 
 class FetchError(Exception):
-    type = None
     pass
 
-def request_html(url, try_again=True, is_decode_utf8 = True):
+def request_html(url, try_again=1, is_decode_utf8 = True):
     headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
     count_fail = 0
     def in_try():

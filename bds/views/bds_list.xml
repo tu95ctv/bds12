@@ -17,9 +17,12 @@
                 <!-- <field name="trigger"/> -->
                 <!-- <field name="don_gia"></field> -->
                 <!-- <field name="ti_le_don_gia" /> -->
-                <!-- <field name="area"/> -->
-                <field name="loai_nha"/>
-                <field name="sell_or_rent"/>
+                <field name="area"/>
+                <field name="so_lau" />
+                <field name="so_phong_ngu" />
+                <field name="hem_rong" />
+                <!-- <field name="loai_nha"/>
+                <field name="sell_or_rent"/> -->
                 <!-- <field name="phuong_id"/> -->
                 <field name="quan_id"/>
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
@@ -28,13 +31,12 @@
                 <field name="trich_dia_chi" />
                 <field name="mat_tien_address" readonly="0" />
                 <field name="kw_mg"/>
+                <field name="kw_mg_cap_2"/>
+                <field name="kw_hoa_hong"/>
                 <field name="t1l1" />
-                <field name="so_phong_ngu" />
                 <field name="hoa_la_canh" />
-                <field name="so_lau" />
-                <field name="so_lau_char" />
-                <field name="hem_rong" />
-                <field name="hem_rong_char" />
+                <!-- <field name="so_lau_char" /> -->
+                <!-- <field name="hem_rong_char" /> -->
                 <field name="auto_ngang" />
                 <field name="auto_doc" />
                 <field name="address" />
@@ -46,11 +48,9 @@
            
                 <!-- <field name="cate"/> -->
                 <field name="number_char"/>
-                <field name="kw_co_date"/>
+                <!-- <field name="kw_co_date"/> -->
                 <field name="kw_co_special_break"/>
                 <field name="kw_co_break"/>
-                <field name="kw_co_real"/>
-                <field name="kw_hoa_hong"/>
                 <field name="kw_so_tien_hoa_hong"/>
                 <field name="dd_tin_cua_co"/>
                 <field name="kw_mg"/>

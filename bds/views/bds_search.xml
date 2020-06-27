@@ -45,10 +45,7 @@
         <filter name="kw_co_date" domain ="[('kw_co_date','!=',False)]"></filter>
         <separator />
         <filter name="kw_co_break" domain ="[('kw_co_break','!=',False)]"></filter>
-        <separator />
-        <filter name="kw_co_real" domain ="[('kw_co_real','!=',False)]"></filter>
-        <separator />
-        <filter name="kw_co_mtg" domain ="[('kw_co_mtg','!=',False)]"></filter>
+       
 
 
         <separator />
@@ -101,22 +98,26 @@
             <filter name="loai_nha" domain="[]" context="{'group_by':'loai_nha'}" />
             <filter name="quan_id" string="group_quan" domain="[]" context="{'group_by':'quan_id'}" />
             <filter name="dd_tin_cua_dau_tu" string="dự đoán tin của đầu tư group" domain="[]" context="{'group_by':'dd_tin_cua_dau_tu'}" />
-            <filter name="dd_tin_cua_co" string="dự đoán tin của cò" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
+            <separator />
+            <filter name="dd_tin_cua_co" string="is kw cò cấp 1" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
+            <filter name="kw_mg" string="keyword cò c1" domain="[]" context="{'group_by':'kw_mg'}" />
+            <separator />
+            <filter name="is_kw_mg_cap_2" string="is kw cò cấp 2" domain="[]" context="{'group_by':'is_kw_mg_cap_2'}" />
+            <filter name="kw_mg_cap_2" string="keyword cò c2" domain="[]" context="{'group_by':'kw_mg_cap_2'}" />
+            <separator />
+            <filter name="is_mat_tien_or_trich_dia_chi" string="is_mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'is_mat_tien_or_trich_dia_chi'}" />
+            <filter name="mat_tien_or_trich_dia_chi" string="mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'mat_tien_or_trich_dia_chi'}" />
+            <separator />
             <filter name="so_lau" string="số lầu" domain="[]" context="{'group_by':'so_lau'}" />
             <filter name="hem_rong" string="hẻm rộng" domain="[]" context="{'group_by':'hem_rong'}" />
-
             <filter name="kw_co_break" string="kw_co_break" domain="[]" context="{'group_by':'kw_co_break'}" />
             <filter name="kw_co_special_break" string="kw_co_special_break" domain="[]" context="{'group_by':'kw_co_special_break'}" />
-            <separator />
-            <filter name="dd_tin_cua_co" string="có keyword cò" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
             <separator />
             <filter name="hoa_la_canh" string="hoa_la_canh" domain="[]" context="{'group_by':'hoa_la_canh'}" />
             <filter name="t1l1" string="t1l1" domain="[]" context="{'group_by':'t1l1'}" />
             <filter name="so_phong_ngu" string="so_phong_ngu" domain="[]" context="{'group_by':'so_phong_ngu'}" />
-            <filter name="kw_mg" string="key word môi giới" domain="[]" context="{'group_by':'kw_mg'}" />
             <filter name="chotot_moi_gioi_hay_chinh_chu" string="chotot_moi_gioi_hay_chinh_chu" domain="[]" context="{'group_by':'chotot_moi_gioi_hay_chinh_chu'}" />
-            <filter name="is_mat_tien_or_trich_dia_chi" string="is_mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'is_mat_tien_or_trich_dia_chi'}" />
-            <filter name="mat_tien_or_trich_dia_chi" string="mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'mat_tien_or_trich_dia_chi'}" />
+            <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
         </group>
         
       </search>

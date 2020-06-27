@@ -38,6 +38,20 @@
 
                         <div class="col-12 col-lg-6 o_setting_box">
                             <div class="o_setting_left_pane">
+                                <field name="khong_hien_thi_nhieu_html"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="khong_hien_thi_nhieu_html"/>
+                                <div class="text-muted">
+                                    khong_hien_thi_nhieu_html
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
                                 <field name="gia"/>
                             </div>
                             <div class="o_setting_right_pane">
