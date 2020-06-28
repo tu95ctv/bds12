@@ -299,6 +299,35 @@ class bds(models.Model):
 
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
 
+    @api.depends('html','title','address','trigger')
+    def _mat_tien_address(self):
+        for r in self:
+            full_adress_list_sum =  []
+            number_list_sum = []
+            html = r.html
+            title = r.title
+            address = r.address
+            # address = (r.address or '').replace(',',' ')
+            # p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            addresses = {
+            # 'title':{'value':title},
+            'html':{'value':title + html,
+                'p':'(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+                }, 
+            }
+            for key,val in addresses.items():
+                html = val['value']
+                p = val.get('p',p)
+                if html:
+                    full_adress_list = detech_mat_tien(html, p)
+                    if full_adress_list:
+                        for number, full_address in full_adress_list:
+                            if number not in number_list_sum:
+                                full_adress_list_sum.append(full_address)
+                                number_list_sum.append(number)
+            if full_adress_list_sum:
+                r.mat_tien_address = ','.join(full_adress_list_sum)
 
 
     @api.depends('trich_dia_chi','mat_tien_address')
@@ -427,36 +456,7 @@ class bds(models.Model):
                 r.diff_public_days_from_now = (fields.Date.today() - r.public_date).days
 
 
-    @api.depends('html','title','address','trigger')
-    def _mat_tien_address(self):
-        for r in self:
-            full_adress_list_sum =  []
-            number_list_sum = []
-            html = r.html
-            title = r.title
-            address = r.address
-            # address = (r.address or '').replace(',',' ')
-            # p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-            p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-            addresses = {
-            # 'title':{'value':title},
-            'html':{'value':title + html,
-                'p':'(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-                }, 
-            }
-            for key,val in addresses.items():
-                html = val['value']
-                p = val.get('p',p)
-                if html:
-                    full_adress_list = detech_mat_tien(html, p)
-                    if full_adress_list:
-                        for number, full_address in full_adress_list:
-                            if number not in number_list_sum:
-                                full_adress_list_sum.append(full_address)
-                                number_list_sum.append(number)
-            if full_adress_list_sum:
-                r.mat_tien_address = ','.join(full_adress_list_sum)
-
+    
     def make_trigger(self):
         self.trigger = True
 
