@@ -33,6 +33,15 @@ def detech_mat_tien(html, p = None):
             full_address_unidecode = unidecode (full_address)
             if number not in deal_s:
                 deal_s.append(number)
+                sxs = re.search('x(?: |$)',ten_duong, re.I)
+                if sxs:
+                    continue
+                # ddm = re.search('\d+m',ten_duong, re.I)
+                # if ddm:
+                #     continue
+                ddm = re.search('(?:^| )\d+m',full_address, re.I)
+                if ddm:
+                    continue
 
                 check_co_word = re.search('\D', full_address)
                 if not check_co_word:
@@ -256,9 +265,10 @@ class bds(models.Model):
     trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
     mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
     mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    is_mat_tien_or_trich_dia_chi = fields.Boolean(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-
-    dd_tin_cua_co = fields.Boolean(compute='_compute_kw_mg', store = True, string='is có kw môi giới')
+    # is_mat_tien_or_trich_dia_chi = fields.Boolean(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    # dd_tin_cua_co = fields.Boolean(compute='_compute_kw_mg', store = True, string='is có kw môi giới')
+    dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
     kw_mg= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
     kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
     is_kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
@@ -295,7 +305,7 @@ class bds(models.Model):
     def _compute_mat_tien_or_trich_dia_chi(self):
         for r in self:
             r.mat_tien_or_trich_dia_chi = r.mat_tien_address or r.trich_dia_chi
-            r.is_mat_tien_or_trich_dia_chi = bool(r.mat_tien_or_trich_dia_chi)
+            r.is_mat_tien_or_trich_dia_chi ='1' if  bool(r.mat_tien_or_trich_dia_chi) else '0'
 
 
     def _so_phong_ngu_detect(self, html):
@@ -426,15 +436,13 @@ class bds(models.Model):
             title = r.title
             address = r.address
             # address = (r.address or '').replace(',',' ')
-            p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            # p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            p = '(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
             addresses = {
-            'title':{'value':title},
-            'html':{'value':title,
-                'p':'(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
+            # 'title':{'value':title},
+            'html':{'value':title + html,
+                'p':'(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
                 }, 
-            # 'address':{'value':address,
-            #     'p':'^(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-            # }
             }
             for key,val in addresses.items():
                 html = val['value']
@@ -716,86 +724,104 @@ class bds(models.Model):
                 r.trich_dia_chi = trich_dia_chi
             
     
+    def compute_kw_mg(self, html):
+        found_kw_mgs = []
+        pat_247 = '24h*/7|(?<!an ninh )24h*/24|1/500'
+        rs = re.search(pat_247, html, re.I)
+        kw_co_date = False #1
+        if rs:
+            found_kw_mgs.append(rs.group(0))
+            kw_co_date = rs.group(0)
+        
+        #(?:hẻm|h) {0,1}xh|(?<!phòng )khách(?! sạn)
+        # nha_dat_kws = 'nhà đất|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
+        # '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|' +\
+        # '(?:lh|liên hệ).{0,20}xem nhà|xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|gọi ngay|giá tốt|' +\
+        # 'hổ trợ[\w\s]{0,20}ngân hàng|hợp.{1,20}đầu tư|tin thật|cn đủ|hình thật|csht|tttm|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|'+\
+        # '(?:quý|quí) khách|cho khách|chưa qua đầu tư|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|mong gặp khách thiện chí|'+\
+        # 'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|không lỗi phong thủy|xuất cảnh|nợ ngân hàng'
+
+        nha_dat_kws_cap_1 = 'nhà đất(?! thánh)|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
+        '(?<!nova)land(?!mark|abc)|tư vấn|(?:thông tin|sản phẩm) (?:chính xác|thật)|' +\
+        'xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|' +\
+        'hổ trợ[\w\s]{0,20}ngân hàng|vay (?:vốn )ngân hàng|hổ trợ[\w\s]{0,20}pháp lý|hợp.{1,20}đầu tư|csht|tttm|'+\
+        'chưa qua đầu tư|'+\
+        'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|nợ ngân hàng|hợp tác|thanh lý' 
+
+        # nha_dat_kws_cap_2 = 'shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|gọi ngay|giá tốt|tin thật|cn đủ|hình thật|(?:lh|liên hệ).{0,20}xem nhà'
+        # nha_dat_kws_cap_3 = '(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|' +\
+        # 'không lỗi phong thủy'
+
+
+        nha_dat_list_rs = re.findall(nha_dat_kws_cap_1, html, re.I)
+        if nha_dat_list_rs:
+            found_kw_mgs.extend(nha_dat_list_rs)
+
+        mtg_kws = 'mmg|mqc|mtg|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)'
+        nha_dat_list_rs = re.findall(mtg_kws, html, re.I)
+        kw_mg_cap_2 = False #2
+        is_kw_mg_cap_2 = False#3
+        if nha_dat_list_rs:
+            # found_kw_mgs.extend(nha_dat_list_rs)
+            kw_mg_cap_2 = ','.join(nha_dat_list_rs)
+            is_kw_mg_cap_2 = True
+
+        # break_kw = '(\n-|\n\+)'
+        break_kw = '(\n✓|\n\*)'
+        break_rs = re.findall(break_kw, html, re.I)
+        kw_co_special_break = False # 4
+        if break_rs:
+            len_break_rs = len(break_rs)
+            kw_co_special_break = len_break_rs
+            # if len_break_rs > 2:
+            #     found_kw_mgs.append('len_special_break_rs > 2')
+
+
+        
+        break_kw = '(\n)'
+        break_rs = re.findall(break_kw, html, re.I)
+        kw_co_break = False # 5
+        if break_rs:
+            len_break_rs = len(break_rs)
+            kw_co_break = len_break_rs
+            # if len_break_rs > 8:
+            #     found_kw_mgs.append('len_break_rs > 8')
+        
+        number_char = len(html)
+        
+
+        hoa_la_canh_pt = '🏠|💥|✅|👉🏻|⭐️|💵|💰|☎️|⚡|📲|💎|🌹|☎|🌈|🍎|🍏|🏦|📣|🆘|☎️|🤝|👍|👉|' +\
+            '🏡|🗽|🎠|🏖|😍|🔥'
+        nha_dat_list_rs = re.findall(hoa_la_canh_pt, html, re.I)
+        hoa_la_canh = False # 6
+        if nha_dat_list_rs:
+            hoa_la_canh = len(nha_dat_list_rs)
+            found_kw_mgs.append(nha_dat_list_rs[0])
+        
+        t1l1_list = self._compute_t1l1_detect(html)
+        t1l1 = False #7
+        if t1l1_list:
+            t1l1 = ','.join(t1l1_list)
+            # if len (t1l1_list)> 1:
+            #     found_kw_mgs.append('len (t1l1_list)> 1')
+        kw_mg = False #8
+        dd_tin_cua_co = 'no_kw_co_cap_1' # 9
+        if found_kw_mgs:
+            kw_mg = ','.join(found_kw_mgs)
+            dd_tin_cua_co = 'kw_co_cap_1'
+
+        return kw_co_date, kw_mg_cap_2, is_kw_mg_cap_2, kw_co_special_break, kw_co_break,\
+                hoa_la_canh, t1l1, kw_mg, dd_tin_cua_co
+
+
     @api.depends('html', 'title')
     @skip_if_cate_not_bds 
     def _compute_kw_mg(self):  
         for r in self:
             html = r.title + ' ' + r.html
-            found_kw_mgs = []
-            pat_247 = '24h*/7|24h*/24|1/500'
-            rs = re.search(pat_247, html, re.I)
-            if rs:
-                found_kw_mgs.append(rs.group(0))
-                r.kw_co_date = rs.group(0)
+            r.kw_co_date, r.kw_mg_cap_2, r.is_kw_mg_cap_2, r.kw_co_special_break, r.kw_co_break,\
+                r.hoa_la_canh, r.t1l1, r.kw_mg, r.dd_tin_cua_co = self.compute_kw_mg(html)
             
-            #(?:hẻm|h) {0,1}xh|(?<!phòng )khách(?! sạn)
-            # nha_dat_kws = 'nhà đất|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
-            # '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|' +\
-            # '(?:lh|liên hệ).{0,20}xem nhà|xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|gọi ngay|giá tốt|' +\
-            # 'hổ trợ[\w\s]{0,20}ngân hàng|hợp.{1,20}đầu tư|tin thật|cn đủ|hình thật|csht|tttm|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|'+\
-            # '(?:quý|quí) khách|cho khách|chưa qua đầu tư|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|mong gặp khách thiện chí|'+\
-            # 'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|không lỗi phong thủy|xuất cảnh|nợ ngân hàng'
-
-            nha_dat_kws_cap_1 = 'nhà đất|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
-            '(?<!nova)land(?!mark|abc)|tư vấn|thông tin chính xác|' +\
-            'xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|' +\
-            'hổ trợ[\w\s]{0,20}ngân hàng|vay (?:vốn )ngân hàng|hổ trợ[\w\s]{0,20}pháp lý|hợp.{1,20}đầu tư|csht|tttm|'+\
-            'chưa qua đầu tư|'+\
-            'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|nợ ngân hàng|hợp tác'
-
-            # nha_dat_kws_cap_2 = 'shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|gọi ngay|giá tốt|tin thật|cn đủ|hình thật|(?:lh|liên hệ).{0,20}xem nhà'
-            # nha_dat_kws_cap_3 = '(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|' +\
-            # 'không lỗi phong thủy'
-
-
-            nha_dat_list_rs = re.findall(nha_dat_kws_cap_1, html, re.I)
-            if nha_dat_list_rs:
-                found_kw_mgs.extend(nha_dat_list_rs)
-
-            mtg_kws = 'mmg|mqc|mtg|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)'
-            nha_dat_list_rs = re.findall(mtg_kws, html, re.I)
-            if nha_dat_list_rs:
-                # found_kw_mgs.extend(nha_dat_list_rs)
-                r.kw_mg_cap_2 = ','.join(nha_dat_list_rs)
-                r.is_kw_mg_cap_2 = True
-
-            # break_kw = '(\n-|\n\+)'
-            break_kw = '(\n✓|\n\_ )'
-            break_rs = re.findall(break_kw, html, re.I)
-            if break_rs:
-                len_break_rs = len(break_rs)
-                r.kw_co_special_break = len_break_rs
-                if len_break_rs > 2:
-                    found_kw_mgs.append('len_special_break_rs > 2')
-
-
-            break_kw = '(\n)'
-            break_rs = re.findall(break_kw, html, re.I)
-            if break_rs:
-                len_break_rs = len(break_rs)
-                r.kw_co_break = len_break_rs
-                # if len_break_rs > 8:
-                #     found_kw_mgs.append('len_break_rs > 8')
-            
-            r.number_char = len(html)
-            
-
-            hoa_la_canh_pt = '🏠|💥|✅|👉🏻|⭐️|💵|💰|☎️|⚡|📲|💎|🌹|☎|🌈|🍎|🍏|🏦|📣|🆘|☎️|🤝|👍|👉'
-            nha_dat_list_rs = re.findall(hoa_la_canh_pt, html, re.I)
-            if nha_dat_list_rs:
-                r.hoa_la_canh = len(nha_dat_list_rs)
-                found_kw_mgs.append(nha_dat_list_rs[0])
-            
-            t1l1_list = self._compute_t1l1_detect(html)
-            if t1l1_list:
-                r.t1l1 = ','.join(t1l1_list)
-                # if len (t1l1_list)> 1:
-                #     found_kw_mgs.append('len (t1l1_list)> 1')
-            
-            
-            if found_kw_mgs:
-                r.kw_mg = ','.join(found_kw_mgs)
-                r.dd_tin_cua_co = True
             
     @api.depends('trich_dia_chi')
     def same_address_bds_ids_(self):
@@ -839,10 +865,10 @@ class bds(models.Model):
 
 
     def _compute_hoa_hong(self, html):
-        p = '((?<=\W)(?:hoa hồng|hh(?!t)|huê hồng)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
+        p = '((?<=\W)(?:hoa hồng|hh(?!t)|huê hồng)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*(?:\D|\s){0,31}((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
         rs = re.search(p, html, re.I)
         if not rs:
-            p = '((?:phí(?! hh| hoa hồng| huê hồng)|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
+            p = '((?:phí(?! hh| hoa hồng| huê hồng|\w)|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
             rs = re.search(p, html, re.I)
         kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu = False, False, False
         if rs:
@@ -852,10 +878,11 @@ class bds(models.Model):
                 khong_cho_mg = re.search('không', pre_str, re.I)
                 if khong_cho_mg:
                     continue
-                kw_hoa_hong = rs.group(1)
-                if kw_hoa_hong.strip().lower() in  ['phí', 'chấp nhận']:
+                kw_hoa_hong_tach = rs.group(1)
+                kw_hoa_hong_tach = kw_hoa_hong_tach.strip().lower()
+                if kw_hoa_hong_tach in  ['phí', 'chấp nhận']:
                     continue
-                kw_hoa_hong = kw_hoa_hong
+                kw_hoa_hong = kw_hoa_hong_tach
                 kw_so_tien_hoa_hong = rs.group(2)
                 dd_tin_cua_dau_tu = True
         else:
@@ -864,7 +891,7 @@ class bds(models.Model):
                 kw_hoa_hong = rs.group(1)
                 kw_so_tien_hoa_hong = rs.group(2)
                 dd_tin_cua_dau_tu = True
-        return kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu 
+        return kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu
 
 
 
@@ -971,9 +998,10 @@ class bds(models.Model):
             r.html_show = 'id:%s <b>%s</b>'%(r.id, r.title if r.title else '') + \
             ('\n' + '<b>%s</b>'%r.quan_id.name if r.quan_id.name  else '') +\
             ('\n<br>' + r.html if r.html else '') +\
-            (
-            (
             ('\n<br>Phone: ' + (r.poster_id.name or '')) +\
+            ('\n<br>detail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
+            (
+            (
             ('\n<br>' +r.link_show if  r.link_show else '')+ \
             ('\n<br> Giá: <b>%s tỷ</b>'%(r.gia if r.gia else '')) +\
             ('\n<br> kích thước: %s'%('<b>%sm x %sm</b>'%(r.auto_ngang, r.auto_doc) if (r.auto_ngang or r.auto_doc) else ''))+\
@@ -986,7 +1014,6 @@ class bds(models.Model):
             ('\n<br>Tổng số bài của người này: <b>%s</b>'%r.count_post_all_site) +\
             ('\n<br>Chợ tốt CC or MG: %s' %dict(self.env['bds.bds']._fields['chotot_moi_gioi_hay_chinh_chu'].selection).get(r.chotot_moi_gioi_hay_chinh_chu))+\
             ('\n<br>du_doan_cc_or_mg: <b>%s </b>'%dict(self.env['bds.poster']._fields['du_doan_cc_or_mg'].selection).get(r.poster_id.du_doan_cc_or_mg))+\
-            ('\n<br>detail_du_doan_cc_or_mg: %s'%r.poster_id.detail_du_doan_cc_or_mg) +\
             ('\n<br> address_rate: %s'%r.poster_id.address_rate) +\
             ('\n<br>tỉ lệ keyword cò : %s'%r.poster_id.dd_tin_cua_co_rate) +\
             ('\n<br>tỉ lệ keyword đầu tư: %s'%r.poster_id.dd_tin_cua_dau_tu_rate) +\
