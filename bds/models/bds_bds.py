@@ -39,7 +39,7 @@ def detech_mat_tien(html, p = None):
                 # ddm = re.search('\d+m',ten_duong, re.I)
                 # if ddm:
                 #     continue
-                ddm = re.search('(?:^| )\d+m',full_address, re.I)
+                ddm = re.search('(?:^|x|\*|\s)\s*\d+m',full_address, re.I)
                 if ddm:
                     continue
 
@@ -125,6 +125,146 @@ def detect_hem_address(address):
                 only_number_trust_address_result_keys.append(adress_number)
     return trust_address_result_keys, co_date_247_result_keys
 
+def tim_dien_tich_trong_bai(html):
+    p ='(?:diện tích|dt|dtcn)[\W]*([1-9]+[\.,]\d+)\s*m2'
+    rs = re.search(p, html, re.I)
+    dt = 0
+    if rs:
+        dt = rs.group(1)
+        dt = dt.replace(',','.')
+        dt = float(dt)
+    return dt
+
+def tim_dien_tich_sd_trong_bai(html):
+    p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn))[\W]*([0-9]+[\.,]*\d*)\s*m2'
+    rs = re.search(p, html, re.I)
+    dt = 0
+    if rs:
+        dt = rs.group(1)
+        dt = dt.replace(',','.')
+        dt = float(dt)
+    return dt
+
+def tim_dai_rong(html):
+    auto_ngang, auto_doc = 0,0
+    pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}[x*] {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
+    rs = re.search(pt, html,flags = re.I)
+    
+    if rs:
+        auto_ngang, auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
+    elif not rs:
+        pt= '(dài|rộng|ngang)[: ]{1,2}(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(([\W]{1,3}(dài|rộng|ngang)[: ]{1,2}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
+        rs = re.search(pt, html,flags = re.I)
+        if rs:
+            auto_ngang, auto_doc = float(rs.group(2).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(6).replace(',','.').replace('m','.').replace('M','.'))
+    return auto_ngang, auto_doc
+
+def auto_ngang_doc_compute(html,rarea):
+    auto_ngang, auto_doc = tim_dai_rong(html)
+    dien_tich_trong_topic = tim_dien_tich_trong_bai(html)
+    choose_area = 0
+    auto_dien_tich = 0
+    ti_le_dien_tich_web_vs_auto_dien_tich = 0
+    if auto_ngang and auto_doc:
+        auto_dien_tich = auto_ngang*auto_doc
+        ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
+        if rarea ==0:
+            choose_area = auto_dien_tich 
+        elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.8:
+            choose_area = auto_dien_tich
+        else:
+            choose_area = rarea
+    else:
+        choose_area = rarea or dien_tich_trong_topic
+    return auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic
+
+def detech_hxh(html):
+    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xh|xe hơi)'
+    rs = re.search(p, html, re.I)
+    hxh_str, full_hxh = False,False
+    if rs:
+        span0 = rs.span(0)[0]
+        pre_index = span0-30
+        pre = html[pre_index:span0]
+        gan_sat_cach_pt = 'gần|sát|cách'
+        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
+        if gan_sat_cach_search:
+            return hxh_str, full_hxh
+        before_index = span0 + 10
+        full_hxh = html[pre_index:before_index]
+        hxh_str = rs.group(0)
+    return hxh_str, full_hxh
+
+
+def detech_hxt(html):
+    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xt|xe (?:tải|tãi))'
+    rs = re.search(p, html, re.I)
+    hxh_str, full_hxh = False,False
+    if rs:
+        span0 = rs.span(0)[0]
+        pre_index = span0-30
+        pre = html[pre_index:span0]
+        gan_sat_cach_pt = 'gần|sát|cách'
+        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
+        if gan_sat_cach_search:
+            return hxh_str, full_hxh
+        before_index = span0 + 10
+        full_hxh = html[pre_index:before_index]
+        hxh_str = rs.group(0)
+    return hxh_str, full_hxh
+    
+def detech_hxm(html):
+    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xm|xe (?:máy))'
+    rs = re.search(p, html, re.I)
+    hxh_str, full_hxh = False,False
+    if rs:
+        span0 = rs.span(0)[0]
+        pre_index = span0-30
+        pre = html[pre_index:span0]
+        gan_sat_cach_pt = 'gần|sát|cách'
+        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
+        if gan_sat_cach_search:
+            return hxh_str, full_hxh
+        before_index = span0 + 10
+        full_hxh = html[pre_index:before_index]
+        hxh_str = rs.group(0)
+    return hxh_str, full_hxh
+    
+def detech_hbg(html):
+    p = '(?:h|hẻm|hẽm)\s{0,1}(?:bg|ba (?:gát|gác))'
+    rs = re.search(p, html, re.I)
+    hxh_str, full_hxh = False,False
+    if rs:
+        span0 = rs.span(0)[0]
+        pre_index = span0-30
+        pre = html[pre_index:span0]
+        gan_sat_cach_pt = 'gần|sát|cách'
+        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
+        if gan_sat_cach_search:
+            return hxh_str, full_hxh
+        before_index = span0 + 10
+        full_hxh = html[pre_index:before_index]
+        hxh_str = rs.group(0)
+    return hxh_str, full_hxh
+
+def detech_hem_all(html):
+    loai_hem_selection = False
+    loai_hem, full_loai_hem = detech_hxh(html)
+    if loai_hem:
+        loai_hem_selection = 'hxh'
+    if not loai_hem:
+        loai_hem,  full_loai_hem = detech_hxt(html)
+        if loai_hem:
+            loai_hem_selection = 'hxt'
+        if not loai_hem:
+            loai_hem,  full_loai_hem = detech_hxm(html)
+            if loai_hem:
+                loai_hem_selection = 'hxm'
+            if not loai_hem:
+                loai_hem,  full_loai_hem = detech_hbg(html)
+                if loai_hem:
+                    loai_hem_selection = 'hbg'
+    return loai_hem, full_loai_hem, loai_hem_selection
 
 
 def skip_if_cate_not_bds(depend_func):
@@ -298,6 +438,36 @@ class bds(models.Model):
     hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
 
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
+    dtsd = fields.Float(compute='auto_ngang_doc_', store=True)
+
+    loai_hem = fields.Char(compute='_compute_loai_hem', store=True)
+    full_loai_hem = fields.Char(compute='_compute_loai_hem', store=True)
+
+    loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
+    full_loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
+    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
+   
+    @api.depends('html')
+    def _compute_loai_hem_xt(self):
+        for r in self:
+            html = r.html
+            loai_hem,  full_loai_hem = detech_hxt(html)
+            if not loai_hem:
+                loai_hem,  full_loai_hem = detech_hxm(html)
+                if not loai_hem:
+                    loai_hem,  full_loai_hem = detech_hbg(html)
+            r.loai_hem_xt, r.full_loai_hem_xt = loai_hem,  full_loai_hem
+
+
+    
+    
+    @api.depends('html')
+    def _compute_loai_hem(self):
+        for r in self:
+            html = r.html
+            loai_hem, full_loai_hem, loai_hem_selection = detech_hem_all(html)
+            r.loai_hem_xt, r.full_loai_hem_xt, r.loai_hem_selection = loai_hem, full_loai_hem, loai_hem_selection
+            
 
     @api.depends('html','title','address','trigger')
     def _mat_tien_address(self):
@@ -349,6 +519,8 @@ class bds(models.Model):
                 so_phong_ngu = 0
         return so_phong_ngu
 
+
+
     @api.depends('html')
     def _compute_so_phong_ngu(self):
 
@@ -356,8 +528,6 @@ class bds(models.Model):
             html = (r.title or '' ) + ' ' + (r.html or '')
             so_phong_ngu = self._so_phong_ngu_detect(html)
             r.so_phong_ngu = so_phong_ngu
-            
-
 
 
     def _compute_t1l1_detect(self, html):
@@ -415,6 +585,14 @@ class bds(models.Model):
                 so_lau = int(so_lau)
             except:
                 so_lau = 0
+            pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)'
+            so_lau_char = rs.group(0)
+            try:
+                so_tang = int(so_lau)
+                so_lau = so_tang - 1
+            except:
+                so_lau = 0
+            
         else:
             pt = '(cấp 4|c4|c4)\W'
             rs = re.search(pt, html, re.I)
@@ -494,9 +672,14 @@ class bds(models.Model):
             poster_dict['count_bds_post_of_poster'] = count_bds_post_of_poster
             
             count_post_all_site = self.search_count([('poster_id','=',r.id)])
+            count_post_every_site_max_readgroup_rsul = self.env['bds.bds'].read_group([('poster_id','=',r.id)],['siteleech_id'],['siteleech_id'])
             poster_dict['count_post_all_site'] = count_post_all_site
+            
+            
+            siteleech_id_count = max(map(lambda i: i['siteleech_id_count'], count_post_every_site_max_readgroup_rsul))
             count_post_all_site_in_month = self.search_count([('poster_id','=',r.id),('public_datetime','>',fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))])
             poster_dict['count_post_all_site_in_month'] = count_post_all_site_in_month
+            
             address_topic_number = self.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
             poster_dict['address_topic_number'] = address_topic_number
             address_rate = 0
@@ -744,12 +927,13 @@ class bds(models.Model):
         nha_dat_kws_cap_1 = 'nhà đất(?! thánh)|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
         '(?<!nova)land(?!mark|abc)|tư vấn|(?:thông tin|sản phẩm) (?:chính xác|thật)|' +\
         'xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|' +\
-        'hổ trợ[\w\s]{0,20}ngân hàng|vay (?:vốn )ngân hàng|hổ trợ[\w\s]{0,20}pháp lý|hợp.{1,20}đầu tư|csht|tttm|'+\
-        'chưa qua đầu tư|'+\
+        'hỗ trợ[\w\s]{0,20}pháp lý|hợp.{1,20}đầu tư|csht|tttm|'+\
+        'chưa qua đầu tư|cấp 1[,\- ]*2[,\- ]*3|'+\
         'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|nợ ngân hàng|hợp tác|thanh lý' 
 
         # nha_dat_kws_cap_2 = 'shr|(?:cc|công chứng )(?:ngay )*(?:sang tên|trong ngày)|gọi ngay|giá tốt|tin thật|cn đủ|hình thật|(?:lh|liên hệ).{0,20}xem nhà'
         # nha_dat_kws_cap_3 = '(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)|' +\
+        #hỗ trợ[\w\s]{0,20}ngân hàng|vay (?:vốn )*ngân hàng
         # 'không lỗi phong thủy'
 
 
@@ -796,7 +980,7 @@ class bds(models.Model):
         hoa_la_canh = False # 6
         if nha_dat_list_rs:
             hoa_la_canh = len(nha_dat_list_rs)
-            found_kw_mgs.append(nha_dat_list_rs[0])
+            # found_kw_mgs.append(nha_dat_list_rs[0])
         
         t1l1_list = self._compute_t1l1_detect(html)
         t1l1 = False #7
@@ -834,28 +1018,14 @@ class bds(models.Model):
     @skip_if_cate_not_bds            
     def auto_ngang_doc_(self):
         for r in self:
-            pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}x {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
-            rs = re.search(pt, r.html,flags = re.I)
-            if rs:
-                auto_ngang, auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
-            elif not rs:
-                pt= '(dài|rộng|chiều dài|chiều rộng)[: ]{1,2}(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(([, ]{1,3}(dài|rộng|chiều dài|chiều rộng)[: ]{1,2}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
-                rs = re.search(pt, r.html,flags = re.I)
-                if rs:
-                    auto_ngang, auto_doc = float(rs.group(2).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(6).replace(',','.').replace('m','.').replace('M','.'))
-            if rs and  auto_ngang and auto_doc:
-                auto_dien_tich = auto_ngang*auto_doc
-                rarea = r.area
-                ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
-                r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich = auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
-                if rarea ==0:
-                    r.choose_area = auto_dien_tich
-                elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.8:
-                    r.choose_area = auto_dien_tich
-                else:
-                    r.choose_area = rarea
-            else:
-                r.choose_area = r.area
+            html = r.html
+            auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic = \
+                auto_ngang_doc_compute(html, r.area)
+            r.choose_area = choose_area
+            r.dtsd = tim_dien_tich_sd_trong_bai(r.html)
+            r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
+                 auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
+
     def str_before_index(self, index, input_str):
         pre_index = index - 30
         if pre_index < 0:
@@ -865,7 +1035,7 @@ class bds(models.Model):
 
 
     def _compute_hoa_hong(self, html):
-        p = '((?<=\W)(?:hoa hồng|hh(?!t)|huê hồng)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*(?:\D|\s){0,31}((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
+        p = '((?<=\W)(?:hoa hồng|hh(?!t)|huê hồng|🌹)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*(?:\D|\s){0,31}((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
         rs = re.search(p, html, re.I)
         if not rs:
             p = '((?:phí(?! hh| hoa hồng| huê hồng|\w)|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
@@ -875,7 +1045,7 @@ class bds(models.Model):
             for i in [1]:
                 index = rs.span()[0]
                 pre_str = self.str_before_index(index, html)
-                khong_cho_mg = re.search('không', pre_str, re.I)
+                khong_cho_mg = re.search('không|ko', pre_str, re.I)
                 if khong_cho_mg:
                     continue
                 kw_hoa_hong_tach = rs.group(1)
@@ -1006,6 +1176,7 @@ class bds(models.Model):
             ('\n<br> Giá: <b>%s tỷ</b>'%(r.gia if r.gia else '')) +\
             ('\n<br> kích thước: %s'%('<b>%sm x %sm</b>'%(r.auto_ngang, r.auto_doc) if (r.auto_ngang or r.auto_doc) else ''))+\
             ('\n<br> Area: %s'%('<b>%s m2</b>'%r.area if r.area else ''))+\
+            ('\n<br> auto_dien_tich: %s'%('<b>%s m2</b>'%r.auto_dien_tich if r.auto_dien_tich else ''))+\
             ('\n<br> Chọn lại diện tích: %s'%('<b>%s m2</b>'%r.choose_area if r.choose_area else ''))+\
             ('\n<br>địa chỉ: %s'%(r.trich_dia_chi or r.mat_tien_address)) +\
             ('\n<br>Site: %s'%r.siteleech_id.name) +\
