@@ -4,7 +4,7 @@
             <field name="model">bds.bds</field>
             <field name ="priority">5</field>
             <field name="arch" type="xml">
-                <tree default_order="public_datetime DESC" editable="bottom"   >
+                <tree  editable="bottom"   >
                     <button name="open_something" type="object"/>
                     <field name="is_read"></field>
                     <field name="quan_tam"></field>

@@ -55,8 +55,12 @@
                                 
                                 <field name="publicdate_ids">
                                     <tree>
+                                        <field name="public_datetime"></field>
+                                        <field name="public_datetime_cu"></field>
+                                        <field name="diff_public_datetime"></field>
                                         <field name="public_date"></field>
                                         <field name="public_date_cu"></field>
+                                        <field name="diff_public_date"></field>
                                     </tree>
                                 </field>
                                 <!-- <field name="same_address_bds_ids" /> -->

@@ -290,14 +290,14 @@ class UserReadMark(models.Model):
     _name = 'user.read.mark'
 
     user_id = fields.Many2one('res.users')
-    bds_id = fields.Many2one('bds.bds')
-
+    # bds_id = fields.Many2one('bds.bds')
+    bds_id = fields.Char('bds.bds')
 class UserQuanTamMark(models.Model):
     _name = 'user.quantam.mark'
 
     user_id = fields.Many2one('res.users')
-    bds_id = fields.Many2one('bds.bds')
-
+    # bds_id = fields.Many2one('bds.bds')
+    bds_id = fields.Char('bds.bds')
 
 class bds(models.Model):
     _name = 'bds.bds'
@@ -315,16 +315,11 @@ class bds(models.Model):
     # cate = fields.Selection([('bds','BDS'),('phone','Phone'),('laptop','Laptop')])
     cate = fields.Char(default='bds')
     url_id = fields.Many2one('bds.url')
-    publicdate_ids =fields.One2many('bds.publicdate','bds_id')
-    len_publicdate_ids = fields.Integer(compute='len_publicdate_ids_', store=True)
-    public_date = fields.Date()
-    diff_public_date = fields.Integer()
-    gialines_ids = fields.One2many('bds.gialines','bds_id')
     title = fields.Char()
     images_ids = fields.One2many('bds.images', 'bds_id' )
     siteleech_id = fields.Many2one('bds.siteleech')
     thumb = fields.Char()
-    poster_id = fields.Many2one('bds.poster')
+    poster_id = fields.Many2one('bds.poster', ondelete='restrict')
     html = fields.Html()
     chotot_moi_gioi_hay_chinh_chu = fields.Selection([('moi_gioi', 'Bán chuyên'), 
         ('chinh_chu', 'Cá nhân'),('khong_biet','Không Phải bài ở chợt tốt')], default='khong_biet',string='Bán chuyên')
@@ -335,9 +330,16 @@ class bds(models.Model):
     quan_id = fields.Many2one('bds.quan',ondelete='restrict',string='Quận')
     phuong_id = fields.Many2one('bds.phuong','Phường')
     date_text = fields.Char()
+    
     public_datetime = fields.Datetime()
-    ngay_update_gia = fields.Datetime()
     diff_public_datetime = fields.Integer()
+    public_date = fields.Date()
+    diff_public_date = fields.Integer()
+    publicdate_ids =fields.One2many('bds.publicdate','bds_id')
+    len_publicdate_ids = fields.Integer(compute='len_publicdate_ids_', store=True)
+    gialines_ids = fields.One2many('bds.gialines','bds_id')
+    diff_gia = fields.Float()
+    ngay_update_gia = fields.Datetime()
     #set field (field mà mình điền vào)
     is_read = fields.Boolean()
     quan_tam = fields.Datetime(string=u'Quan Tâm')
@@ -390,8 +392,11 @@ class bds(models.Model):
     count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
     dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
     dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
-    
-    
+    len_site = fields.Integer(related='poster_id.len_site', store  = True)
+
+    count_post_of_onesite_max = fields.Integer(related='poster_id.count_post_of_onesite_max', store  = True)
+    siteleech_max_id = fields.Many2one(related='poster_id.siteleech_max_id', store  = True)
+    # site_ids = fields.Many2many(related='poster_id.site_ids', store  = True)
     #!related
     # for filter field
     quan_id_selection = fields.Selection('get_quan_')
@@ -446,7 +451,9 @@ class bds(models.Model):
     loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
     full_loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
     loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
-   
+    
+    
+
     @api.depends('html')
     def _compute_loai_hem_xt(self):
         for r in self:
@@ -672,12 +679,32 @@ class bds(models.Model):
             poster_dict['count_bds_post_of_poster'] = count_bds_post_of_poster
             
             count_post_all_site = self.search_count([('poster_id','=',r.id)])
-            count_post_every_site_max_readgroup_rsul = self.env['bds.bds'].read_group([('poster_id','=',r.id)],['siteleech_id'],['siteleech_id'])
             poster_dict['count_post_all_site'] = count_post_all_site
-            
-            
-            siteleech_id_count = max(map(lambda i: i['siteleech_id_count'], count_post_every_site_max_readgroup_rsul))
-            count_post_all_site_in_month = self.search_count([('poster_id','=',r.id),('public_datetime','>',fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))])
+           
+           
+            # domain_in_month = [('poster_id','=',r.id),('public_datetime','>', fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))]
+            month = ('public_datetime','>', fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))
+            domain_in_month = [('poster_id','=',r.id), month]
+            count_post_every_site_max_readgroup_rsul = self.env['bds.bds'].read_group(domain_in_month,['siteleech_id'],['siteleech_id'])
+            list_siteleech_id_count_post = list(map(lambda i: i['siteleech_id_count'], count_post_every_site_max_readgroup_rsul))
+            site_ids = list(map(lambda i: i['siteleech_id'][0], count_post_every_site_max_readgroup_rsul))
+            try:
+                count_post_of_onesite_max = max(list_siteleech_id_count_post)
+                count_post_of_onesite_max_index = list_siteleech_id_count_post.index(count_post_of_onesite_max)
+                siteleech_max_id = count_post_every_site_max_readgroup_rsul[count_post_of_onesite_max_index]['siteleech_id'][0]
+            except ValueError as e:
+                count_post_of_onesite_max = count_post_all_site
+                siteleech_max_id = bds_id.siteleech_id.id
+
+
+            poster_dict['count_post_of_onesite_max'] = count_post_of_onesite_max
+            poster_dict['siteleech_max_id'] = siteleech_max_id
+            count_post_all_site_in_month = self.search_count(domain_in_month)
+
+            print ('**8list_siteleech_id**', site_ids)
+            print ('****site_ids***', site_ids)
+            poster_dict['site_ids'] = [(6,0,site_ids)]
+
             poster_dict['count_post_all_site_in_month'] = count_post_all_site_in_month
             
             address_topic_number = self.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
@@ -704,6 +731,7 @@ class bds(models.Model):
             poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
             dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','!=', False)])
             dd_tin_cua_dau_tu = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
+            
             if chotot_mg_or_cc =='moi_gioi' :
                 if address_rate > 0.5:
                     du_doan_cc_or_mg= 'dd_cc'
@@ -720,8 +748,7 @@ class bds(models.Model):
                     detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
             else:
                 if chotot_mg_or_cc =='chinh_chu':
-                    
-                    if count_post_all_site > 3:
+                    if count_post_of_onesite_max > 3:
                         if address_rate > 0:
                             du_doan_cc_or_mg= 'dd_cc'
                             detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
@@ -735,7 +762,7 @@ class bds(models.Model):
                         else:
                             detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
                 else:#khong_biet, muaban
-                    if count_post_all_site  > 3:
+                    if count_post_of_onesite_max  > 3:
                         if address_rate >= 0.3:
                             du_doan_cc_or_mg= 'dd_cc'
                             detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'
@@ -743,7 +770,7 @@ class bds(models.Model):
                             du_doan_cc_or_mg= 'dd_mg'
                             detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
                             
-                    else: #count_post_all_site  <= 3
+                    else: #count_post_of_onesite_max  <= 3
                         if address_rate: 
                             du_doan_cc_or_mg= 'dd_cc'
                             detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'

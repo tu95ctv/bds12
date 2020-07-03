@@ -26,6 +26,16 @@ class Poster(models.Model):
     
     quan_id_for_search = fields.Many2one('bds.quan',related = 'quanofposter_ids.quan_id')
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
+    # site_ids = fields.Many2many('bds.siteleech','site_poster_rel','siteleech_id', 'poster_id')
+    site_ids = fields.Many2many('bds.siteleech')
+    len_site = fields.Integer(compute='_compute_len_site', store=True)
+
+    @api.depends('site_ids')
+    def _compute_len_site(self):
+        for r in self:
+            r.len_site = len(r.site_ids)
+
+
 
 
    
@@ -129,6 +139,9 @@ class Poster(models.Model):
     count_bds_post_of_poster = fields.Integer()
     count_post_all_site = fields.Integer(store=True)
     count_post_all_site_in_month = fields.Integer() 
+    count_post_of_onesite_max = fields.Integer(store=True)
+    siteleech_max_id = fields.Many2one('bds.siteleech')
+    
     detail_du_doan_cc_or_mg = fields.Selection(
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 

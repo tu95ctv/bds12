@@ -109,6 +109,7 @@
                      <field name="rate_moi_gioi" /> -->
                      <field name="username" />
                     <field name="count_post_all_site" />
+                    <field name="site_ids" />
                     <field name="address_topic_number" />
                     <field name="address_rate" />
                     <field name="detail_du_doan_cc_or_mg" />

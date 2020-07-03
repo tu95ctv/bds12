@@ -4,7 +4,7 @@
         <field name="model">bds.bds</field>
         <field name ="priority">1</field>
         <field name="arch" type="xml">
-            <tree default_order="public_datetime DESC" editable="bottom" decoration-info="quan_tam!=False"
+            <tree default_order="public_datetime ASC" editable="bottom" decoration-info="quan_tam!=False"
             decoration-danger="ko_quan_tam!=False" >
                 <button name="open_something" type="object"/>
                 <field name="quan_tam"></field>
@@ -26,6 +26,12 @@
                 <!-- <field name="phuong_id"/> -->
                 <field name="quan_id"/>
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
+                <!-- <field name="site_ids" /> -->
+                <field name="diff_gia" />
+                <field name="diff_public_datetime" />
+                <field name="len_site" />
+                <field name="count_post_of_onesite_max" />
+                <field name="siteleech_max_id" />
                 <field name="loai_hem" />
                 <field name="full_loai_hem" />
                 <field name="loai_hem_xt" />

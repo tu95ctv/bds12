@@ -7,18 +7,20 @@ import base64
 class Gialines(models.Model):
     _name='bds.gialines'
     gia = fields.Float()
-    bds_id = fields.Many2one('bds.bds')
+    bds_id = fields.Many2one('bds.bds', ondelete='cascade')
     gia_cu = fields.Float()
     diff_gia = fields.Float()
     
 
 class Publicdate(models.Model):
     _name='bds.publicdate'
-    public_date_cu = fields.Date()
-    bds_id = fields.Many2one('bds.bds')
+    bds_id = fields.Many2one('bds.bds', ondelete='cascade')
     public_date = fields.Date()
+    public_date_cu = fields.Date()
     diff_public_date = fields.Integer()
-
+    public_datetime = fields.Datetime()
+    public_datetime_cu = fields.Datetime()
+    diff_public_datetime = fields.Integer()
 
 class SiteDuocLeech(models.Model):
     _name = 'bds.siteleech'

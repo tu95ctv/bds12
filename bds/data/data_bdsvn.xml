@@ -14,7 +14,9 @@
         </record>
       <record model="bds.url" id="url_bds_com_vn_qtanbinh">
             <field name="description">bds.com.vn Tân Bình</field>
-            <field name="url">https://batdongsan.com.vn/ban-nha-rieng-tan-binh</field>
+            <!-- <field name="url">https://batdongsan.com.vn/ban-nha-dat-tan-binh/p5</field> -->
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-tan-binh/</field>
+
         </record>
       <record model="bds.url" id="url_bds_com_vn_tan_phu">
             <field name="description">bds.com.vn Tân Phú</field>

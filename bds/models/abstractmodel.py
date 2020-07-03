@@ -6,10 +6,12 @@ import math
 from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
 from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
 from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic
 
 from bs4 import BeautifulSoup
 import re
 import datetime
+from datetime import timedelta
 from copy import deepcopy
 from odoo.exceptions import UserError
 import os
@@ -18,7 +20,6 @@ from odoo.addons.bds.models.bds_tools  import  request_html
 from unidecode import unidecode
 import json
 import math
-import datetime
 from odoo.addons.bds.models.bds_tools  import  FetchError
 def convert_muaban_string_gia_to_float(str):
     rs = re.search('(\d+) tỷ',str,re.I)
@@ -207,8 +208,11 @@ class ChototMainFetch(models.AbstractModel):
                 self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
             except FetchError as e:
                 self.env['bds.error'].create({'name':str(e),'des':str(e)})
-
-
+            except Exception as e:
+                if url_id.siteleech_id.name == 'batdongsan.com.vn':
+                    self.env['bds.error'].create({'name':str(e),'des':str(e)})
+                else:
+                    raise
 
 
     def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}):
@@ -217,26 +221,51 @@ class ChototMainFetch(models.AbstractModel):
         #             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
         update_dict = {}
         public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
+        now = datetime.datetime.now()
+        
         gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
         public_date  = gmt7_public_datetime.date()
         search_bds_obj= self.env['bds.bds'].search([('link','=',link)])
+        
         if search_bds_obj:
             number_notice_dict["existing_link_number"] = number_notice_dict["existing_link_number"] + 1
-            public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
-            public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
-
-
-            # if self.allow_write_public_datetime and  public_date != public_date_cu and public_date_cu and public_date:
-            if public_datetime_cu != public_datetime:
-                diff_public_date = (public_date - public_date_cu).days
-                diff_public_datetime = (public_datetime - public_datetime_cu).seconds
-                update_dict.update({'public_datetime': public_datetime, 
-                    'diff_public_datetime':diff_public_datetime,
-                    'public_date':public_date, 
+            diff_day_public_from_now =  (now - public_datetime).days
+            if diff_day_public_from_now==0:
+                
+                public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
+                diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
+                print ('***diff_public_datetime_in_hours***',diff_public_datetime_in_hours,'public_datetime', public_datetime,'public_datetime_cu',public_datetime_cu, type(public_datetime), type(public_datetime_cu)  )
+                if diff_public_datetime_in_hours > 2 :
+                    public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
+                    diff_public_date = (public_date - public_date_cu).days
+                    update_dict.update({
+                        'public_datetime': public_datetime, 
+                        'public_datetime_cu':public_datetime_cu,
+                        'diff_public_datetime':diff_public_datetime_in_hours,
+                        'public_date':public_date, 
+                        'public_date_cu':public_date_cu,
+                        'diff_public_date':diff_public_date, 
+                        'publicdate_ids':[(0,False,{
+                                    'public_datetime': public_datetime, 
+                                    'public_datetime_cu':public_datetime_cu,
+                                    'diff_public_datetime':diff_public_datetime_in_hours,
+                                    'public_date':public_date, 
+                                    'public_date_cu':public_date_cu,
+                                    'diff_public_date':diff_public_date, 
+                                    }
+                                    )]
+                        })
+            gia=topic_data_from_page['gia']
+            gia_cu = search_bds_obj.gia
+            diff_gia = gia - gia_cu
+            if diff_gia != 0.0:
+                update_dict.update({
                     'ngay_update_gia':datetime.datetime.now(),
-                    'diff_public_date':diff_public_date, 
-                    'publicdate_ids':[(0,False,{'diff_public_date':diff_public_date, 'public_date':public_date, 'public_date_cu':public_date_cu})]})
-            
+                    'diff_gia':diff_gia,
+                    'gialines_ids':[(0,False,{'gia':gia, 'gia_cu':gia_cu, 'diff_gia':diff_gia})]
+                    })
+
+
             if update_dict:
                 # print (u'-----------Update gia topic_index %s/%s- page_int %s - page_index %s/so_page %s'
                 #     %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
@@ -368,12 +397,14 @@ class BDSFetch(models.AbstractModel):
             return get_last_page_from_bdsvn_website(url_id.url)
         return super(BDSFetch, self).get_last_page_number(url_id)
     
+    
     def request_topic (self, link, url_id):
         topic_dict = super(BDSFetch, self).request_topic(link, url_id)
         if self.site_name =='batdongsan':
             topic_html_or_json = request_html(link)
-            topic_dict = get_muaban_vals_one_topic(self,  topic_html_or_json, self.siteleech_id_id)
+            topic_dict = get_bds_dict_in_topic(self,{}, topic_html_or_json, self.siteleech_id_id)
         return topic_dict
+        
 
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
         
@@ -407,7 +438,8 @@ class BDSFetch(models.AbstractModel):
                 gia = gia_soup[0].get_text()
                 int_gia = convert_gia_from_string_to_float(gia)
                 topic_data_from_page['gia'] = int_gia
-                date_dang = title_and_icon.select('div.p-main div.p-bottom-crop div.floatright')
+                print ('***topic_data_from_page***', topic_data_from_page)
+                date_dang = title_and_icon.select('span.uptime')
                 date_dang = date_dang[0].get_text().replace('\n','')
                 date_dang = date_dang[-10:]
                 public_datetime = datetime.datetime.strptime(date_dang,"%d/%m/%Y")

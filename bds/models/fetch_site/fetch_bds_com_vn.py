@@ -66,6 +66,7 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
     update_dict['phone_poster']=mobile
     update_dict['poster_id'] = user.id    
+    return update_dict
     
 
 
@@ -80,9 +81,12 @@ def get_public_datetime(soup):
 
 
 def get_product_detail(soup):
-    select = soup.select('div.pm-desc')[0]
-    
-    return select.get_text()
+    try:
+        select = soup.select('div.pm-desc')[0]
+        
+        return select.get_text()
+    except:
+        return False
 
 
 # def get_quan_list_in_big_page(self,column_name='bds_bds.phuong_id'):

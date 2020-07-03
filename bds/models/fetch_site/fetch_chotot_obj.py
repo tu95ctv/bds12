@@ -9,6 +9,7 @@ import datetime
 ##Nh fetch_bds
 import json
 import pytz
+from dateutil.relativedelta import relativedelta
 ##############Cho tot###############
 
 def create_cho_tot_page_link(url_input, page_int):
@@ -23,7 +24,27 @@ def create_cho_tot_page_link(url_input, page_int):
         url_input = re.sub('page=\d+', repl, url_input)
     return url_input
 
-MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA = {u'ngày':'days',u'tuần':'weeks',u'hôm qua':'days',u'giờ':'hours',u'phút':'minutes',u'giây':'seconds',u'năm':'days',u'tháng':'days'}
+# MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA = {
+#         u'ngày':'days',
+#         u'tuần':'weeks',
+#         u'hôm qua':'days',
+#         u'giờ':'hours',
+#         u'phút':'minutes',
+#         u'giây':'seconds',
+#         u'năm':'days',
+#         u'tháng':'days'
+#         }
+
+MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA = {
+        u'ngày':'days',
+        u'tuần':'weeks',
+        u'hôm qua':'days',
+        u'giờ':'hours',
+        u'phút':'minutes',
+        u'giây':'seconds',
+        u'năm':'years',
+        u'tháng':'months'
+        }
 
 def convert_chotot_date_to_datetime(string):
     rs = re.search (r'(\d*?)\s?(ngày|tuần|hôm qua|giờ|phút|giây|năm|tháng)',string,re.I)
@@ -32,14 +53,14 @@ def convert_chotot_date_to_datetime(string):
     if rs1=='':
         rs1 =1
     rs1 = int (rs1)
-    if rs2==u'tháng':
-        rs1 = rs1*365/12
-    elif rs2==u'năm':
-        rs1 = rs1*365
-    elif rs2=='tuần':
-        rs1 = rs1*7
+    # if rs2==u'tháng':
+    #     rs1 = rs1*365/12
+    # elif rs2==u'năm':
+    #     rs1 = rs1*365
+    # elif rs2=='tuần':
+    #     rs1 = rs1*7
     rs2 = MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA[rs2]
-    dt = datetime.datetime.now() - datetime.timedelta(**{rs2:rs1})
+    dt = datetime.datetime.now() - relativedelta(**{rs2:rs1})
     return dt
 
 
