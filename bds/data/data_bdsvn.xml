@@ -58,6 +58,12 @@
             <field name="description">bds.com.vn 8</field>
             <field name="url">https://batdongsan.com.vn/ban-nha-rieng-quan-8</field>
         </record>
+
+        <record model="bds.url" id="url_bds_quan_all">
+            <field name="description">bds batdongsan all hcm</field>
+            <field name="url">https://batdongsan.com.vn/ban-nha-dat-tp-hcm</field>
+        </record>
+
         
         
 </odoo>
