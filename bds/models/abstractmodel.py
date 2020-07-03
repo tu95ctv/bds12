@@ -234,7 +234,6 @@ class ChototMainFetch(models.AbstractModel):
                 
                 public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
                 diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
-                print ('***diff_public_datetime_in_hours***',diff_public_datetime_in_hours,'public_datetime', public_datetime,'public_datetime_cu',public_datetime_cu, type(public_datetime), type(public_datetime_cu)  )
                 if diff_public_datetime_in_hours > 2 :
                     public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
                     diff_public_date = (public_date - public_date_cu).days
@@ -438,7 +437,7 @@ class BDSFetch(models.AbstractModel):
                 gia = gia_soup[0].get_text()
                 int_gia = convert_gia_from_string_to_float(gia)
                 topic_data_from_page['gia'] = int_gia
-                print ('***topic_data_from_page***', topic_data_from_page)
+                # print ('***topic_data_from_page***', topic_data_from_page)
                 date_dang = title_and_icon.select('span.uptime')
                 date_dang = date_dang[0].get_text().replace('\n','')
                 date_dang = date_dang[-10:]

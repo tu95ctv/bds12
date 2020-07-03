@@ -701,8 +701,6 @@ class bds(models.Model):
             poster_dict['siteleech_max_id'] = siteleech_max_id
             count_post_all_site_in_month = self.search_count(domain_in_month)
 
-            print ('**8list_siteleech_id**', site_ids)
-            print ('****site_ids***', site_ids)
             poster_dict['site_ids'] = [(6,0,site_ids)]
 
             poster_dict['count_post_all_site_in_month'] = count_post_all_site_in_month
