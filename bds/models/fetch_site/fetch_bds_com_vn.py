@@ -60,7 +60,13 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     quan_id= g_or_c_bds_quan(self,soup)
     update_dict['quan_id'] = quan_id
     update_dict['phuong_id'] = get_phuong_xa_from_topic(self,soup,quan_id)
-    title = soup.select('div.pm-title > h1')[0].contents[0] 
+    try:
+        title = soup.select('div.pm-title > h1')[0].contents[0] 
+    except:
+        f = open("/mnt/c/d4/filebug.html", "w")
+        f.write(html)
+        f.close()
+        raise
     update_dict['title']=title
     mobile,name = get_mobile_name_for_batdongsan(soup)
     user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)

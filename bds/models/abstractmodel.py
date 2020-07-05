@@ -209,7 +209,7 @@ class ChototMainFetch(models.AbstractModel):
             except FetchError as e:
                 self.env['bds.error'].create({'name':str(e),'des':str(e)})
             except Exception as e:
-                if url_id.siteleech_id.name == 'batdongsan.com.vn':
+                if url_id.siteleech_id.name == 'batdongsan':
                     self.env['bds.error'].create({'name':str(e),'des':str(e)})
                 else:
                     raise
@@ -401,6 +401,7 @@ class BDSFetch(models.AbstractModel):
         topic_dict = super(BDSFetch, self).request_topic(link, url_id)
         if self.site_name =='batdongsan':
             topic_html_or_json = request_html(link)
+            print ('***link***', link)
             topic_dict = get_bds_dict_in_topic(self,{}, topic_html_or_json, self.siteleech_id_id)
         return topic_dict
         
