@@ -63,10 +63,10 @@ def get_bds_dict_in_topic(self,update_dict,html,siteleech_id_id):
     try:
         title = soup.select('div.pm-title > h1')[0].contents[0] 
     except:
-        f = open("/mnt/c/d4/filebug.html", "w")
-        f.write(html)
-        f.close()
-        raise
+        # f = open("/mnt/c/d4/filebug.html", "w")
+        # f.write(html)
+        # f.close()
+        raise 
     update_dict['title']=title
     mobile,name = get_mobile_name_for_batdongsan(soup)
     user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)

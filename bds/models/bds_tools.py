@@ -98,3 +98,10 @@ def g_or_c_quan(env, quan_name):
     quan_update_dict = {'name':quan_name,'name_unidecode':quan_unidecode}
     quan = g_or_c_ss(env['bds.quan'],quan_search_dict, quan_update_dict )
     return quan.id
+
+
+def save_to_disk(self, ct, name_file ):
+    path = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(path,'%s.html'%name_file), 'w')
+    f.write(ct)
+    f.close()

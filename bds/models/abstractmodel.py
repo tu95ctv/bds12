@@ -401,7 +401,6 @@ class BDSFetch(models.AbstractModel):
         topic_dict = super(BDSFetch, self).request_topic(link, url_id)
         if self.site_name =='batdongsan':
             topic_html_or_json = request_html(link)
-            print ('***link***', link)
             topic_dict = get_bds_dict_in_topic(self,{}, topic_html_or_json, self.siteleech_id_id)
         return topic_dict
         
