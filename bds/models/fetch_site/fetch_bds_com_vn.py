@@ -10,15 +10,19 @@ def get_last_page_from_bdsvn_website(url_id):
     html = request_html(url_id.url)
     soup = BeautifulSoup(html, 'html.parser')
     range_pages = soup.select('div.background-pager-right-controls > a')
+    
     if range_pages:
-        last_page_href =  range_pages[-1]['href']
-        kq= re.search('\d+$',last_page_href)
-        web_last_page_number =  int(kq.group(0))
+        try:
+            last_page_href =  range_pages[-1]['href']
+            kq= re.search('\d+$',last_page_href)
+            web_last_page_number =  int(kq.group(0))
+            return web_last_page_number
+        except Exception as e:
+            pass
+    if url_id.web_last_page_number:
+        return url_id.web_last_page_number
     else:
-        if url_id.web_last_page_number:
-            return url_id.web_last_page_number
-        else:
-            web_last_page_number = 1000
+        web_last_page_number = 1000
     return web_last_page_number
 
 

@@ -30,7 +30,7 @@ class loop_fetch_cron(models.Model):
                 # fetch_id.fetch_all_url()
                 # loop_fetch_cron_id.fetch_current_id = fetch_id.id
                 # print ('end fetch trong loop')
-                fetch_id.fetch_all_url()
+                fetch_id.fetch()
                 # try:
                 #     fetch_id.fetch_all_url()
                 # except FetchError as e:

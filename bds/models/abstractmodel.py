@@ -69,9 +69,13 @@ class ChototMainFetch(models.AbstractModel):
         else:
             current_page_field_name = 'current_page'
         self.current_page_field_name = current_page_field_name
+        
         current_page = getattr(url_id, current_page_field_name)
         set_leech_max_page = getattr(self,'max_page',0) or url_id.set_leech_max_page
+        
         web_last_page_number =  self.get_last_page_number(url_id)
+
+
         if set_leech_max_page and  set_leech_max_page < web_last_page_number:
             max_page =  set_leech_max_page
         else:
@@ -150,6 +154,7 @@ class ChototMainFetch(models.AbstractModel):
             self.allow_write_public_datetime = True
 
         end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(url_id) 
+        
         begin_time = datetime.datetime.now()
         number_notice_dict = {
             'page_int':0,
