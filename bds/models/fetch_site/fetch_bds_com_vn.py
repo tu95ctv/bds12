@@ -6,17 +6,20 @@ from unidecode import unidecode
 import datetime
 ################### BDS ###################
 
-def get_last_page_from_bdsvn_website(url_input):
-    html = request_html(url_input)
+def get_last_page_from_bdsvn_website(url_id):
+    html = request_html(url_id.url)
     soup = BeautifulSoup(html, 'html.parser')
     range_pages = soup.select('div.background-pager-right-controls > a')
     if range_pages:
         last_page_href =  range_pages[-1]['href']
         kq= re.search('\d+$',last_page_href)
-        last_page_from_website =  int(kq.group(0))
+        web_last_page_number =  int(kq.group(0))
     else:
-        last_page_from_website = 1
-    return last_page_from_website
+        if url_id.web_last_page_number:
+            return url_id.web_last_page_number
+        else:
+            web_last_page_number = 1000
+    return web_last_page_number
 
 
 def get_phuong_xa_from_topic(self,soup,quan_id):

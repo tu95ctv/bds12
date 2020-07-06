@@ -76,12 +76,11 @@ class ChototMainFetch(models.AbstractModel):
             max_page =  set_leech_max_page
         else:
             max_page = web_last_page_number
-        if url_id.siteleech_id.name !='muaban':
-            url_id.web_last_page_number = web_last_page_number
-        else:
-            if url_id.web_last_page_number == False:
-                url_id.web_last_page_number = web_last_page_number
-
+        # if url_id.siteleech_id.name !='muaban':
+        #     url_id.web_last_page_number = web_last_page_number
+        # else:
+            # if url_id.web_last_page_number == False:
+        url_id.web_last_page_number = web_last_page_number
         begin = current_page + 1
         if begin > max_page:
             begin  = 1
@@ -393,7 +392,7 @@ class BDSFetch(models.AbstractModel):
 
     def get_last_page_number(self, url_id):
         if self.site_name =='batdongsan':
-            return get_last_page_from_bdsvn_website(url_id.url)
+            return get_last_page_from_bdsvn_website(url_id)
         return super(BDSFetch, self).get_last_page_number(url_id)
     
     
