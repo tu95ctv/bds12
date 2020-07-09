@@ -262,7 +262,7 @@ class Poster(models.Model):
                 else:
                     chotot_mg_or_cc = 'khong_biet'
             r.chotot_mg_or_cc = chotot_mg_or_cc
-            dd_tin_cua_co = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_co','!=', False)])
+            dd_tin_cua_co = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', 'kw_co_cap_1')])
             dd_tin_cua_dau_tu = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
             
             if chotot_mg_or_cc =='moi_gioi' :

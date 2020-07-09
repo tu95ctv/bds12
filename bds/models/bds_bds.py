@@ -413,7 +413,7 @@ class bds(models.Model):
     is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
     # dd_tin_cua_co = fields.Boolean(compute='_compute_kw_mg', store = True, string='is có kw môi giới')
     dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
-    kw_mg= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
+    kw_mg = fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
     kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
     is_kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
     kw_co_date = fields.Char(compute='_compute_kw_mg',store=True)
