@@ -290,13 +290,12 @@ class UserReadMark(models.Model):
     _name = 'user.read.mark'
 
     user_id = fields.Many2one('res.users')
-    # bds_id = fields.Many2one('bds.bds')
     bds_id = fields.Char('bds.bds')
+
 class UserQuanTamMark(models.Model):
     _name = 'user.quantam.mark'
 
     user_id = fields.Many2one('res.users')
-    # bds_id = fields.Many2one('bds.bds')
     bds_id = fields.Char('bds.bds')
 
 class bds(models.Model):
@@ -452,7 +451,29 @@ class bds(models.Model):
     full_loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
     loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
     
-    
+    def search(self, args, **kwargs):
+        try:
+            rs = args.index(1)
+        except:
+            rs = None
+        if rs !=None:
+            print ('****args****', args)
+            # l =[('user_read_mark_ids','=',False)]
+            rs = args.index(1)
+            del args[rs]
+            print ('****args2****', args)
+            user_read_mark = self.env['user.read.mark'].search([('user_id','=',self.env.uid)])
+            print ('**user_read_mark***', user_read_mark)
+            user_read_mark_bds_ids = user_read_mark.mapped('bds_id')
+            print ('***user_read_mark_bds_ids**', user_read_mark_bds_ids)
+            # user_read_mark_bds_ids = tuple(map(lambda i:i.id, user_read_mark_bds_ids))
+            # user_read_mark_bds_ids = user_read_mark.ids
+            print ('**user_read_mark_bds_ids***', )
+            if user_read_mark_bds_ids:
+                args += [['id', 'not in', user_read_mark_bds_ids]]
+            print ('***args sau cung***', args)
+        return super(bds, self).search(args, **kwargs)
+        
 
     @api.depends('html')
     def _compute_loai_hem_xt(self):
@@ -460,7 +481,7 @@ class bds(models.Model):
             html = r.html
             loai_hem,  full_loai_hem = detech_hxt(html)
             if not loai_hem:
-                loai_hem,  full_loai_hem = detech_hxm(html)
+                loai_hem,  full_loai_hem = detech_hxm(html) 
                 if not loai_hem:
                     loai_hem,  full_loai_hem = detech_hbg(html)
             r.loai_hem_xt, r.full_loai_hem_xt = loai_hem,  full_loai_hem

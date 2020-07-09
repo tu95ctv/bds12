@@ -21,6 +21,8 @@ from unidecode import unidecode
 import json
 import math
 from odoo.addons.bds.models.bds_tools  import  FetchError
+import traceback
+
 def convert_muaban_string_gia_to_float(str):
     rs = re.search('(\d+) tỷ',str,re.I)
     if rs:
@@ -52,82 +54,10 @@ def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
 class ChototMainFetch(models.AbstractModel):
     _name = 'abstract.main.fetch'
 
-    def get_last_page_number(self, url_id):
-        if self.site_name =='chotot':
-            page_1st_url = create_cho_tot_page_link(url_id.url, 1)
-            html = request_html(page_1st_url)
-            html = json.loads(html)
-            total = int(html["total"])
-            web_last_page_number = int(math.ceil(total/20.0))
-            return web_last_page_number
-
-
-    def gen_page_number_list(self, url_id ): 
-        is_current_page_2 = getattr(self, 'is_current_page_2', False)
-        if is_current_page_2:
-            current_page_field_name = 'current_page_2'
-        else:
-            current_page_field_name = 'current_page'
-        self.current_page_field_name = current_page_field_name
-        
-        current_page = getattr(url_id, current_page_field_name)
-        set_leech_max_page = getattr(self,'max_page',0) or url_id.set_leech_max_page
-        
-        web_last_page_number =  self.get_last_page_number(url_id)
-
-
-        if set_leech_max_page and  set_leech_max_page < web_last_page_number:
-            max_page =  set_leech_max_page
-        else:
-            max_page = web_last_page_number
-        # if url_id.siteleech_id.name !='muaban':
-        #     url_id.web_last_page_number = web_last_page_number
-        # else:
-            # if url_id.web_last_page_number == False:
-        url_id.web_last_page_number = web_last_page_number
-        begin = current_page + 1
-        if begin > max_page:
-            begin  = 1
-        end = begin   + url_id.set_number_of_page_once_fetch - 1
-        if end > max_page:
-            end = max_page
-        end_page_number_in_once_fetch = end
-        page_lists = range(begin, end+1)
-        number_of_pages = end - begin + 1
-        return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
-
-    def make_topic_link_from_list_id(self, list_id):
-        if  self.site_name =='chotot':
-            link  = 'https://gateway.chotot.com/v1/public/ad-listing/' + str(list_id)
-        elif self.site_name =='batdongsan':
-            link  = 'https://batdongsan.com.vn' +  list_id
-        else:
-            link = list_id
-        return link
-
     def create_page_link(self, format_page_url, page_int):
         if self.site_name == 'chotot':
             url =  create_cho_tot_page_link(format_page_url, page_int)
             return url
-
-
-    def fetch_topics_info_for_page_handle(self, page_int, format_page_url):
-        topic_data_from_pages_of_a_page = []
-        
-        if self.site_name == 'chotot':
-            page_url = self.create_page_link(format_page_url, page_int)
-            html_page = request_html(page_url)
-            json_a_page = json.loads(html_page)
-            topic_data_from_pages_of_a_page_origin = json_a_page['ads']
-            for topic_data_from_page_cho_tot in topic_data_from_pages_of_a_page_origin:
-                topic_data_from_page = deepcopy (topic_data_from_page_cho_tot)
-                gia, trieu_gia = convert_chotot_price(topic_data_from_page)#topic_data_from_page['price']
-                topic_data_from_page ['gia'] = gia
-                date = topic_data_from_page['date']
-                naitive_dt = convert_chotot_date_to_datetime(date)
-                topic_data_from_page ['public_datetime'] = naitive_dt
-                topic_data_from_pages_of_a_page.append(topic_data_from_page)
-        return topic_data_from_pages_of_a_page
 
     def request_topic (self, link, url_id):
         if self.site_name =='chotot':
@@ -135,6 +65,7 @@ class ChototMainFetch(models.AbstractModel):
             topic_dict = ChototGetTopic(self.env).get_topic(topic_html_or_json, self.siteleech_id_id)
             return topic_dict
 
+    
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
         copy_topic_dict = {}
         if self.site_name =='chotot':
@@ -144,82 +75,17 @@ class ChototMainFetch(models.AbstractModel):
                 copy_topic_dict['loai_nha'] =  topic_data_from_page.get('category_name')       
         return copy_topic_dict
 
-    # MỚI THÊM NGÀY 11/04
-    def fetch_a_url_id (self, url_id):
-        self.site_name = url_id.siteleech_id.name
-        self.siteleech_id_id = url_id.siteleech_id.id
-        if self.site_name=='muaban':
-            self.allow_write_public_datetime = False
+    def make_topic_link_from_list_id(self, list_id):
+        if  self.site_name =='chotot':
+            link  = 'https://gateway.chotot.com/v1/public/ad-listing/' + str(list_id)
+        elif self.site_name =='batdongsan':
+            link  = 'https://batdongsan.com.vn' +  list_id
         else:
-            self.allow_write_public_datetime = True
+            link = list_id
+        return link
+          
 
-        end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(url_id) 
-        
-        begin_time = datetime.datetime.now()
-        number_notice_dict = {
-            'page_int':0,
-            'curent_link':u'0/0',
-            'link_number' : 0,
-            'update_link_number' : 0,
-            'create_link_number' : 0,
-            'existing_link_number' : 0,
-            'begin_page':begin,
-            'so_page':so_page,
-            'page_lists':page_lists,
-            'length_link_per_curent_page':0,
-            'topic_index':0,
-            }
-        page_index = 0
-        for page_int in page_lists:
-            page_index +=1
-            number_notice_dict['page_int'] = page_int
-            number_notice_dict['page_index'] = page_index
-
-            try:
-                self.page_handle( page_int, url_id, number_notice_dict)
-            except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':str(e)})
-
-    
-        self.last_fetched_url_id = url_id.id
-        interval = (datetime.datetime.now() - begin_time).total_seconds()
-        url_id.interval = interval
-        url_id.write({self.current_page_field_name: end_page_number_in_once_fetch,
-                    'create_link_number': number_notice_dict['create_link_number'],
-                    'update_link_number': number_notice_dict["update_link_number"],
-                    'link_number': number_notice_dict["link_number"],
-                    'existing_link_number': number_notice_dict["existing_link_number"],
-                    })
-        return None
-
-
-    
-
-    def page_handle(self, page_int, url_id, number_notice_dict):
-        number_notice_dict['page_int'] = page_int
-        format_page_url = url_id.url  
-        topic_data_from_pages_of_a_page = self.fetch_topics_info_for_page_handle(page_int, format_page_url)
-        number_notice_dict['curent_page'] = page_int 
-        number_notice_dict['length_link_per_previous_page']  = number_notice_dict.get('length_link_per_curent_page', None)
-        number_notice_dict['length_link_per_curent_page'] = len(topic_data_from_pages_of_a_page)
-        topic_index = 0
-        for topic_data_from_page in topic_data_from_pages_of_a_page:
-            topic_index +=1
-            number_notice_dict['topic_index'] = topic_index
-            list_id = topic_data_from_page['list_id']
-            link = self.make_topic_link_from_list_id(list_id)
-            try:
-                self.deal_a_topic(link, number_notice_dict, url_id, topic_data_from_page=topic_data_from_page)
-            except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':str(e)})
-            except Exception as e:
-                if url_id.siteleech_id.name == 'batdongsan':
-                    self.env['bds.error'].create({'name':str(e),'des':str(e)})
-                else:
-                    raise
-
-
-    def deal_a_topic(self, link, number_notice_dict, url_id, topic_data_from_page={}):
+    def deal_a_topic(self, link, url_id, topic_data_from_page={}):
         # print (u'~~~~~~~~dealtopic_index %s/%s- page_int %s - page_index %s/so_page %s'
         #             %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
         #             number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
@@ -230,9 +96,14 @@ class ChototMainFetch(models.AbstractModel):
         gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
         public_date  = gmt7_public_datetime.date()
         search_bds_obj= self.env['bds.bds'].search([('link','=',link)])
-        
+
+        is_existing_link_number = 0
+        is_update_link_number = 0
+        is_create_link_number = 0
+
         if search_bds_obj:
-            number_notice_dict["existing_link_number"] = number_notice_dict["existing_link_number"] + 1
+            
+            # number_notice_dict["existing_link_number"] = number_notice_dict["existing_link_number"] + 1
             diff_day_public_from_now =  (now - public_datetime).days
             if diff_day_public_from_now==0:
                 
@@ -274,7 +145,9 @@ class ChototMainFetch(models.AbstractModel):
                 #     %(number_notice_dict['topic_index'],number_notice_dict['length_link_per_curent_page'],
                 #     number_notice_dict['page_int'], number_notice_dict['page_index'],number_notice_dict['so_page']))
                 search_bds_obj.write(update_dict)
-                number_notice_dict['update_link_number'] = number_notice_dict['update_link_number'] + 1
+                # number_notice_dict['update_link_number'] = number_notice_dict['update_link_number'] + 1
+                is_update_link_number = 1
+            is_existing_link_number = 1
         else:
             write_dict = {}
             write_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
@@ -290,10 +163,177 @@ class ChototMainFetch(models.AbstractModel):
             write_dict['cate'] = url_id.cate
             write_dict['sell_or_rent'] = url_id.sell_or_rent
             self.env['bds.bds'].create(write_dict) 
-            number_notice_dict['create_link_number'] = number_notice_dict['create_link_number'] + 1    
+            # number_notice_dict['create_link_number'] = number_notice_dict['create_link_number'] + 1    
+            is_create_link_number = 1
+        # link_number = number_notice_dict.get("link_number", 0) + 1
+        # number_notice_dict["link_number"] = link_number
+        return is_existing_link_number, is_update_link_number, is_create_link_number
         
-        link_number = number_notice_dict.get("link_number", 0) + 1
-        number_notice_dict["link_number"] = link_number
+
+    def fetch_topics_info_in_page_handle(self, page_int, format_page_url):
+        topic_data_from_pages_of_a_page = []
+        
+        if self.site_name == 'chotot':
+            page_url = self.create_page_link(format_page_url, page_int)
+            html_page = request_html(page_url)
+            json_a_page = json.loads(html_page)
+            topic_data_from_pages_of_a_page_origin = json_a_page['ads']
+            for topic_data_from_page_cho_tot in topic_data_from_pages_of_a_page_origin:
+                topic_data_from_page = deepcopy (topic_data_from_page_cho_tot)
+                gia, trieu_gia = convert_chotot_price(topic_data_from_page)#topic_data_from_page['price']
+                topic_data_from_page ['gia'] = gia
+                date = topic_data_from_page['date']
+                naitive_dt = convert_chotot_date_to_datetime(date)
+                topic_data_from_page ['public_datetime'] = naitive_dt
+                topic_data_from_pages_of_a_page.append(topic_data_from_page)
+        return topic_data_from_pages_of_a_page
+
+
+    def page_handle(self, page_int, url_id):
+        format_page_url = url_id.url  
+        existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
+        try:
+            topic_data_from_pages_of_a_page = self.fetch_topics_info_in_page_handle(page_int, format_page_url)
+        except FetchError as e:
+            self.env['bds.error'].create({'name':str(e),'des':str(e)})
+            return existing_link_number, update_link_number, create_link_number, link_number
+        except Exception as e:
+            if url_id.siteleech_id.name == 'batdongsan':
+                self.env['bds.error'].create({'name':'lỗi fetch_topics_info_in_page_handle','des':traceback.format_exc()})
+                return existing_link_number, update_link_number, create_link_number, link_number
+            else:
+                raise
+            
+
+        # number_notice_dict['curent_page'] = page_int 
+        # number_notice_dict['length_link_per_curent_page'] = len(topic_data_from_pages_of_a_page)
+        # topic_index = 0
+        
+        link_number = len(topic_data_from_pages_of_a_page)
+        for topic_data_from_page in topic_data_from_pages_of_a_page:
+            # topic_index +=1
+            # number_notice_dict['topic_index'] = topic_index
+            list_id = topic_data_from_page['list_id']
+            link = self.make_topic_link_from_list_id(list_id)
+            try:
+                is_existing_link_number, is_update_link_number, is_create_link_number = \
+                    self.deal_a_topic(link, url_id, topic_data_from_page=topic_data_from_page)
+                existing_link_number += is_existing_link_number
+                update_link_number += is_update_link_number
+                create_link_number += is_create_link_number
+            except FetchError as e:
+                self.env['bds.error'].create({'name':str(e),'des':str(e)})
+            except Exception as e:
+                if url_id.siteleech_id.name == 'batdongsan':
+                    self.env['bds.error'].create({'name':str(e),'des':str(e)})
+                else:
+                    raise
+        return existing_link_number, update_link_number, create_link_number, link_number
+
+    def get_last_page_number(self, url_id):
+        if self.site_name =='chotot':
+            page_1st_url = create_cho_tot_page_link(url_id.url, 1)
+            html = request_html(page_1st_url)
+            html = json.loads(html)
+            total = int(html["total"])
+            web_last_page_number = int(math.ceil(total/20.0))
+            return web_last_page_number
+
+    def gen_page_number_list(self, url_id ): 
+        is_current_page_2 = getattr(self, 'is_current_page_2', False)
+        if is_current_page_2:
+            current_page_field_name = 'current_page_2'
+        else:
+            current_page_field_name = 'current_page'
+        self.current_page_field_name = current_page_field_name
+        
+        current_page = getattr(url_id, current_page_field_name)
+        set_leech_max_page = getattr(self,'max_page',0) or url_id.set_leech_max_page
+        
+        fetch_error = False
+        try:
+            web_last_page_number =  self.get_last_page_number(url_id)
+        except FetchError as e:
+            web_last_page_number = url_id.web_last_page_number or 200
+            fetch_error = True
+
+        if set_leech_max_page and  set_leech_max_page < web_last_page_number:
+            max_page =  set_leech_max_page
+        else:
+            max_page = web_last_page_number
+        # if url_id.siteleech_id.name !='muaban':
+        #     url_id.web_last_page_number = web_last_page_number
+        # else:
+            # if url_id.web_last_page_number == False:
+        if fetch_error == False:
+            url_id.web_last_page_number = web_last_page_number
+        begin = current_page + 1
+        if begin > max_page:
+            begin  = 1
+        end = begin   + url_id.set_number_of_page_once_fetch - 1
+        if end > max_page:
+            end = max_page
+        end_page_number_in_once_fetch = end
+        page_lists = range(begin, end+1)
+        number_of_pages = end - begin + 1
+        return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
+
+
+    # MỚI THÊM NGÀY 11/04
+    def fetch_a_url_id (self, url_id):
+        self.site_name = url_id.siteleech_id.name
+        self.siteleech_id_id = url_id.siteleech_id.id
+        if self.site_name=='muaban':
+            self.allow_write_public_datetime = False
+        else:
+            self.allow_write_public_datetime = True
+
+        end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(url_id) 
+        
+        begin_time = datetime.datetime.now()
+        # number_notice_dict = {
+        #     'page_int':0,
+        #     'curent_link':u'0/0',
+        #     'link_number' : 0,
+        #     'update_link_number' : 0,
+        #     'create_link_number' : 0,
+        #     'existing_link_number' : 0,
+        #     'begin_page':begin,
+        #     'so_page':so_page,
+        #     'page_lists':page_lists,
+        #     'length_link_per_curent_page':0,
+        #     'topic_index':0,
+        #     }
+        # page_index = 0
+        existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
+        for page_int in page_lists:
+            # page_index +=1
+            # number_notice_dict['page_index'] = page_index
+
+            # try:
+            existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page, link_number_one_page = \
+                self.page_handle( page_int, url_id)
+
+            existing_link_number += existing_link_number_one_page
+            update_link_number += update_link_number_one_page
+            create_link_number += create_link_number_one_page
+            link_number += link_number_one_page
+            # except FetchError as e:
+            #     self.env['bds.error'].create({'name':str(e),'des':str(e)})
+
+    
+        self.last_fetched_url_id = url_id.id
+        interval = (datetime.datetime.now() - begin_time).total_seconds()
+        url_id.interval = interval
+        url_id.write({self.current_page_field_name: end_page_number_in_once_fetch,
+                    'create_link_number': create_link_number,
+                    'update_link_number': update_link_number,
+                    'link_number': link_number,
+                    'existing_link_number': existing_link_number,
+                    })
+        return None
+
+
 
 
 class MuabanFetch(models.AbstractModel):
@@ -340,8 +380,8 @@ class MuabanFetch(models.AbstractModel):
             
         return page_url
 
-    def fetch_topics_info_for_page_handle(self, page_int, format_page_url):
-        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_for_page_handle(page_int, format_page_url)
+    def fetch_topics_info_in_page_handle(self, page_int, format_page_url):
+        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_in_page_handle(page_int, format_page_url)
         if self.site_name == 'muaban':
             page_url = self.create_page_link(format_page_url, page_int)
             html_page = request_html(page_url)
@@ -424,8 +464,8 @@ class BDSFetch(models.AbstractModel):
             page_url = format_page_url + '/' + 'p' +str(page_int)
         return page_url
 
-    def fetch_topics_info_for_page_handle(self, page_int, format_page_url):
-        topic_data_from_pages_of_a_page = super(BDSFetch, self).fetch_topics_info_for_page_handle(page_int, format_page_url)
+    def fetch_topics_info_in_page_handle(self, page_int, format_page_url):
+        topic_data_from_pages_of_a_page = super(BDSFetch, self).fetch_topics_info_in_page_handle(page_int, format_page_url)
         if self.site_name == 'batdongsan':
             page_url = self.create_page_link(format_page_url, page_int)
             html_page = request_html(page_url)
@@ -433,7 +473,7 @@ class BDSFetch(models.AbstractModel):
             title_and_icons = soup.select('div.search-productItem')
             for title_and_icon in title_and_icons:
                 topic_data_from_page = {}
-                title_soups = title_and_icon.select("div.p-title  a")
+                title_soups = title_and_icon.select("div.p-titlekaka  a")
                 topic_data_from_page['list_id'] = title_soups[0]['href']
                 icon_soup = title_and_icon.select('img.product-avatar-img')
                 topic_data_from_page['thumb'] = icon_soup[0]['src']

@@ -60,7 +60,12 @@
         <filter  name="gia" string="giá từ 2 tới 4"  domain="[ ('gia','&gt;=', 2), ('gia','&gt;=', 4) ]"/>
         <filter  name="gia" string="giá từ 4 tới 6"  domain="[ ('gia','&gt;=', 4), ('gia','&gt;=', 6) ]"/>
         <separator /> -->
+        <filter name="id" string="id not in" domain ="[('id','not in',(180,181))]"></filter>
+
         <filter name="user_read_mark_ids" string="đánh dấu đọc của user hiện tại" domain ="[('user_read_mark_ids.user_id','=',uid)]"></filter>
+        <separator /> 
+        <filter name="user_read_mark_ids" string="đánh dấu chưa đọc của user hiện tại" domain ="[1]" context="{'search_user_not_read':True}"></filter>
+        <separator /> 
         <filter name="user_quantam_mark_ids" string="đánh dấu quan tâm của user hiện tại" domain ="[('user_quantam_mark_ids.user_id','=',uid)]"></filter>
         <separator />
           <filter name="create today" string="Tạo trong ngày" 
