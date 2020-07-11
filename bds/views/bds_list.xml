@@ -32,10 +32,7 @@
                 <field name="len_site" />
                 <field name="count_post_of_onesite_max" />
                 <field name="siteleech_max_id" />
-                <field name="loai_hem" />
-                <field name="full_loai_hem" />
-                <field name="loai_hem_xt" />
-                <field name="full_loai_hem_xt" />
+             
                 <field name="du_doan_cc_or_mg" />
                 <field name="mat_tien_or_trich_dia_chi" />
                 <field name="trich_dia_chi" />
@@ -72,6 +69,17 @@
                 <field name="count_post_all_site" />
                 <field name="ngay_update_gia" />
                 <field name="diff_public_datetime" />
+
+                <field name="so_lan_diff_public_update" />
+                <field name="so_lan_gia_update" />
+
+                <field name="area" />
+                <field name="choose_area" />
+                <field name="ti_le_dien_tich_web_vs_auto_dien_tich" />
+                <field name="loai_nha" />
+                <field name="mat_tien" />
+                <field name="full_mat_tien" />
+                <field name="vip" />
             </tree>
         </field>
     </record>

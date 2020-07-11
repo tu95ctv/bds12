@@ -9,9 +9,8 @@ from unidecode import unidecode
 
 class FetchError(Exception):
     pass
-
-def request_html(url, try_again=1, is_decode_utf8 = True):
-    headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
+headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
+def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
     count_fail = 0
     def in_try():
         req =request.Request(url, None, headers)

@@ -127,13 +127,14 @@
             <filter name="so_phong_ngu" string="so_phong_ngu" domain="[]" context="{'group_by':'so_phong_ngu'}" />
             <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
             <filter name="dtsd" string="dtsd" domain="[]" context="{'group_by':'dtsd'}" />
-            <filter name="loai_hem" string="loai_hem" domain="[]" context="{'group_by':'loai_hem'}" />
-            <filter name="full_loai_hem" string="full_loai_hem" domain="[]" context="{'group_by':'full_loai_hem'}" />
+            
 
-            <filter name="loai_hem_xt" string="loai_hem_xt" domain="[]" context="{'group_by':'loai_hem_xt'}" />
-            <filter name="full_loai_hem_xt" string="full_loai_hem_xt" domain="[]" context="{'group_by':'full_loai_hem_xt'}" />
 
             <filter name="loai_hem_selection" string="loai_hem_selection" domain="[]" context="{'group_by':'loai_hem_selection'}" />
+            
+            <filter name="mat_tien" string="mat_tien" domain="[]" context="{'group_by':'mat_tien'}" />
+            <filter name="is_mat_tien" string="full_mat_tien" domain="[]" context="{'group_by':'full_mat_tien'}" />
+            <filter name="is_mat_tien" string="is_mat_tien" domain="[]" context="{'group_by':'is_mat_tien'}" />
 
         </group>
         

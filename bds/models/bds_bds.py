@@ -33,13 +33,13 @@ def detech_mat_tien(html, p = None):
             full_address_unidecode = unidecode (full_address)
             if number not in deal_s:
                 deal_s.append(number)
-                sxs = re.search('x(?: |$)',ten_duong, re.I)
+                sxs = re.search('x(?: |$)',ten_duong, re.I) # có x trong tên đường
                 if sxs:
                     continue
                 # ddm = re.search('\d+m',ten_duong, re.I)
                 # if ddm:
                 #     continue
-                ddm = re.search('(?:^|x|\*|\s)\s*\d+m',full_address, re.I)
+                ddm = re.search('(?:^|x|\*|\s)\s*\d+m',full_address, re.I)# check mét
                 if ddm:
                     continue
 
@@ -170,7 +170,7 @@ def auto_ngang_doc_compute(html,rarea):
         ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
         if rarea ==0:
             choose_area = auto_dien_tich 
-        elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.8:
+        elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.4:
             choose_area = auto_dien_tich
         else:
             choose_area = rarea
@@ -179,7 +179,7 @@ def auto_ngang_doc_compute(html,rarea):
     return auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic
 
 def detech_hxh(html):
-    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xh|xe hơi)'
+    p = '(?:h|hẻm|hẽm|d|đ|đường)\s{0,1}(?:xh|xe hơi)'
     rs = re.search(p, html, re.I)
     hxh_str, full_hxh = False,False
     if rs:
@@ -195,9 +195,36 @@ def detech_hxh(html):
         hxh_str = rs.group(0)
     return hxh_str, full_hxh
 
+def detech_is_mat_tien(html):
+    # is_loop = True
+    while 1:
+        p = '(?:(?<!2 )mặt tiền|nhà mt|mặt phố)(?! hẻm)'
+        rs = re.search(p, html, re.I)
+        hxh_str, full_hxh,is_mat_tien = False,False,False
+        if rs:
+            span0 = rs.span(0)[0]
+            pre_index = span0-10
+            if pre_index<0:
+                pre_index = 0
+            pre = html[pre_index:span0]
+            gan_sat_cach_pt = 'gần|sát|cách|hai|từ|ra'
+            gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
+            if gan_sat_cach_search:
+                before_index = rs.span()[1] + 1
+                html = html[before_index:]
+                continue
+            hxh_str = rs.group(0)
+            full_before_index = rs.span(0)[1] + 10
+            full_hxh = html[pre_index:full_before_index]
+            is_mat_tien = True
+            return hxh_str, full_hxh, is_mat_tien
+        else:
+            return hxh_str, full_hxh, is_mat_tien
+
+
 
 def detech_hxt(html):
-    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xt|xe (?:tải|tãi))'
+    p = '(?:h|hẻm|hẽm|d|đ|đường)\s{0,1}(?:xt|xe (?:tải|tãi))'
     rs = re.search(p, html, re.I)
     hxh_str, full_hxh = False,False
     if rs:
@@ -252,15 +279,15 @@ def detech_hem_all(html):
     loai_hem, full_loai_hem = detech_hxh(html)
     if loai_hem:
         loai_hem_selection = 'hxh'
-    if not loai_hem:
+    else:
         loai_hem,  full_loai_hem = detech_hxt(html)
         if loai_hem:
             loai_hem_selection = 'hxt'
-        if not loai_hem:
+        else:
             loai_hem,  full_loai_hem = detech_hxm(html)
             if loai_hem:
                 loai_hem_selection = 'hxm'
-            if not loai_hem:
+            else:
                 loai_hem,  full_loai_hem = detech_hbg(html)
                 if loai_hem:
                     loai_hem_selection = 'hbg'
@@ -355,8 +382,8 @@ class bds(models.Model):
     # subtitle_html_for_agency = fields.Html(compute='subtitle_html_for_agency_',store=True, string="Để làm cò")
     auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(compute = 'auto_ngang_doc_',store=True)
+    auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
+    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
   
 
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
@@ -371,7 +398,7 @@ class bds(models.Model):
     muc_dt = fields.Selection(
         [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
         compute='muc_dt_',store = True,string=u'Mức diện tích')
-    don_gia = fields.Float(digit=(6,0),compute='don_gia_',store=True,string=u'Đơn giá')
+    don_gia = fields.Float(digit=(6,2),compute='don_gia_',store=True,string=u'Đơn giá')
     ti_le_don_gia = fields.Float(digits=(6,2),compute='ti_le_don_gia_',store=True)
     muc_don_gia = fields.Selection([('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
                                     ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
@@ -436,68 +463,58 @@ class bds(models.Model):
     # choose_area = fields.Float(digits=(6,2))#,store=True
     
     choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
-    so_lau = fields.Float(compute ='_compute_so_lau',store=True)
+    so_lau = fields.Float(digits=(6,1),compute ='_compute_so_lau',store=True)
     so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
-    hem_rong = fields.Float(compute='_compute_hem_rong', store=True)
+    hem_rong = fields.Float(digits=(6,2), compute='_compute_hem_rong', store=True)
     hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
 
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
-    dtsd = fields.Float(compute='auto_ngang_doc_', store=True)
+    dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
 
-    loai_hem = fields.Char(compute='_compute_loai_hem', store=True)
-    full_loai_hem = fields.Char(compute='_compute_loai_hem', store=True)
-
-    loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
-    full_loai_hem_xt = fields.Char(compute='_compute_loai_hem_xt', store=True)
+ 
+    
     loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
     
+
+    so_lan_diff_public_update = fields.Integer()
+    so_lan_gia_update = fields.Integer()
+    mat_tien = fields.Char(compute='_detect_mat_tien', store=True)
+    full_mat_tien = fields.Char(compute='_detect_mat_tien', store=True)
+    is_mat_tien = fields.Boolean(compute='_detect_mat_tien', store = True)
+    vip = fields.Char()
+    @api.depends('trigger')
+    def _detect_mat_tien(self):
+        for r in self:
+            r.mat_tien, r.full_mat_tien, r.is_mat_tien = detech_is_mat_tien(r.title + ' ' + r.html)
+
     def search(self, args, **kwargs):
         try:
             rs = args.index(1)
         except:
             rs = None
         if rs !=None:
-            print ('****args****', args)
             # l =[('user_read_mark_ids','=',False)]
             rs = args.index(1)
             del args[rs]
-            print ('****args2****', args)
             user_read_mark = self.env['user.read.mark'].search([('user_id','=',self.env.uid)])
-            print ('**user_read_mark***', user_read_mark)
             user_read_mark_bds_ids = user_read_mark.mapped('bds_id')
-            print ('***user_read_mark_bds_ids**', user_read_mark_bds_ids)
             # user_read_mark_bds_ids = tuple(map(lambda i:i.id, user_read_mark_bds_ids))
             # user_read_mark_bds_ids = user_read_mark.ids
-            print ('**user_read_mark_bds_ids***', )
             if user_read_mark_bds_ids:
                 args += [['id', 'not in', user_read_mark_bds_ids]]
-            print ('***args sau cung***', args)
         return super(bds, self).search(args, **kwargs)
         
 
-    @api.depends('html')
-    def _compute_loai_hem_xt(self):
-        for r in self:
-            html = r.html
-            loai_hem,  full_loai_hem = detech_hxt(html)
-            if not loai_hem:
-                loai_hem,  full_loai_hem = detech_hxm(html) 
-                if not loai_hem:
-                    loai_hem,  full_loai_hem = detech_hbg(html)
-            r.loai_hem_xt, r.full_loai_hem_xt = loai_hem,  full_loai_hem
-
-
-    
     
     @api.depends('html')
     def _compute_loai_hem(self):
         for r in self:
-            html = r.html
+            html = r.title + ' '  + r.html
             loai_hem, full_loai_hem, loai_hem_selection = detech_hem_all(html)
-            r.loai_hem_xt, r.full_loai_hem_xt, r.loai_hem_selection = loai_hem, full_loai_hem, loai_hem_selection
+            r.loai_hem, r.full_loai_hem, r.loai_hem_selection = loai_hem, full_loai_hem, loai_hem_selection
             
 
-    @api.depends('html','title','address','trigger')
+    @api.depends('html','title','address')
     def _mat_tien_address(self):
         for r in self:
             full_adress_list_sum =  []
@@ -648,6 +665,8 @@ class bds(models.Model):
         r = super(bds,self).create(vals)
         r.count_post_of_poster_()
         r.poster_id.quanofposter_ids_()
+        r.quan_id.muc_gia_quan_()
+        r.quan_id.len_post_ids_()
         # r.quan_id.muc_gia_quan_()
 
 
@@ -664,7 +683,8 @@ class bds(models.Model):
 
     
     def make_trigger(self):
-        self.trigger = True
+        for r in self:
+            r.trigger = True
 
     # def test(self):
     #     query = "select html from bds_bds where html like 'mặt tiền' limit 2"
@@ -748,7 +768,7 @@ class bds(models.Model):
                 else:
                     chotot_mg_or_cc = 'khong_biet'
             poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
-            dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','!=', False)])
+            dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', 'kw_co_cap_1')])
             dd_tin_cua_dau_tu = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
             
             if chotot_mg_or_cc =='moi_gioi' :
@@ -933,7 +953,7 @@ class bds(models.Model):
         return sum_trust_address_result_keys, co_date_247_result_keys_sum
 
 
-    @api.depends('html', 'trigger')
+    @api.depends('html')
     @skip_if_cate_not_bds 
     def trich_dia_chi_(self):
         for r in self:
@@ -1112,7 +1132,7 @@ class bds(models.Model):
 
 
 
-    @api.depends('html','trigger')
+    @api.depends('html')
     @skip_if_cate_not_bds               
     def _compute_dd_tin_cua_dau_tu(self):
         
@@ -1163,8 +1183,8 @@ class bds(models.Model):
     @api.depends('gia','choose_area')
     def don_gia_(self):
         for r in self:
-            if r.gia and r.area:
-                r.don_gia = r.gia*1000/r.area
+            if r.gia > 0.5 and r.choose_area:
+                r.don_gia = r.gia*1000/r.choose_area
                 
     @api.depends('don_gia')
     def muc_don_gia_(self):
@@ -1282,7 +1302,6 @@ class bds(models.Model):
                 images = r.images_ids
                 image_tags = map(lambda i: '<img src="%s" style="width:300px" alt="Girl in a jacket">'%i, list(images.mapped('url')) + [r.thumb])
                 image_html = '<br>'.join(image_tags)
-                # print ('***image_html**', image_html)
                 one_mail_html += '<br>' + image_html
 
                 body_html += '<br><br><br>' + one_mail_html

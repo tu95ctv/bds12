@@ -231,7 +231,6 @@ class Poster(models.Model):
     def count_post_of_poster_(self):
         bds_obj = self.env['bds.bds']
         for r in self:
-            print ('***count_post_of_poster_***', r.id)
             count_post_all_site = bds_obj.search_count([('poster_id','=',r.id)])
             r.count_post_all_site = count_post_all_site
             # return count_post_all_site

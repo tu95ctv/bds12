@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
-
 from odoo import models, fields, api
-# from odoo.addons.bds.models.fetch import fetch
 from odoo.addons.bds.models.bds_tools  import  FetchError
 
 class loop_fetch_cron(models.Model):
     _name = 'loop.fetch.cron'
     fetch_ids = fields.Many2many('bds.fetch',required=True)
     fetch_current_id = fields.Many2one('bds.fetch')
-    
     def fetch_cron(self):
         loop_fetch_cron_id =  self.search([], limit=1, order='id desc')
         if loop_fetch_cron_id:
@@ -25,20 +22,7 @@ class loop_fetch_cron(models.Model):
                 if new_index > len(fetch_ids)-1:
                     new_index = 0    
                 fetch_id = fetch_ids[new_index]
-
-                # print ('fetch trong loop')
-                # fetch_id.fetch_all_url()
-                # loop_fetch_cron_id.fetch_current_id = fetch_id.id
-                # print ('end fetch trong loop')
                 fetch_id.fetch()
-                # try:
-                #     fetch_id.fetch_all_url()
-                # except FetchError as e:
-                #     try:
-                #         self.env['bds.error'].create({'name':'lỗi: %s trong fetch_cron'%e, 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
-                #     except Exception as e:
-                #         self.env['bds.error'].create({'name':'có một lỗi khi fetch', 'des': 'id:%s - name:%s'%(fetch_id.id, fetch_id.name)})
-                    # print ('end co 1 loi')
                 loop_fetch_cron_id.fetch_current_id = fetch_id.id
             else:
                 raise ValueError('khong ton tai: fetch_ids')

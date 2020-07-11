@@ -52,26 +52,39 @@ class QuanHuyen(models.Model):
     name_unidecode = fields.Char()
     name_without_quan = fields.Char()
     post_ids = fields.One2many('bds.bds','quan_id')
-    muc_gia_quan = fields.Float(digit=(6,2),string=u'Mức Đơn Giá(triệu/m2)',compute='muc_gia_quan_',store=True)
-    len_post_ids = fields.Integer(compute='len_post_ids_')
+    # muc_gia_quan = fields.Float(digit=(6,2), string=u'Mức Đơn Giá(triệu/m2)', compute='muc_gia_quan_',store=True)
+    muc_gia_quan = fields.Float(digit=(6,2))
+    len_post_ids = fields.Integer()
+
+    # len_post_ids = fields.Integer(compute='len_post_ids_')
     level = fields.Selection([('trung_tam','Trung Tâm'), ('kha_trung_tam','Khá Trung Tâm'), ('vung_ven','Vùng ven')])
 
+    def compute_len_post_ids(self):
+        r = self
+        rs = self.env['bds.bds'].search_count([('quan_id','=',r.id)])
+        return rs
+
+    
     @api.depends('post_ids')
     def len_post_ids_(self):
         for r in self:
-            r.len_post_ids = self.env['bds.bds'].search_count([('quan_id','=',r.id)])
-#             r.len_post_ids = len(r.post_ids)
+            r.len_post_ids = r.compute_len_post_ids()
         
     @api.depends('name')
     def name_khong_dau_(self):
         name_khong_dau_compute(self)
         
+
+    def compute_muc_gia_quan(self):
+        r = self
+        readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('quan_id','=',r.id)],['don_gia:avg(don_gia)'],[])
+        rs = readgroup_rs[0]['don_gia']
+        return rs
+
     @api.depends('post_ids')
     def muc_gia_quan_(self):
         for r in self:
-            readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('quan_id','=',r.id)],['don_gia:avg(don_gia)'],[])
-            rs = readgroup_rs[0]['don_gia']
-            r.muc_gia_quan = rs
+            r.muc_gia_quan = r.compute_muc_gia_quan()
     
     def set_cron_quan_trung_tam(self):
         trung_tams = ['quận 1', 'quận 3', 'quận 5', 'quận 10', 'quận tân bình', 'quận phú nhuận', 'quận tân bình', 'quận tân phú']
