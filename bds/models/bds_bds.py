@@ -624,7 +624,9 @@ class bds(models.Model):
     gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     muc_gia_quan = fields.Float(related='quan_id.muc_gia_quan')
-    ti_le_don_gia_dat_con_lai =  fields.Float()
+    ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    don_gia_quan = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    is_choose_dien_tich = fields.Float()
     @api.depends('trigger')
     def _detect_mat_tien(self):
         for r in self:
@@ -789,9 +791,15 @@ class bds(models.Model):
         r.poster_id.quanofposter_ids_()
         r.quan_id.muc_gia_quan_()
         r.quan_id.len_post_ids_()
-        if r.loai_hem_combine:
-            attr = 'don_gia_%'%r.loai_hem_combine
-        don_gia_quan = r.quan_id
+        # if r.loai_hem_combine and r.don_gia_dat_con_lai:
+        #     if r.loai_hem_combine =='mt':
+        #         loai_hem_combine = 'mat_tien'
+        #     else:
+        #         loai_hem_combine = r.loai_hem_combine
+        #     attr = 'don_gia_%s'%loai_hem_combine
+        #     don_gia_quan = getattr(r.quan_id, attr)
+        #     r.don_gia_quan = don_gia_quan
+        #     r.ti_le_don_gia_dat_con_lai = r.don_gia_dat_con_lai/don_gia_quan
         # r.quan_id.muc_gia_quan_()
 
 
@@ -1208,7 +1216,6 @@ class bds(models.Model):
     @api.depends('html','cate','area','trigger')
     @skip_if_cate_not_bds            
     def auto_ngang_doc_(self):
-        
         for r in self:
             html = r.title + r.html
             auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic = \
@@ -1218,29 +1225,64 @@ class bds(models.Model):
             ti_le_dtsd = False
             dtsd_tu_so_lau = 0
             dtsd_he_so_lau = 0
-            if so_lau:
-                dtsd_tu_so_lau = (so_lau + 1) * choose_area * 0.9
-                dtsd_he_so_lau = (so_lau_he_so + 1) * choose_area * 0.9 
-                if so_lau_he_so < 2:
-                    dtsd_he_so_lau = dtsd_he_so_lau * 0.5
-                if dtsd and choose_area:
-                    ti_le_dtsd = dtsd_tu_so_lau / dtsd
 
-            dtsd_combine = dtsd or dtsd_tu_so_lau
-            dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
-            if not dtsd_combine_he_so_lau:
-                dtsd_combine_he_so_lau =  choose_area * 0.5
-            gia_xac_nha = dtsd_combine_he_so_lau * 0.006
-            gia_dat_con_lai = 0
-            don_gia_dat_con_lai = 0
-            if r.gia and gia_xac_nha:
-                gia_dat_con_lai = r.gia - gia_xac_nha
-                if choose_area:
-                    don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
-            don_gia = 0
-            if r.gia > 0.5 and choose_area:
-                don_gia = r.gia*1000/choose_area
-                # don_gia_combine = don_gia_dat_con_lai or don_gia
+            allow_loop = 2
+            while allow_loop:
+                allow_loop -=1
+                if so_lau:
+                    dtsd_tu_so_lau = (so_lau + 1) * choose_area * 0.9
+                    dtsd_he_so_lau = (so_lau_he_so + 1) * choose_area * 0.9 
+                    if so_lau_he_so < 2:
+                        dtsd_he_so_lau = dtsd_he_so_lau * 0.5
+                    if dtsd and choose_area:
+                        ti_le_dtsd = dtsd_tu_so_lau / dtsd
+                dtsd_combine = dtsd or dtsd_tu_so_lau
+                dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
+                if not dtsd_combine_he_so_lau:
+                    dtsd_combine_he_so_lau =  choose_area * 0.5
+                gia_xac_nha = dtsd_combine_he_so_lau * 0.006
+                gia_dat_con_lai = 0
+                don_gia_dat_con_lai = 0
+                if r.gia and gia_xac_nha:
+                    gia_dat_con_lai = r.gia - gia_xac_nha
+                    if choose_area:
+                        don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
+                don_gia = 0
+                if r.gia > 0.5 and choose_area:
+                    don_gia = r.gia*1000/choose_area
+                    # don_gia_combine = don_gia_dat_con_lai or don_gia
+
+                # muc gia quan vao day
+                don_gia_quan = 0
+                ti_le_don_gia_dat_con_lai = 0
+
+                if r.loai_hem_combine and don_gia_dat_con_lai:
+                    if r.loai_hem_combine =='mt':
+                        loai_hem_combine = 'mat_tien'
+                    else:
+                        loai_hem_combine = r.loai_hem_combine
+                    attr = 'don_gia_%s'%loai_hem_combine
+                    don_gia_quan = getattr(r.quan_id, attr)
+                
+                if not don_gia_quan:
+                    don_gia_quan = r.quan_id.muc_gia_quan
+
+                if don_gia_quan:
+                    ti_le_don_gia_dat_con_lai = don_gia_dat_con_lai/don_gia_quan
+
+                if ti_le_don_gia_dat_con_lai != 0 and ti_le_don_gia_dat_con_lai < 0.3:
+                    if choose_area and so_lau:
+                        choose_area = choose_area/(so_lau + 1)
+                        continue
+                    else:
+                        break
+                else:
+                    break
+                
+            
+            
+            r.don_gia_quan = don_gia_quan
+            r.ti_le_don_gia_dat_con_lai = ti_le_don_gia_dat_con_lai
 
             r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
                  auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich

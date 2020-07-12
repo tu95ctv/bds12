@@ -138,6 +138,9 @@
             <filter name="gia_dat_con_lai" string="gia_dat_con_lai" domain="[]" context="{'group_by':'gia_dat_con_lai'}" />
             <filter name="don_gia_dat_con_lai" string="don_gia_dat_con_lai" domain="[]" context="{'group_by':'don_gia_dat_con_lai'}" />
             <filter name="loai_hem_combine" string="loai_hem_combine" domain="[]" context="{'group_by':'loai_hem_combine'}" />
+            <filter name="ti_le_don_gia_dat_con_lai" string="ti_le_don_gia_dat_con_lai" domain="[]" context="{'group_by':'ti_le_don_gia_dat_con_lai'}" />
+            <filter name="don_gia_quan" string="don_gia_quan" domain="[]" context="{'group_by':'don_gia_quan'}" />
+        
         </group>
         
       </search>

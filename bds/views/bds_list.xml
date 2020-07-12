@@ -92,6 +92,8 @@
                 <field name="gia_xac_nha" />
                 <field name="gia_dat_con_lai" />
                 <field name="loai_hem_combine" />
+                <field name="ti_le_don_gia_dat_con_lai" />
+                <field name="don_gia_quan" />
             </tree>
         </field>
     </record>

@@ -21,7 +21,7 @@
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
-
+        'data/quan_data.xml',
         'data/data_chotot_chung_cu.xml',
         'data/data_chotot_other.xml',
         'data/data_chotot_phuong.xml',
