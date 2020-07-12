@@ -12,6 +12,7 @@
                                 <field name="name" />
                                 <field name="name_viet_tat" />
                                 <field name="muc_gia_quan" />
+                                <field name="don_gia_dat_con_lai" />
                                 <field name="post_ids" />
                             </group>
                             <group />
@@ -30,6 +31,12 @@
                     <field name="name_viet_tat" />
                     <field name="len_post_ids" />
                     <field name="muc_gia_quan" />
+                    <field name="don_gia_dat_con_lai" />
+                    <field name="don_gia_mat_tien" />
+                    <field name="don_gia_hxt" />
+                    <field name="don_gia_hxh" />
+                    <field name="don_gia_hbg" />
+                    <field name="don_gia_hxm" />
                     <!-- <field name="post_ids" /> -->
                 </tree>
             </field>

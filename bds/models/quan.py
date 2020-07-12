@@ -54,6 +54,13 @@ class QuanHuyen(models.Model):
     post_ids = fields.One2many('bds.bds','quan_id')
     # muc_gia_quan = fields.Float(digit=(6,2), string=u'Mức Đơn Giá(triệu/m2)', compute='muc_gia_quan_',store=True)
     muc_gia_quan = fields.Float(digit=(6,2))
+    don_gia_dat_con_lai = fields.Float(digit=(6,2))
+    don_gia_mat_tien = fields.Float(digit=(6,2)) 
+    don_gia_hxt = fields.Float(digit=(6,2)) 
+    don_gia_hxh = fields.Float(digit=(6,2)) 
+    don_gia_hbg = fields.Float(digit=(6,2)) 
+    don_gia_hxm = fields.Float(digit=(6,2)) 
+
     len_post_ids = fields.Integer()
 
     # len_post_ids = fields.Integer(compute='len_post_ids_')
@@ -77,14 +84,32 @@ class QuanHuyen(models.Model):
 
     def compute_muc_gia_quan(self):
         r = self
-        readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('quan_id','=',r.id)],['don_gia:avg(don_gia)'],[])
-        rs = readgroup_rs[0]['don_gia']
-        return rs
+        readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 15), ('don_gia','<=', 600),('quan_id','=',r.id)],
+        ['don_gia:avg(don_gia)', 'don_gia_dat_con_lai:avg(don_gia_dat_con_lai)'],[])
+        don_gia = readgroup_rs[0]['don_gia']
+        don_gia_dat_con_lai = readgroup_rs[0]['don_gia_dat_con_lai']
+        return don_gia, don_gia_dat_con_lai
+
+    def compute_don_gia_mat_tien(self, key='mt'):
+        readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 15), ('don_gia','<=', 600),
+            ('quan_id','=',self.id), ('loai_hem_combine','=', key)],
+        ['don_gia:avg(don_gia)', 'don_gia_dat_con_lai:avg(don_gia_dat_con_lai)'],[])
+        # don_gia = readgroup_rs[0]['don_gia']
+        don_gia_dat_con_lai = readgroup_rs[0]['don_gia_dat_con_lai']
+        return don_gia_dat_con_lai
+
 
     @api.depends('post_ids')
     def muc_gia_quan_(self):
         for r in self:
-            r.muc_gia_quan = r.compute_muc_gia_quan()
+            r.muc_gia_quan, r.don_gia_dat_con_lai = r.compute_muc_gia_quan()
+            r.don_gia_mat_tien = self.compute_don_gia_mat_tien(key='mt')
+            
+            r.don_gia_hxt = self.compute_don_gia_mat_tien(key='hxt')
+            r.don_gia_hxh = self.compute_don_gia_mat_tien(key='hxh')
+            r.don_gia_hbg = self.compute_don_gia_mat_tien(key='hbg')
+            r.don_gia_hxm = self.compute_don_gia_mat_tien(key='hxm')
+
     
     def set_cron_quan_trung_tam(self):
         trung_tams = ['quận 1', 'quận 3', 'quận 5', 'quận 10', 'quận tân bình', 'quận phú nhuận', 'quận tân bình', 'quận tân phú']

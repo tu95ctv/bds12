@@ -138,7 +138,7 @@ def tim_dien_tich_trong_bai(html):
 def tim_dien_tich_sd_trong_bai(html):
     dt = 0
     while 1:
-        p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn))[\W]*([0-9]+[\.,]*\d*)\s*m2'
+        p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn|xd))[\W]*([0-9]+[\.,]*\d*)\s*m2'
         rs = re.search(p, html, re.I)
         if rs:
             span0 = rs.span(0)[0]
@@ -498,9 +498,7 @@ class bds(models.Model):
     user_quantam_mark_ids = fields.One2many('user.quantam.mark','bds_id')
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
     loai_nha = fields.Char('Loại nhà')
-
     loai_nha_selection = fields.Selection('get_loai_nha_selection_', string='Loại nhà')
-
     link = fields.Char()
     # cate = fields.Selection([('bds','BDS'),('phone','Phone'),('laptop','Laptop')])
     cate = fields.Char(default='bds')
@@ -534,22 +532,15 @@ class bds(models.Model):
     is_read = fields.Boolean()
     quan_tam = fields.Datetime(string=u'Quan Tâm')
     ko_quan_tam = fields.Datetime(string=u'Không Quan Tâm')
-
     #compute field
     html_show = fields.Text(compute='html_show_',string=u'Nội dung')
     html_replace = fields.Html(compute='html_replace_')
     html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
     link_show =  fields.Char(compute='link_show_')
-
-   
-    
-    # subtitle_html_for_agency = fields.Html(compute='subtitle_html_for_agency_',store=True, string="Để làm cò")
     auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
     auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
     ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
-  
-
     same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
@@ -562,7 +553,7 @@ class bds(models.Model):
     muc_dt = fields.Selection(
         [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
         compute='muc_dt_',store = True,string=u'Mức diện tích')
-    don_gia = fields.Float(digit=(6,2),compute='don_gia_',store=True,string=u'Đơn giá')
+    don_gia = fields.Float(digit=(6,2),compute='auto_ngang_doc_',store=True,string=u'Đơn giá')
     ti_le_don_gia = fields.Float(digits=(6,2),compute='ti_le_don_gia_',store=True)
     muc_don_gia = fields.Selection([('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
                                     ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
@@ -591,13 +582,10 @@ class bds(models.Model):
     is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
     trigger = fields.Boolean()
     diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
-
     trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
     mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
     mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    # is_mat_tien_or_trich_dia_chi = fields.Boolean(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
     is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    # dd_tin_cua_co = fields.Boolean(compute='_compute_kw_mg', store = True, string='is có kw môi giới')
     dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
     kw_mg = fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
     kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
@@ -609,37 +597,20 @@ class bds(models.Model):
     number_char = fields.Integer(compute='_compute_kw_mg',store=True)
     hoa_la_canh = fields.Char(compute='_compute_kw_mg',store=True)
     t1l1 = fields.Char(compute='_compute_kw_mg', store=True)
-
-
     dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
     kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
     kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
-    
-    # so_lau = fields.Float()
-    # so_lau_char = fields.Char()
-    # hem_rong = fields.Float()
-    # hem_rong_char = fields.Char()
-    # choose_area = fields.Float(digits=(6,2))#,store=True
-    
     choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
     so_lau = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
     so_lau_he_so = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
     so_lau_char = fields.Char(compute ='auto_ngang_doc_',store=True)
-
     hem_rong = fields.Float(digits=(6,2), compute='_compute_hem_rong', store=True)
     hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
     loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
     loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
          compute='_compute_loai_hem', store=True)
-
-
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
     dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-
- 
-    
-    
-
     so_lan_diff_public_update = fields.Integer()
     so_lan_gia_update = fields.Integer()
     mat_tien = fields.Char(compute='_detect_mat_tien', store=True)
@@ -649,11 +620,11 @@ class bds(models.Model):
     dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     ti_le_dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     dtsd_combine = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    
     gia_xac_nha = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     muc_gia_quan = fields.Float(related='quan_id.muc_gia_quan')
+    ti_le_don_gia_dat_con_lai =  fields.Float()
     @api.depends('trigger')
     def _detect_mat_tien(self):
         for r in self:
@@ -818,6 +789,9 @@ class bds(models.Model):
         r.poster_id.quanofposter_ids_()
         r.quan_id.muc_gia_quan_()
         r.quan_id.len_post_ids_()
+        if r.loai_hem_combine:
+            attr = 'don_gia_%'%r.loai_hem_combine
+        don_gia_quan = r.quan_id
         # r.quan_id.muc_gia_quan_()
 
 
@@ -1254,6 +1228,8 @@ class bds(models.Model):
 
             dtsd_combine = dtsd or dtsd_tu_so_lau
             dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
+            if not dtsd_combine_he_so_lau:
+                dtsd_combine_he_so_lau =  choose_area * 0.5
             gia_xac_nha = dtsd_combine_he_so_lau * 0.006
             gia_dat_con_lai = 0
             don_gia_dat_con_lai = 0
@@ -1261,8 +1237,10 @@ class bds(models.Model):
                 gia_dat_con_lai = r.gia - gia_xac_nha
                 if choose_area:
                     don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
-
-
+            don_gia = 0
+            if r.gia > 0.5 and choose_area:
+                don_gia = r.gia*1000/choose_area
+                # don_gia_combine = don_gia_dat_con_lai or don_gia
 
             r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
                  auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
@@ -1277,6 +1255,8 @@ class bds(models.Model):
             r.gia_xac_nha = gia_xac_nha
             r.gia_dat_con_lai = gia_dat_con_lai
             r.don_gia_dat_con_lai = don_gia_dat_con_lai
+            r.don_gia = don_gia
+            # r.don_gia_combine = don_gia_combine
 
 
     def str_before_index(self, index, input_str):
@@ -1367,11 +1347,11 @@ class bds(models.Model):
             except:
                 pass
                 
-    @api.depends('gia','choose_area')
-    def don_gia_(self):
-        for r in self:
-            if r.gia > 0.5 and r.choose_area:
-                r.don_gia = r.gia*1000/r.choose_area
+    # @api.depends('gia','choose_area')
+    # def don_gia_(self):
+    #     for r in self:
+    #         if r.gia > 0.5 and r.choose_area:
+    #             r.don_gia = r.gia*1000/r.choose_area
                 
     @api.depends('don_gia')
     def muc_don_gia_(self):
