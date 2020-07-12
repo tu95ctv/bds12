@@ -4,7 +4,7 @@
         <field name="model">bds.bds</field>
         <field name ="priority">1</field>
         <field name="arch" type="xml">
-            <tree default_order="public_datetime ASC" editable="bottom" decoration-info="quan_tam!=False"
+            <tree  editable="bottom" decoration-info="quan_tam!=False"
             decoration-danger="ko_quan_tam!=False" >
                 <button name="open_something" type="object"/>
                 <field name="quan_tam"></field>
@@ -18,7 +18,12 @@
                 <!-- <field name="don_gia"></field> -->
                 <!-- <field name="ti_le_don_gia" /> -->
                 <field name="area"/>
+                <field name="choose_area"/>
+                <field name="don_gia_dat_con_lai" />
+                <field name="don_gia" />
+                <field name="muc_gia_quan" />
                 <field name="so_lau" />
+                <field name="so_lau_he_so" />
                 <field name="so_phong_ngu" />
                 <field name="hem_rong" />
                 <!-- <field name="loai_nha"/>
@@ -80,6 +85,13 @@
                 <field name="mat_tien" />
                 <field name="full_mat_tien" />
                 <field name="vip" />
+                <field name="dtsd" />
+                <field name="dtsd_tu_so_lau" />
+                <field name="ti_le_dtsd" />
+                <field name="dtsd_combine" />
+                <field name="gia_xac_nha" />
+                <field name="gia_dat_con_lai" />
+                <field name="loai_hem_combine" />
             </tree>
         </field>
     </record>

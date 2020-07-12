@@ -118,9 +118,14 @@
             <filter name="chotot_moi_gioi_hay_chinh_chu" string="chotot_moi_gioi_hay_chinh_chu" domain="[]" context="{'group_by':'chotot_moi_gioi_hay_chinh_chu'}" />
             <separator />
             <filter name="so_lau" string="số lầu" domain="[]" context="{'group_by':'so_lau'}" />
-            <filter name="hem_rong" string="hẻm rộng" domain="[]" context="{'group_by':'hem_rong'}" />
             <filter name="kw_co_break" string="kw_co_break" domain="[]" context="{'group_by':'kw_co_break'}" />
             <filter name="kw_co_special_break" string="kw_co_special_break" domain="[]" context="{'group_by':'kw_co_special_break'}" />
+            <separator />
+            <filter name="hem_rong" string="hẻm rộng" domain="[]" context="{'group_by':'hem_rong'}" />
+            <filter name="loai_hem_selection" string="loai_hem_selection" domain="[]" context="{'group_by':'loai_hem_selection'}" />
+            <filter name="mat_tien" string="mat_tien" domain="[]" context="{'group_by':'mat_tien'}" />
+            <filter name="full_mat_tien" string="full_mat_tien" domain="[]" context="{'group_by':'full_mat_tien'}" />
+            <filter name="is_mat_tien" string="is_mat_tien" domain="[]" context="{'group_by':'is_mat_tien'}" />
             <separator />
             <filter name="hoa_la_canh" string="hoa_la_canh" domain="[]" context="{'group_by':'hoa_la_canh'}" />
             <filter name="t1l1" string="t1l1" domain="[]" context="{'group_by':'t1l1'}" />
@@ -128,14 +133,11 @@
             <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
             <filter name="dtsd" string="dtsd" domain="[]" context="{'group_by':'dtsd'}" />
             
-
-
-            <filter name="loai_hem_selection" string="loai_hem_selection" domain="[]" context="{'group_by':'loai_hem_selection'}" />
-            
-            <filter name="mat_tien" string="mat_tien" domain="[]" context="{'group_by':'mat_tien'}" />
-            <filter name="is_mat_tien" string="full_mat_tien" domain="[]" context="{'group_by':'full_mat_tien'}" />
-            <filter name="is_mat_tien" string="is_mat_tien" domain="[]" context="{'group_by':'is_mat_tien'}" />
-
+            <filter name="dtsd_combine" string="dtsd_combine" domain="[]" context="{'group_by':'dtsd_combine'}" />
+            <filter name="gia_xac_nha" string="gia_xac_nha" domain="[]" context="{'group_by':'gia_xac_nha'}" />
+            <filter name="gia_dat_con_lai" string="gia_dat_con_lai" domain="[]" context="{'group_by':'gia_dat_con_lai'}" />
+            <filter name="don_gia_dat_con_lai" string="don_gia_dat_con_lai" domain="[]" context="{'group_by':'don_gia_dat_con_lai'}" />
+            <filter name="loai_hem_combine" string="loai_hem_combine" domain="[]" context="{'group_by':'loai_hem_combine'}" />
         </group>
         
       </search>

@@ -136,14 +136,30 @@ def tim_dien_tich_trong_bai(html):
     return dt
 
 def tim_dien_tich_sd_trong_bai(html):
-    p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn))[\W]*([0-9]+[\.,]*\d*)\s*m2'
-    rs = re.search(p, html, re.I)
     dt = 0
-    if rs:
-        dt = rs.group(1)
-        dt = dt.replace(',','.')
-        dt = float(dt)
-    return dt
+    while 1:
+        p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn))[\W]*([0-9]+[\.,]*\d*)\s*m2'
+        rs = re.search(p, html, re.I)
+        if rs:
+            span0 = rs.span(0)[0]
+            span1 =  rs.span(0)[1]
+            pre_index = span0-50
+            if pre_index<0:
+                pre_index = 0
+            pre = html[pre_index:span0]
+            gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
+            gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
+            if gpxd_search:
+                before_index = span1 + 1
+                html = html[before_index:]
+                continue
+            else:
+                dt = rs.group(1)
+                dt = dt.replace(',','.')
+                dt = float(dt)
+                return dt
+        else:
+            return dt
 
 def tim_dai_rong(html):
     auto_ngang, auto_doc = 0,0
@@ -185,6 +201,8 @@ def detech_hxh(html):
     if rs:
         span0 = rs.span(0)[0]
         pre_index = span0-30
+        if pre_index<0:
+            pre_index = 0
         pre = html[pre_index:span0]
         gan_sat_cach_pt = 'gần|sát|cách'
         gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
@@ -220,8 +238,6 @@ def detech_is_mat_tien(html):
             return hxh_str, full_hxh, is_mat_tien
         else:
             return hxh_str, full_hxh, is_mat_tien
-
-
 
 def detech_hxt(html):
     p = '(?:h|hẻm|hẽm|d|đ|đường)\s{0,1}(?:xt|xe (?:tải|tãi))'
@@ -293,7 +309,6 @@ def detech_hem_all(html):
                     loai_hem_selection = 'hbg'
     return loai_hem, full_loai_hem, loai_hem_selection
 
-
 def skip_if_cate_not_bds(depend_func):
     def wrapper(*args,**kargs):
         self = args[0]
@@ -311,6 +326,155 @@ def skip_depends(depend_func):
             #     depend_func(r)
     return wrapper
 
+
+def previous_of_match(html, rs_group, previous_char_number = 30):
+    span0 = rs_group.span(0)[0]
+    pre_index = span0-previous_char_number
+    pre = html[pre_index:span0]
+    return pre
+
+def gpxd_search(pre):
+    gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
+    gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
+    return gpxd_search
+
+def cach_search(pre):
+    gan_sat_cach_pt = 'cách'
+    gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
+    return gpxd_search
+        
+
+def detect_only_lau(html, pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'):
+    while 1:
+        rs = re.search(pt, html, re.I)
+        so_lau = 0
+        so_lau_char = False
+        if rs:
+            pre = previous_of_match(html, rs)
+            gpxd_search_rs = gpxd_search(pre)
+            if gpxd_search_rs:
+                before_index = rs.span(0)[1] + 1
+                html = html[before_index:]
+                continue
+            else:
+                so_lau = rs.group(1)
+                so_lau_char = rs.group(0)
+                try:
+                    so_lau = int(so_lau)
+                except:
+                    so_lau = 0
+                return so_lau, so_lau_char
+        else:
+            return so_lau, so_lau_char
+
+def detect_lung_only(html, pt = 'lửng|lững'):
+    while 1:
+        is_lung = False
+        rs = re.search(pt, html, re.I)
+        so_lau = 0
+        so_lau_char = False
+        if rs:
+            pre = previous_of_match(html, rs)
+            gpxd_search_rs = gpxd_search(pre)
+            if gpxd_search_rs:
+                before_index = rs.span(0)[1] + 1
+                html = html[before_index:]
+                continue
+            else:
+                is_lung = True
+                return is_lung
+        else:
+            return is_lung
+
+def detect_lau_tranh_gpxd(html):
+    so_lau, so_lau_char = detect_only_lau(html)
+    if not so_lau:
+        so_lau, so_lau_char = detect_only_lau(html, pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)')
+        if so_lau:
+            so_lau = so_lau -1
+
+    so_lau_he_so = so_lau
+
+    is_lung = detect_lung_only(html)
+    if is_lung:
+        so_lau +=0.5
+        so_lau_he_so +=0.7
+
+    is_st = detect_lung_only(html, pt = 'st|sân thượng')
+    if is_st:
+        so_lau +=1
+        so_lau_he_so +=0.5
+    return so_lau, so_lau_char, so_lau_he_so
+
+
+
+def detect_hem_rong(html):
+    while 1:
+        pt = '(?<!cách )(?:hẻm|hẽm|đường)\s+(?:trước nhà)*\s*(?:xh|xe hơi|ô tô|xe máy|kia|ba gác|ba gát)*\s*(?:trước nhà)*\s*(?:nhỏ)*\s*(?:rộng)*\s*(\d+\.*\d*)\s*(?:m|mét)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            pre = previous_of_match(html, rs)
+            cach_search_rs = cach_search(pre)
+            if cach_search_rs:
+                before_index = rs.span(0)[1] + 1
+                html = html[before_index:]
+                continue
+            else:
+                hem_rong_char, hem_rong = rs.group(0), rs.group(1)
+                hem_rong = float(hem_rong)
+                return hem_rong_char, hem_rong
+        else:
+            return False, False
+
+
+
+def detect_lau(html):
+
+    pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
+    rs = re.search(pt, html, re.I)
+    so_lau = 0
+    so_lau_char = False
+    
+    if rs:
+        so_lau = rs.group(1)
+        so_lau_char = rs.group(0)
+        try:
+            so_lau = int(so_lau)
+        except:
+            so_lau = 0
+    else:
+        pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            so_lau = rs.group(1)
+            so_lau_char = rs.group(0)
+            try:
+                so_lau = int(so_lau)
+            except:
+                so_lau = 0
+        else:
+            pt = '(cấp 4|c4|c4)\W'
+            rs = re.search(pt, html, re.I)
+            if rs:
+                so_lau = 0.1
+                so_lau_char = rs.group(1)
+
+
+                
+    so_lau_he_so = so_lau
+    pt = 'lửng|lững'
+    rs = re.search(pt, html, re.I)
+    if rs:
+        so_lau +=0.5
+        so_lau_he_so +=0.7
+
+    pt = 'st|sân thượng'
+    rs = re.search(pt, html, re.I)
+    if rs:
+        so_lau +=1
+        so_lau_he_so +=0.5
+
+    return so_lau, so_lau_char, so_lau_he_so
 
 
 class UserReadMark(models.Model):
@@ -406,11 +570,7 @@ class bds(models.Model):
     muc_ti_le_don_gia = fields.Selection([('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
                                     ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
                                     ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')],compute='muc_ti_le_don_gia_',store=True)
-
     post_ids_of_user  = fields.One2many('bds.bds','poster_id',related='poster_id.post_ids')
-
-
-
     detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
     du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
     count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
@@ -419,7 +579,6 @@ class bds(models.Model):
     dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
     dd_tin_cua_dau_tu_rate = fields.Float(related='poster_id.dd_tin_cua_dau_tu_rate', store  = True)
     len_site = fields.Integer(related='poster_id.len_site', store  = True)
-
     count_post_of_onesite_max = fields.Integer(related='poster_id.count_post_of_onesite_max', store  = True)
     siteleech_max_id = fields.Many2one(related='poster_id.siteleech_max_id', store  = True)
     # site_ids = fields.Many2many(related='poster_id.site_ids', store  = True)
@@ -463,17 +622,22 @@ class bds(models.Model):
     # choose_area = fields.Float(digits=(6,2))#,store=True
     
     choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
-    so_lau = fields.Float(digits=(6,1),compute ='_compute_so_lau',store=True)
-    so_lau_char = fields.Char(compute ='_compute_so_lau',store=True)
+    so_lau = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
+    so_lau_he_so = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
+    so_lau_char = fields.Char(compute ='auto_ngang_doc_',store=True)
+
     hem_rong = fields.Float(digits=(6,2), compute='_compute_hem_rong', store=True)
     hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
+    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
+    loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
+         compute='_compute_loai_hem', store=True)
+
 
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
     dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
 
  
     
-    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
     
 
     so_lan_diff_public_update = fields.Integer()
@@ -482,6 +646,14 @@ class bds(models.Model):
     full_mat_tien = fields.Char(compute='_detect_mat_tien', store=True)
     is_mat_tien = fields.Boolean(compute='_detect_mat_tien', store = True)
     vip = fields.Char()
+    dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    ti_le_dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    dtsd_combine = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    
+    gia_xac_nha = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
+    muc_gia_quan = fields.Float(related='quan_id.muc_gia_quan')
     @api.depends('trigger')
     def _detect_mat_tien(self):
         for r in self:
@@ -506,12 +678,32 @@ class bds(models.Model):
         
 
     
-    @api.depends('html')
+    @api.depends('html', 'hem_rong', 'is_mat_tien')
     def _compute_loai_hem(self):
         for r in self:
             html = r.title + ' '  + r.html
             loai_hem, full_loai_hem, loai_hem_selection = detech_hem_all(html)
+            loai_hem_combine = loai_hem_selection
+            if not loai_hem:
+                if r.is_mat_tien:
+                    loai_hem_combine = 'mt'
+                elif r.hem_rong:
+                    if r.hem_rong > 10:
+                        loai_hem_combine = 'mt'
+                    elif r.hem_rong >= 6:
+                        loai_hem_combine = 'hxt'
+                    elif r.hem_rong >= 4:
+                        loai_hem_combine = 'hxh'
+                    elif r.hem_rong >= 2.5:
+                        loai_hem_combine = 'hbg'
+                    elif r.hem_rong:
+                        loai_hem_combine = 'hxm'
+
             r.loai_hem, r.full_loai_hem, r.loai_hem_selection = loai_hem, full_loai_hem, loai_hem_selection
+            r.loai_hem_combine = loai_hem_combine
+            
+
+
             
 
     @api.depends('html','title','address')
@@ -604,60 +796,19 @@ class bds(models.Model):
 
 
 
-    @api.depends('html')
+    @api.depends('html', 'trigger')
     def _compute_hem_rong(self):
         for r in self:
-            pt = '(?<!cách )(?:hẻm|hẽm|đường)\s+(?:trước nhà)*\s*(?:xh|xe hơi|xe máy|kia|ba gác|ba gát)*\s*(?:nhỏ)*\s*(?:rộng)*\s*(\d+\.*\d*)\s*(?:m|mét)(?:\W|$)'
-            rs = re.search(pt, r.html, re.I)
-            if rs:
-                r.hem_rong_char, r.hem_rong = rs.group(0), rs.group(1)
-    
-    
-    def detect_lau(self, html):
-        pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        so_lau = 0
-        so_lau_char = False
-        
-        # if not rs:
-        #     pt = '1t[,\s]*(\d)l(?:\W|$)'
-        #     rs = re.search(pt, html, re.I)
-        #     print (rs)
-        if rs:
-            so_lau = rs.group(1)
-            so_lau_char = rs.group(0)
-            try:
-                so_lau = int(so_lau)
-            except:
-                so_lau = 0
-            pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)'
-            so_lau_char = rs.group(0)
-            try:
-                so_tang = int(so_lau)
-                so_lau = so_tang - 1
-            except:
-                so_lau = 0
-            
-        else:
-            pt = '(cấp 4|c4|c4)\W'
-            rs = re.search(pt, html, re.I)
-            if rs:
-                so_lau = 0.1
-                so_lau_char = rs.group(1)
-        pt = 'lửng|lững'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            so_lau +=0.5
-        return so_lau, so_lau_char
+            r.hem_rong_char, r.hem_rong = detect_hem_rong(r.title  +  r.html)
 
 
-
-    @api.depends('html')
-    def _compute_so_lau(self):
-        for r in self:
-            so_lau, so_lau_char =  self.detect_lau(r.html)
-            r.so_lau = so_lau
-            r.so_lau_char = so_lau_char
+    # @api.depends('html')
+    # def _compute_so_lau(self):
+    #     for r in self:
+    #         so_lau, so_lau_char, so_lau_he_so =  detect_lau(r.html)
+    #         r.so_lau = so_lau
+    #         r.so_lau_char = so_lau_char
+    #         r.so_lau_he_so = so_lau_he_so
 
     
     @api.model
@@ -1080,17 +1231,53 @@ class bds(models.Model):
                 same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi),('id','!=',r.id)])
                 r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
 
-    @api.depends('html','cate','area')
+    @api.depends('html','cate','area','trigger')
     @skip_if_cate_not_bds            
     def auto_ngang_doc_(self):
+        
         for r in self:
-            html = r.html
+            html = r.title + r.html
             auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic = \
                 auto_ngang_doc_compute(html, r.area)
-            r.choose_area = choose_area
-            r.dtsd = tim_dien_tich_sd_trong_bai(r.html)
+            dtsd = tim_dien_tich_sd_trong_bai(html)
+            so_lau, so_lau_char, so_lau_he_so =  detect_lau_tranh_gpxd(html)
+            ti_le_dtsd = False
+            dtsd_tu_so_lau = 0
+            dtsd_he_so_lau = 0
+            if so_lau:
+                dtsd_tu_so_lau = (so_lau + 1) * choose_area * 0.9
+                dtsd_he_so_lau = (so_lau_he_so + 1) * choose_area * 0.9 
+                if so_lau_he_so < 2:
+                    dtsd_he_so_lau = dtsd_he_so_lau * 0.5
+                if dtsd and choose_area:
+                    ti_le_dtsd = dtsd_tu_so_lau / dtsd
+
+            dtsd_combine = dtsd or dtsd_tu_so_lau
+            dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
+            gia_xac_nha = dtsd_combine_he_so_lau * 0.006
+            gia_dat_con_lai = 0
+            don_gia_dat_con_lai = 0
+            if r.gia and gia_xac_nha:
+                gia_dat_con_lai = r.gia - gia_xac_nha
+                if choose_area:
+                    don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
+
+
+
             r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
                  auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
+            r.dtsd = dtsd
+            r.choose_area = choose_area
+            r.so_lau = so_lau
+            r.so_lau_char = so_lau_char
+            r.so_lau_he_so = so_lau_he_so
+            r.dtsd_tu_so_lau = dtsd_tu_so_lau
+            r.ti_le_dtsd = ti_le_dtsd
+            r.dtsd_combine = dtsd_combine 
+            r.gia_xac_nha = gia_xac_nha
+            r.gia_dat_con_lai = gia_dat_con_lai
+            r.don_gia_dat_con_lai = don_gia_dat_con_lai
+
 
     def str_before_index(self, index, input_str):
         pre_index = index - 30
@@ -1284,7 +1471,7 @@ class bds(models.Model):
         # minutes =25
         gia = float(self.env['ir.config_parameter'].sudo().get_param('bds.gia',default=0))
         if gia ==0:
-            gia =100
+            gia =13
             
         #mat_tien_address
         # gia = 100
