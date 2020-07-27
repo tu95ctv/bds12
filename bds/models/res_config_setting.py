@@ -12,6 +12,7 @@ class ResConfigSettings(models.TransientModel):
     gia = fields.Float(digits=(6,2))
     email_to = fields.Char()
     khong_hien_thi_nhieu_html = fields.Boolean()
+    black_list_address = fields.Text()
     @api.model
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
@@ -19,6 +20,7 @@ class ResConfigSettings(models.TransientModel):
         res['gia'] = float(self.env['ir.config_parameter'].sudo().get_param('bds.gia',default=0))
         res['email_to'] = self.env['ir.config_parameter'].sudo().get_param('bds.email_to')
         res['khong_hien_thi_nhieu_html'] = self.env['ir.config_parameter'].sudo().get_param('bds.khong_hien_thi_nhieu_html')
+        res['black_list_address'] = self.env['ir.config_parameter'].sudo().get_param('bds.black_list_address')
         return res
 
     @api.model
@@ -27,6 +29,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param('bds.gia', self.gia)
         self.env['ir.config_parameter'].sudo().set_param('bds.email_to', self.email_to)
         self.env['ir.config_parameter'].sudo().set_param('bds.khong_hien_thi_nhieu_html', self.khong_hien_thi_nhieu_html)
+        self.env['ir.config_parameter'].sudo().set_param('bds.black_list_address', self.black_list_address)
         super(ResConfigSettings, self).set_values()
 
 

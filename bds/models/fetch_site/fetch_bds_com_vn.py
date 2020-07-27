@@ -115,7 +115,7 @@ def g_or_c_bds_quan(self,soup):
         quan_name =  sl[0].get_text()
         name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
         quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
-        quan = g_or_c_ss(self.env['bds.quan'], {'name_without_quan':name_without_quan_huyen},
+        quan = g_or_c_ss(self.env['res.country.district'], {'name_without_quan':name_without_quan_huyen},
                           {'name':quan_name,'name_unidecode':quan_unidecode}, False)
         return quan.id
     else:

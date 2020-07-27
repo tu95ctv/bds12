@@ -24,7 +24,7 @@ class Poster(models.Model):
     username_in_site_ids = fields.One2many('bds.posternamelines','poster_id')
     username_in_site_ids_show = fields.Char(compute='username_in_site_ids_show_')
     
-    quan_id_for_search = fields.Many2one('bds.quan',related = 'quanofposter_ids.quan_id')
+    quan_id_for_search = fields.Many2one('res.country.district',related = 'quanofposter_ids.quan_id')
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
     # site_ids = fields.Many2many('bds.siteleech','site_poster_rel','siteleech_id', 'poster_id')
     site_ids = fields.Many2many('bds.siteleech')
@@ -174,7 +174,7 @@ class Poster(models.Model):
     quanofposter_ids = fields.One2many('bds.quanofposter', 'poster_id')
     quan_chuyen_1 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_')
     quan_chuyen_2 = fields.Many2one('bds.quanofposter', compute = 'quan_chuyen_1_')
-    quan_chuyen_1_id = fields.Many2one('bds.quan', related ='quan_chuyen_1.quan_id' )
+    quan_chuyen_1_id = fields.Many2one('res.country.district', related ='quan_chuyen_1.quan_id' )
     number_post_of_quan = fields.Char(compute='number_post_of_quan_')
     created_by_site_id = fields.Many2one('bds.siteleech')
     block = fields.Boolean()
@@ -384,9 +384,10 @@ class Poster(models.Model):
     @api.depends('phone')
     def nha_mang_(self):
         for r in self:
-            patterns = {'vina':'(^091|^094|^0123|^0124|^0125|^0127|^0129|^088)',
-                        'mobi':'(^090|^093|^089|^0120|^0121|^0122|^0126|^0128)',
-                       'viettel': '(^098|^097|^096|^0169|^0168|^0167|^0166|^0165|^0164|^0163|^0162|^086)'}
+            patterns = {'vina':'(^091|^094|^083|^084|^085|^081|^082)',
+                        'mobi':'(^090|^093|070|^079|^077|^076|^078)',
+                       'viettel':'(^086|^096|^097|^098|^032|^033|^034|^035|^036|^037|^038|^039)'}
+           
             if r.phone:
                 for nha_mang,pattern in patterns.items():
                     rs = re.search(pattern, r.phone)
@@ -409,7 +410,7 @@ class Poster(models.Model):
                 product_category = self.env.cr.fetchall()
                 for  tuple_count_quan in product_category:
                     quan_id = int(tuple_count_quan[1])
-                    quan = self.env['bds.quan'].browse(quan_id)
+                    quan = self.env['res.country.district'].browse(quan_id)
                     if quan.name in [quan_name]:#u'Quận 1',u'Quận 3',u'Quận 5',u'Quận 10',u'Tân Bình'
                         for key1 in ['count','avg']:
                             if key1 =='count':

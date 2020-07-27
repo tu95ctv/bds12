@@ -1,13 +1,12 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_bds_bds,bds.bds,model_bds_bds,base.group_user,1,1,1,1
 access_bds_poster,bds.poster,model_bds_poster,base.group_user,1,1,1,1
-access_bds_quan,access_bds_quan,model_bds_quan,,1,1,1,1
+access_bds_res_country_district,access_bds_res_country_district,model_res_country_district,,1,1,1,1
 access_bds_siteleech,access_bds_siteleech,model_bds_siteleech,,1,1,1,1
 access_bds_fetch,access_bds_fetch,model_bds_fetch,,1,1,1,1
 access_bds_url,access_bds_url,model_bds_url,,1,1,1,1
 access_bds_images,access_bds_images,model_bds_images,,1,1,1,1
 access_bds_phuong,access_bds_phuong,model_bds_phuong,,1,1,1,1
-access_bds_quan,access_bds_quan,model_bds_quan,,1,1,1,1
 access_bds_quanofposter,access_bds_quanofposter,model_bds_quanofposter,,1,1,1,1
 access_bds_posternamelines,access_bds_posternamelines,model_bds_posternamelines,,1,1,1,1
 access_bds_publicdate,access_bds_publicdate,model_bds_publicdate,,1,1,1,1
@@ -17,6 +16,7 @@ access_bds_getphoneposter,access_bds_getphoneposter,model_bds_getphoneposter,,1,
 access_user_read_mark,access_user_read_mark,model_user_read_mark,,1,1,1,1
 access_user_quantam_mark,access_user_quantam_mark,model_user_quantam_mark,,1,1,1,1
 access_bds_error,access_bds_error,model_bds_error,,1,1,1,1
+access_bds_tieuchi,access_bds_tieuchi,model_bds_tieuchi,,1,1,1,1
 
 
 

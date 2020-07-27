@@ -1,0 +1,28 @@
+<odoo>
+    <record model="ir.ui.view" id="tieu_chi_list">
+        <field name="name">tieu_chi_list</field>
+        <field name="model">bds.tieuchi</field>
+        <field name ="priority">1</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="tieu_chi_int_1" />
+                <field name="tieu_chi_int_2" />
+                <field name="tieu_chi_int_3" />
+                <field name="tieu_chi_int_4" />
+
+                <field name="tieu_chi_char_1" />
+                <field name="tieu_chi_char_2" />
+                <field name="tieu_chi_char_3" />
+                <field name="tieu_chi_char_4" />
+
+                <field name="type" />
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="tieuchi_action">
+        <field name="name">Tiêu Chí</field>
+        <field name="res_model">bds.tieuchi</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

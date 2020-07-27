@@ -30,7 +30,8 @@
         'data/data_bdsvn.xml',
         'data/cronjob_data.xml',
         'data/email.xml',
-        
+        'data/data_config_parameter.xml',
+
         'views/bds_images.xml',
         'views/cron.xml',
         'views/fetch.xml',
@@ -47,6 +48,7 @@
         'views/res_config_settings_views.xml',
         'views/user_bds_mark_read.xml',
         'wizard/trigger_form.xml',
+        'views/tieu_chi.xml',
         'views/menu.xml',
 
     ],

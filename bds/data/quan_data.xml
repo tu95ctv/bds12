@@ -11,143 +11,178 @@
 			<field name="code">760</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_761" model="res.country.district">
-			<field name="name">Quận 12</field>
-			<field name="code">761</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_762" model="res.country.district">
-			<field name="name">Quận Thủ Đức</field>
-			<field name="code">762</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_763" model="res.country.district">
-			<field name="name">Quận 9</field>
-			<field name="code">763</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_764" model="res.country.district">
-			<field name="name">Quận Gò Vấp</field>
-			<field name="code">764</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_765" model="res.country.district">
-			<field name="name">Quận Bình Thạnh</field>
-			<field name="code">765</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_766" model="res.country.district">
-			<field name="name">Quận Tân Bình</field>
-			<field name="code">766</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_767" model="res.country.district">
-			<field name="name">Quận Tân Phú</field>
-			<field name="code">767</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_768" model="res.country.district">
-			<field name="name">Quận Phú Nhuận</field>
-			<field name="code">768</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_769" model="res.country.district">
-			<field name="name">Quận 2</field>
-			<field name="code">769</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_770" model="res.country.district">
-			<field name="name">Quận 3</field>
-			<field name="code">770</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">180</field>
 		</record>
 		<record id="district_771" model="res.country.district">
 			<field name="name">Quận 10</field>
 			<field name="code">771</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">140</field>
 		</record>
-		<record id="district_772" model="res.country.district">
-			<field name="name">Quận 11</field>
-			<field name="code">772</field>
+		
+		<record id="district_770" model="res.country.district">
+			<field name="name">Quận 3</field>
+			<field name="code">770</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">140</field>
 		</record>
-		<record id="district_773" model="res.country.district">
-			<field name="name">Quận 4</field>
-			<field name="code">773</field>
+		<record id="district_768" model="res.country.district">
+			<field name="name">Quận Phú Nhuận</field>
+			<field name="code">768</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">130</field>
+		</record>
+			
+		<record id="district_766" model="res.country.district">
+			<field name="name">Quận Tân Bình</field>
+			<field name="code">766</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">120</field>
 		</record>
 		<record id="district_774" model="res.country.district">
 			<field name="name">Quận 5</field>
 			<field name="code">774</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">120</field>
 		</record>
+		<record id="district_772" model="res.country.district">
+			<field name="name">Quận 11</field>
+			<field name="code">772</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">110</field>
+		</record>
+		<record id="district_765" model="res.country.district">
+			<field name="name">Quận Bình Thạnh</field>
+			<field name="code">765</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">100</field>
+		</record>
+		<record id="district_773" model="res.country.district">
+			<field name="name">Quận 4</field>
+			<field name="code">773</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">100</field>
+		</record>
+		
 		<record id="district_775" model="res.country.district">
 			<field name="name">Quận 6</field>
 			<field name="code">775</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">90</field>
+		</record>
+		<record id="district_767" model="res.country.district">
+			<field name="name">Quận Tân Phú</field>
+			<field name="code">767</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">90</field>
+		</record>
+		<record id="district_769" model="res.country.district">
+			<field name="name">Quận 2</field>
+			<field name="code">769</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">90</field>
 		</record>
 		<record id="district_776" model="res.country.district">
 			<field name="name">Quận 8</field>
 			<field name="code">776</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
-		</record>
-		<record id="district_777" model="res.country.district">
-			<field name="name">Quận Bình Tân</field>
-			<field name="code">777</field>
-			<field name="active" eval="True"/>
-			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">80</field>
 		</record>
 		<record id="district_778" model="res.country.district">
 			<field name="name">Quận 7</field>
 			<field name="code">778</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">80</field>
 		</record>
-		<record id="district_783" model="res.country.district">
-			<field name="name">Huyện Củ Chi</field>
-			<field name="code">783</field>
+		<record id="district_764" model="res.country.district">
+			<field name="name">Quận Gò Vấp</field>
+			<field name="code">764</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">70</field>
 		</record>
-		<record id="district_784" model="res.country.district">
-			<field name="name">Huyện Hóc Môn</field>
-			<field name="code">784</field>
+		<record id="district_777" model="res.country.district">
+			<field name="name">Quận Bình Tân</field>
+			<field name="code">777</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">60</field>
 		</record>
-		<record id="district_785" model="res.country.district">
-			<field name="name">Huyện Bình Chánh</field>
-			<field name="code">785</field>
+		<record id="district_762" model="res.country.district">
+			<field name="name">Quận Thủ Đức</field>
+			<field name="code">762</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">50</field>
 		</record>
 		<record id="district_786" model="res.country.district">
 			<field name="name">Huyện Nhà Bè</field>
 			<field name="code">786</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">45</field>
 		</record>
+	
+		<record id="district_761" model="res.country.district">
+			<field name="name">Quận 12</field>
+			<field name="code">761</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">45</field>
+		</record>
+
+		<record id="district_763" model="res.country.district">
+			<field name="name">Quận 9</field>
+			<field name="code">763</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">40</field>
+		</record>
+
+		<record id="district_784" model="res.country.district">
+			<field name="name">Huyện Hóc Môn</field>
+			<field name="code">784</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">30</field>
+		</record>
+		
+		
+		<record id="district_785" model="res.country.district">
+			<field name="name">Huyện Bình Chánh</field>
+			<field name="code">785</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">25</field>
+		</record>
+		
+		<record id="district_783" model="res.country.district">
+			<field name="name">Huyện Củ Chi</field>
+			<field name="code">783</field>
+			<field name="active" eval="True"/>
+			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">15</field>
+		</record>
+		
+	
 		<record id="district_787" model="res.country.district">
 			<field name="name">Huyện Cần Giờ</field>
 			<field name="code">787</field>
 			<field name="active" eval="True"/>
 			<field name="state_id" ref="vn_province_79"/>
+			<field name="don_gia_hxh_tc">10</field>
 		</record>
 </odoo>

@@ -105,7 +105,7 @@ class CommonMainFetch(models.AbstractModel):
             gia_cu = search_bds_obj.gia
             diff_gia = gia - gia_cu
             if diff_gia != 0.0:
-                so_lan_gia_update = r.so_lan_gia_update + 1
+                so_lan_gia_update = search_bds_obj.so_lan_gia_update + 1
                 update_dict.update({
                     'so_lan_gia_update':so_lan_gia_update,
                     'ngay_update_gia':datetime.datetime.now(),

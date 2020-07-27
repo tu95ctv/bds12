@@ -3,7 +3,7 @@
 			 <!-- QUAN -->
         <record id="quan_form" model="ir.ui.view">
             <field name="name">bds</field>
-            <field name="model">bds.quan</field>
+            <field name="model">res.country.district</field>
             <field name="arch" type="xml">
                 <form>
                     <sheet>
@@ -22,14 +22,16 @@
             </field>
         </record>
         <record id="quan_list" model="ir.ui.view">
-            <field name="name">bds.quan</field>
-            <field name="model">bds.quan</field>
+            <field name="name">res.country.district</field>
+            <field name="model">res.country.district</field>
             <field name="arch" type="xml">
                 <tree>
                     <field name="name" />
+                    <field name="name_without_quan" />
                     <field name="level" />
                     <field name="name_viet_tat" />
                     <field name="len_post_ids" />
+                    <field name="len_post_fix_ti_le" />
                     <field name="muc_gia_quan" />
                     <field name="don_gia_dat_con_lai" />
                     <field name="don_gia_mat_tien" />
@@ -37,13 +39,22 @@
                     <field name="don_gia_hxh" />
                     <field name="don_gia_hbg" />
                     <field name="don_gia_hxm" />
+
+                    <field name="don_gia_mat_tien_tc" />
+                    <field name="don_gia_hxt_tc" />
+                    <field name="don_gia_hxh_tc" />
+                    <field name="don_gia_hbg_tc" />
+                    <field name="don_gia_hxm_tc" />
+
+
+
                     <!-- <field name="post_ids" /> -->
                 </tree>
             </field>
         </record>
         <record model="ir.actions.act_window" id="quan_action">
             <field name="name">Quận</field>
-            <field name="res_model">bds.quan</field>
+            <field name="res_model">res.country.district</field>
             <field name="view_mode">tree,form</field>
         </record>
         <!-- !QUAN -->

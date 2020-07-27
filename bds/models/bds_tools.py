@@ -95,7 +95,7 @@ def g_or_c_quan(env, quan_name):
     quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
     quan_search_dict = {'name_without_quan':name_without_quan_huyen}
     quan_update_dict = {'name':quan_name,'name_unidecode':quan_unidecode}
-    quan = g_or_c_ss(env['bds.quan'],quan_search_dict, quan_update_dict )
+    quan = g_or_c_ss(env['res.country.district'],quan_search_dict, quan_update_dict )
     return quan.id
 
 

@@ -15,7 +15,7 @@ class QuanOfPoster(models.Model):
     _name = 'bds.quanofposter'
     name = fields.Char(compute='name_',store=True)
     
-    quan_id = fields.Many2one('bds.quan')
+    quan_id = fields.Many2one('res.country.district')
     siteleech_id = fields.Many2one('bds.siteleech')
     quantity = fields.Integer()
     min_price = fields.Float(digits=(32,1))

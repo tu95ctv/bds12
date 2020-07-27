@@ -11,10 +11,11 @@
                         <group>
                             <field name="name" />
                             <field name="nha_mang" />
+                            <field name="quan_id" />
+                            <field name="not_in_phone" />
                         </group>
                         <group>
                             <field name="post_count_min" />
-                            <field name="loc_gian_tiep_quan_bds_topic" />
                         </group>
 
                         <group string="Kết quả">

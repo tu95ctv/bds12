@@ -76,6 +76,21 @@
                         </div>
 
 
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="black_list_address"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="black_list_address"/>
+                                <div class="text-muted">
+                                    black_list_address
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
 
 
 

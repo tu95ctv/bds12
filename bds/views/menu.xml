@@ -25,6 +25,7 @@
     <menuitem name="urlbds" id="url_menu" parent="stuff_menu" action="url_action" />
     <menuitem name="Phone" id="phone_menu" parent="stuff_menu" action="phone_action" />
     <menuitem name="Other Product" id="product_other_menu" parent="stuff_menu" action="product_other_action" />
+    <menuitem name="Tiêu Chí" id="tieuchi_menu" parent="stuff_menu" action="tieuchi_action" />
     <menuitem id="menu_bds_config_settings" name="Configuration" parent="bds_icon"
             sequence="100" />
     <menuitem id="menu_bds_general_settings" name="Settings" parent="menu_bds_config_settings"
