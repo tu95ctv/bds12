@@ -82,7 +82,6 @@
           <separator />
         <filter name="ngay_update_gia" string="co ngay_update_gia" domain="[('ngay_update_gia','!=',False)]" help="Pickings that are late on scheduled time" />
           <separator />
-        <filter name="len_publicdate_ids" string="co len_publicdate_ids" domain="[('len_publicdate_ids','>',0)]" help="Pickings that are late on scheduled time" />
         <filter name="thismonth" string="public  Month" domain="[('public_datetime','&lt;',(context_today()+ datetime.timedelta(days=1)).strftime('%Y-%m-%d')), ('public_datetime','&gt;=',time.strftime('%Y-%m-01'))]"  />
         <filter name="thisyear" string="public Year" domain="[('public_datetime','&lt;',(context_today()+relativedelta(years=1)).strftime('%Y-%m-01')), ('public_datetime','&gt;=',time.strftime('%Y-%m-01'))]" />
         <separator />

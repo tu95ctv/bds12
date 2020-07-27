@@ -534,8 +534,6 @@ def detect_hem_rong(html):
         else:
             return False, False
 
-
-
 def detect_lau(html):
 
     pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
@@ -584,6 +582,44 @@ def detect_lau(html):
 
     return so_lau, so_lau_char, so_lau_he_so
 
+def _compute_muc_gia(gia):
+        muc_gia_list = [('0','0'),('<1','<1'),('1-2','1-2'),('2-3','2-3'),
+            ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')]
+        selection = None
+        for muc_gia_can_tren in range(0,len(muc_gia_list)):
+            if gia <= muc_gia_can_tren:
+                selection = muc_gia_list[muc_gia_can_tren-1][0]
+                break
+        if not selection:
+            selection = muc_gia_list[-1][0]
+        return selection
+
+def muc_don_gia(don_gia):
+        muc_dt_list =[('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
+                                    ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),('180-210','180-210'),('>210','>210')]
+        selection = None
+        for muc_gia_can_tren in range(1,8):
+            if don_gia <= muc_gia_can_tren*30:
+                selection = muc_dt_list[muc_gia_can_tren-1][0]
+                break
+        if not selection:
+            selection = muc_dt_list[-1][0]
+        return selection
+
+
+def muc_ti_le_don_gia(ti_le_don_gia):
+    muc_dt_list =[('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
+                                ('1.2-1.6','1.2-1.6'), ('1.6-2.0','1.6-2.0'), ('2.0-2.4','2.0-2.4'), ('2.4-2.8','2.4-2.8'), ('>2.8','>2.8')]
+    selection = None
+    for muc_gia_can_tren in range(0,8):
+        if ti_le_don_gia <= muc_gia_can_tren*0.4:
+            selection = muc_dt_list[muc_gia_can_tren-1][0]
+            break
+    if not selection:
+        r.muc_ti_le_don_gia = muc_dt_list[-1][0]
+    return selection
+
+
 
 class UserReadMark(models.Model):
     _name = 'user.read.mark'
@@ -597,11 +633,18 @@ class UserQuanTamMark(models.Model):
     user_id = fields.Many2one('res.users')
     bds_id = fields.Char('bds.bds')
 
+
 class bds(models.Model):
     _name = 'bds.bds'
     _order = "id desc"
     _rec_name = 'title'
+
     
+    
+    trigger = fields.Boolean()
+    so_lan_diff_public_update = fields.Integer()
+    so_lan_gia_update = fields.Integer()
+    vip = fields.Char()
     user_read_mark_ids = fields.One2many('user.read.mark','bds_id')
     user_quantam_mark_ids = fields.One2many('user.quantam.mark','bds_id')
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
@@ -632,7 +675,6 @@ class bds(models.Model):
     public_date = fields.Date()
     diff_public_date = fields.Integer()
     publicdate_ids =fields.One2many('bds.publicdate','bds_id')
-    len_publicdate_ids = fields.Integer(compute='len_publicdate_ids_', store=True)
     gialines_ids = fields.One2many('bds.gialines','bds_id')
     diff_gia = fields.Float()
     ngay_update_gia = fields.Datetime()
@@ -640,36 +682,52 @@ class bds(models.Model):
     is_read = fields.Boolean()
     quan_tam = fields.Datetime(string=u'Quan Tâm')
     ko_quan_tam = fields.Datetime(string=u'Không Quan Tâm')
-    #compute field
+    # no store
     html_show = fields.Text(compute='html_show_',string=u'Nội dung')
     html_replace = fields.Html(compute='html_replace_')
+
+    #compute field
+   
+
     html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
-    link_show =  fields.Char(compute='link_show_')
-    auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
-    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
-    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     mien_tiep_mg = fields.Char(compute='mien_tiep_mg_', store=True)
+    link_show =  fields.Char(compute='link_show_')
+
+    
+
+    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',compute='same_address_bds_ids_',store=True)
     cho_tot_link_fake = fields.Char(compute='cho_tot_link_fake_')
     thumb_view = fields.Binary(compute='thumb_view_')  
-    muc_gia = fields.Selection([('<1','<1'),('1-2','1-2'),('2-3','2-3'),
+
+    muc_gia = fields.Selection([('0','0'), ('<1','<1'),('1-2','1-2'),('2-3','2-3'),
                                 ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
                                 ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
                                 ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
-                               compute='muc_gia_',store = True,string=u'Mức Giá')
+                               compute='muc_gia_', store = True, string=u'Mức Giá')
     muc_dt = fields.Selection(
-        [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
-        compute='muc_dt_',store = True,string=u'Mức diện tích')
-    don_gia = fields.Float(digit=(6,2),compute='auto_ngang_doc_',store=True,string=u'Đơn giá')
-    ti_le_don_gia = fields.Float(digits=(6,2),compute='ti_le_don_gia_',store=True)
-    muc_don_gia = fields.Selection([('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
+        [('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),
+        ('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
+        compute='muc_dt_', store = True, string=u'Mức diện tích')
+
+    muc_don_gia = fields.Selection([(('0','0'),'0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
                                     ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
-                                    ('180-210','180-210'),('>210','>210')],compute='muc_don_gia_',store=True)
+                                    ('180-210','180-210'),('>210','>210')], compute='auto_ngang_doc_', store=True )
+    
+    ti_le_don_gia = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True )
+
     muc_ti_le_don_gia = fields.Selection([('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
                                     ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
-                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')],compute='muc_ti_le_don_gia_',store=True)
-    post_ids_of_user  = fields.One2many('bds.bds','poster_id',related='poster_id.post_ids')
+                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')], compute='auto_ngang_doc_', store=True)
+    
+
+
+
+
+    # related no store
+    muc_gia_quan = fields.Float(related='quan_id.muc_gia_quan')
+    post_ids_of_user  = fields.One2many('bds.bds','poster_id', related='poster_id.post_ids')
+    
+    #related store
     detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
     du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
     count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
@@ -680,21 +738,39 @@ class bds(models.Model):
     len_site = fields.Integer(related='poster_id.len_site', store  = True)
     count_post_of_onesite_max = fields.Integer(related='poster_id.count_post_of_onesite_max', store  = True)
     siteleech_max_id = fields.Many2one(related='poster_id.siteleech_max_id', store  = True)
-    # site_ids = fields.Many2many(related='poster_id.site_ids', store  = True)
-    #!related
+
+    #!related store
     # for filter field
     quan_id_selection = fields.Selection('get_quan_')
-    greater_day = fields.Integer()
     siteleech_id_selection = fields.Selection('siteleech_id_selection_')
+    greater_day = fields.Integer()# for search field
+    # !for filter field
+    # compute no store
     is_user_read_mark = fields.Boolean(compute='_is_user_read_mark')
     is_user_quantam_mark = fields.Boolean(compute='_is_user_quantam_mark')
-    trigger = fields.Boolean()
-    diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now', store=True)
-    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True,string='Trích địa chỉ')
-    mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
+    diff_public_days_from_now = fields.Integer(compute='_compute_diff_public_days_from_now')
+    #! compute no store
+   
+    #store field
+
+    trich_dia_chi = fields.Char(compute='trich_dia_chi_', store = True, string='Trích địa chỉ')
+
     mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
+    is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),
+        ('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    
+    #auto_ngang_doc_
+    auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
+    auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
+    auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
+    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
+
+    don_gia = fields.Float(digit=(6,2),compute='auto_ngang_doc_',store=True,string=u'Đơn giá')
+
+    #
+    #_compute_kw_mg
+    dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),
+        ('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
     kw_mg = fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
     kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
     is_kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
@@ -705,36 +781,51 @@ class bds(models.Model):
     number_char = fields.Integer(compute='_compute_kw_mg',store=True)
     hoa_la_canh = fields.Char(compute='_compute_kw_mg',store=True)
     t1l1 = fields.Char(compute='_compute_kw_mg', store=True)
+    #!_compute_kw_mg
+
+    #_compute_dd_tin_cua_dau_tu
     dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
     kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
     kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+    #!_compute_dd_tin_cua_dau_tu
+
+   
+
+    hem_rong = fields.Float(digits=(6,2), compute='_compute_hem_rong', store=True)
+    hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
+
+    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], 
+        compute='_compute_loai_hem', store=True)
+    loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
+         compute='_compute_loai_hem', store=True)
+
+    so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
+
+    mat_tien = fields.Char(compute='_detect_is_mat_tien', store=True)
+    full_mat_tien = fields.Char(compute='_detect_is_mat_tien', store=True)
+    is_mat_tien = fields.Boolean(compute='_detect_is_mat_tien', store = True)
+    
+
+    #auto_ngang_doc_
     choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
     so_lau = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
     so_lau_he_so = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
     so_lau_char = fields.Char(compute ='auto_ngang_doc_',store=True)
-    hem_rong = fields.Float(digits=(6,2), compute='_compute_hem_rong', store=True)
-    hem_rong_char = fields.Char(compute='_compute_hem_rong', store=True)
-    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], compute='_compute_loai_hem', store=True)
-    loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
-         compute='_compute_loai_hem', store=True)
-    so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
+    #!auto_ngang_doc_
     dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    so_lan_diff_public_update = fields.Integer()
-    so_lan_gia_update = fields.Integer()
-    mat_tien = fields.Char(compute='_detect_is_mat_tien', store=True)
-    full_mat_tien = fields.Char(compute='_detect_is_mat_tien', store=True)
-    is_mat_tien = fields.Boolean(compute='_detect_is_mat_tien', store = True)
-    vip = fields.Char()
     dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     ti_le_dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     dtsd_combine = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     gia_xac_nha = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    muc_gia_quan = fields.Float(related='quan_id.muc_gia_quan')
     ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
     don_gia_quan = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    is_choose_dien_tich = fields.Float()
+ 
+    # compute 1 lần có store
+    mat_tien_address = fields.Char(compute ='_mat_tien_address', store=True)
+
+
 
     @api.depends('trigger')
     def _detect_is_mat_tien(self):
@@ -815,10 +906,6 @@ class bds(models.Model):
             so_phong_ngu = self._so_phong_ngu_detect(html)
             r.so_phong_ngu = so_phong_ngu
 
-
-    
-        
-
     @api.depends('html', 'trigger')
     def _compute_hem_rong(self):
         for r in self:
@@ -841,7 +928,9 @@ class bds(models.Model):
     def make_trigger(self):
         for r in self:
             r.trigger = True
+
     
+    # method out function
     def count_post_of_poster_(self):
         for r in self:
             bds_id = r
@@ -1046,11 +1135,7 @@ class bds(models.Model):
         rs = list(map(lambda i:(i.name,i.name),quans))
         return rs
            
-    @api.depends('publicdate_ids')
-    def len_publicdate_ids_(self):
-        for r in self:
-            r.len_publicdate_ids = len(r.publicdate_ids)
-    
+   
     @api.depends('html')
     @skip_if_cate_not_bds
     def html_replace_(self):
@@ -1178,17 +1263,18 @@ class bds(models.Model):
 
                 if ti_le_don_gia_dat_con_lai != 0 and ti_le_don_gia_dat_con_lai < 0.3:
                     if choose_area and so_lau:
-                        choose_area = choose_area/(so_lau + 1)
+                        choose_area = choose_area/(so_lau + 1) # cho lập lại khi choose_area được gán lại
                         continue
                     else:
                         break
                 else:
                     break
-            
-            
+            ti_le_don_gia = ti_le_don_gia_dat_con_lai
+            muc_ti_le_don_gia = muc_ti_le_don_gia(ti_le_don_gia)   
+            muc_don_gia = muc_don_gia(don_gia)  
             r.don_gia_quan = don_gia_quan
             r.ti_le_don_gia_dat_con_lai = ti_le_don_gia_dat_con_lai
-
+            r.ti_le_don_gia  = ti_le_don_gia
             r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
                  auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
             r.dtsd = dtsd
@@ -1203,6 +1289,8 @@ class bds(models.Model):
             r.gia_dat_con_lai = gia_dat_con_lai
             r.don_gia_dat_con_lai = don_gia_dat_con_lai
             r.don_gia = don_gia
+            r.muc_don_gia = muc_don_gia
+            r.muc_ti_le_don_gia = muc_ti_le_don_gia
             # r.don_gia_combine = don_gia_combine
 
 
@@ -1265,43 +1353,37 @@ class bds(models.Model):
             r.html_khong_dau = unidecode(r.html) if r.html else r.html
   
 
-    @api.depends('ti_le_don_gia')
-    def muc_ti_le_don_gia_(self):
-        muc_dt_list =[('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
-                                    ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),('2.4-2.8','2.4-2.8'),('>2.8','>2.8')]
-        for r in self:
-            selection = None
-            for muc_gia_can_tren in range(1,8):
-                if r.ti_le_don_gia < muc_gia_can_tren*0.4:
-                    selection = muc_dt_list[muc_gia_can_tren-1][0]
-                    r.muc_ti_le_don_gia = selection
-                    break
-            if not selection:
-                r.muc_ti_le_don_gia = '>2.8'
+    
+
+
+    # @api.depends('ti_le_don_gia')
+    # def muc_ti_le_don_gia_(self):
+    #     muc_dt_list =[('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
+    #                                 ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),('2.4-2.8','2.4-2.8'),('>2.8','>2.8')]
+    #     for r in self:
+    #         selection = None
+    #         for muc_gia_can_tren in range(1,8):
+    #             if r.ti_le_don_gia < muc_gia_can_tren*0.4:
+    #                 selection = muc_dt_list[muc_gia_can_tren-1][0]
+    #                 r.muc_ti_le_don_gia = selection
+    #                 break
+    #         if not selection:
+    #             r.muc_ti_le_don_gia = '>2.8'
 
     @api.depends('don_gia','quan_id')
     def ti_le_don_gia_(self):
         for r in self:
-            try:
-                if r.don_gia and r.quan_id.muc_gia_quan:
-                    r.ti_le_don_gia = r.don_gia/r.quan_id.muc_gia_quan
-            except:
-                pass
+            if r.don_gia and r.quan_id.muc_gia_quan:
+                r.ti_le_don_gia = r.don_gia/r.quan_id.muc_gia_quan
+         
                 
-                
-    @api.depends('don_gia')
-    def muc_don_gia_(self):
-        muc_dt_list =[('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
-                                    ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),('180-210','180-210'),('>210','>210')]
-        for r in self:
-            selection = None
-            for muc_gia_can_tren in range(1,8):
-                if r.don_gia < muc_gia_can_tren*30:
-                    selection = muc_dt_list[muc_gia_can_tren-1][0]
-                    r.muc_don_gia = selection
-                    break
-            if not selection:
-                r.muc_don_gia = '>210'
+
+    
+    # @api.depends('don_gia')
+    # def muc_don_gia_(self):
+    #     for r in self:
+    #         r.muc_don_gia = muc_don_gia(r.don_gia)
+            
 
     @api.depends('choose_area')
     def muc_dt_(self):
@@ -1318,18 +1400,9 @@ class bds(models.Model):
 
     @api.depends('gia')
     def muc_gia_(self):
-        muc_gia_list = [('<1','<1'),('1-2','1-2'),('2-3','2-3'),('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')]
         for r in self:
-            selection = None
-            for muc_gia_can_tren in range(1,len(muc_gia_list)):
-                if r.gia < muc_gia_can_tren:
-                    selection = muc_gia_list[muc_gia_can_tren-1][0]
-                    r.muc_gia = selection
-                    break
-            if not selection:
-                r.muc_gia = muc_gia_list[-1][0]
-
-
+            r.muc_gia = _compute_muc_gia(gia)
+            
     @api.depends('html')
     def html_show_(self):
         khong_hien_thi_nhieu_html = self.env['ir.config_parameter'].sudo().get_param('bds.khong_hien_thi_nhieu_html')
