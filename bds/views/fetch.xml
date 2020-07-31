@@ -10,36 +10,64 @@
                     <button name="fetch_all_url" string="fetch_all_url" type="object" class="btn-primary" />
                     <button name="set_0" string="set_0" type="object" class="btn-primary" />
                 </header>
-                
                 <group>
-                    <field name="url_ids" nolabel="1" >
-                        <tree editable="1">
-                            <field name="id" />
-                            <field name="url" />
-                            <field name="description" />
-                            <field name="cate" />
-                            <field name="siteleech_id" />
-                            <field name="write_date" />
-                            <field name="set_number_of_page_once_fetch" />
-                            <field name="link_number" />
-                            <field name="existing_link_number" />
-                            <field name="update_link_number" />
-                            <field name="create_link_number" />
-                            <field name="web_last_page_number" />
-                            <field name="current_page" />
-                            <field name="current_page_2" />
-                            <field name="interval" />
-                        </tree>
-                    </field>
-                </group>
-                <group>
-                    <field name="name" />
-                    <field name="des" />
-                    <field name="last_fetched_url_id" />
-                    <field name="max_page" />
-                    <field name="is_current_page_2" />
+                    <group>
+                        <field name="name" />
+                        <field name="des" />
+                        <field name="last_fetched_item_id" />
+                        <field name="max_page" />
+                        <!-- <field name="is_current_page_2" /> -->
+                        <field name="is_next_if_only_finish" />
+                        <field name="is_cronjob" />
+                        <field name="is_bo_sung_topic" />
+                    </group>
+                    <group>
 
+                        <field name="number_of_part"/>
+                        <field name="nth_part"/>
+                        <button name="batch_div_part" string="batch_div_part" type="object" class="btn-primary" />
+                        <field name="batch_number_of_once_fetch"/>
+                        <button name="set_batch_number_of_once_fetch" string="set_batch_number_of_once_fetch" type="object" class="btn-primary" />
+                    </group>
                 </group>
+                <notebook>
+                    <page string="Fetch Item">
+                        <field name="fetch_item_ids" nolabel="1" >
+                            <tree editable="1">
+                                <field name="id" />
+                                <field name="model_id" />
+                                <field name="limit" />
+                                <field name="asc_or_desc" />
+                                <field name="url_id" />
+                                <field name="name" />
+                                <field name="web_last_page_number" />
+                                <field name="min_page" />
+                                <field name="set_leech_max_page" />
+                                <field name="is_finished" />
+                                <field name="set_number_of_page_once_fetch" />
+                                <field name="link_number" />
+                                <field name="existing_link_number" />
+                                <field name="update_link_number" />
+                                <field name="create_link_number" />
+                                <field name="current_page" />
+                                <field name="interval" />
+                                <field name="write_date" />
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="URLs">
+                        <field name="url_ids" nolabel="1" >
+                            <tree editable="1">
+                                <field name="id" />
+                                <field name="url" />
+                                <field name="description" />
+                                <field name="cate" />
+                                <field name="siteleech_id" />
+                            </tree>
+                        </field>
+                        <button name="unlink_url_ids" string="unlink_url_ids" type="object" class="btn-primary" />
+                    </page>
+                </notebook>
             </form>
         </field>
     </record>
@@ -51,6 +79,7 @@
                 <field name="id" />
                 <field name="name" />
                 <field name="url_ids" widget="many2many_tags"/>
+                <field name="is_cronjob" />
             </tree>
         </field>
     </record>

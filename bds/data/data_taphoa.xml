@@ -1,0 +1,9 @@
+<odoo>
+    <data>
+        <record model="bds.url" id="url_cua_hang_tap_hoa">
+            <field name="description">Cửa hàng tạp hóa</field>
+            <field name="url">http://www.cuahangtaphoa.com/index.php?page=taphoa&amp;keyword=&amp;sapxep=0&amp;tinhthanh=363&amp;quanhuyen=0&amp;n=19</field>
+        </record>
+    </data>
+</odoo>
+

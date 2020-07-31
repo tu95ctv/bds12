@@ -17,12 +17,7 @@
                             <field name="siteleech_id" />
                             <field name="priority" />
                         </group>
-                        <group>
-                            <field name="web_last_page_number" />
-                            <field name="current_page" />
-                            <field name="update_link_number" />
-                            <field name="create_link_number" />
-                        </group>
+                      
                     </group>
                     
                 </sheet>
@@ -43,18 +38,6 @@
                 <field name="cate" />
                 <field name="sell_or_rent" />
                 <field name="siteleech_id" />
-                <field name="write_date" />
-                <field name="minute_change" />
-                <field name="priority" />
-                <field name="current_page" />
-                <field name="current_page_2" />
-                <field name="create_link_number" />
-                <field name="set_number_of_page_once_fetch" />
-                <field name="existing_link_number" />
-                <field name="update_link_number" />
-                <field name="web_last_page_number" />
-                <field name="link_number" />
-                <!-- <field name="interval" /> -->
             </tree>
         </field>
     </record>

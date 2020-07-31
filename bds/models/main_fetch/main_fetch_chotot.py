@@ -69,30 +69,29 @@ class ChototMainFetch(models.AbstractModel):
 
     
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        copy_topic_dict = {}
+        filtered_page_topic_dict = {}
         if self.site_name =='chotot':
-            copy_topic_dict['thumb'] = topic_data_from_page.get('image',False)
-            copy_topic_dict['chotot_moi_gioi_hay_chinh_chu'] = 'moi_gioi' if topic_data_from_page.get('company_ad',False) else 'chinh_chu'
+            filtered_page_topic_dict['thumb'] = topic_data_from_page.get('image',False)
+            filtered_page_topic_dict['chotot_moi_gioi_hay_chinh_chu'] = 'moi_gioi' if topic_data_from_page.get('company_ad',False) else 'chinh_chu'
             if topic_data_from_page.get('category_name'):
-                copy_topic_dict['loai_nha'] =  topic_data_from_page.get('category_name')       
-        return copy_topic_dict
+                filtered_page_topic_dict['loai_nha'] =  topic_data_from_page.get('category_name')       
+        return filtered_page_topic_dict
 
     def make_topic_link_from_list_id(self, list_id):
+        link = super().make_topic_link_from_list_id(list_id)
         if  self.site_name =='chotot':
             link  = 'https://gateway.chotot.com/v1/public/ad-listing/' + str(list_id)
-        elif self.site_name =='batdongsan':
-            link  = 'https://batdongsan.com.vn' +  list_id
-        else:
-            link = list_id
         return link
 
+
+
    
-    def fetch_topics_info_in_page_handle(self, page_int, format_page_url):
+    def fetch_topics_info_per_page(self, html_page):
         topic_data_from_pages_of_a_page = []
         
         if self.site_name == 'chotot':
-            page_url = self.create_page_link(format_page_url, page_int)
-            html_page = request_html(page_url)
+            # page_url = self.create_page_link(format_page_url, page_int)
+            # html_page = request_html(page_url)
             json_a_page = json.loads(html_page)
             topic_data_from_pages_of_a_page_origin = json_a_page['ads']
             for topic_data_from_page_cho_tot in topic_data_from_pages_of_a_page_origin:

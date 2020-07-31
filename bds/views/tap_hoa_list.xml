@@ -1,0 +1,37 @@
+<odoo>
+    <record model="ir.ui.view" id="tap_hoa_list">
+        <field name="name">bds list</field>
+        <field name="model">bds.bds</field>
+        <field name ="priority">1</field>
+        <field name="arch" type="xml">
+            <tree  editable="bottom" >
+                <button name="open_something" type="object"/>
+                <field name="id"></field>
+                <field name="link"/>
+                <field name="address"/>
+                <field name="quan_id"/>
+                <field name="name_of_poster" />
+                <field name="poster_id" />
+                <field name="nganh_nghe_kinh_doanh" />
+                <field name="public_date" />
+                <field name="html"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
+            </tree>
+        </field>
+    </record>
+
+ 
+    <record model="ir.actions.act_window" id="tap_hoa_action">
+        <field name="name">BDS</field>
+        <field name="res_model">bds.bds</field>
+        <field name="view_mode">tree,form</field>
+        <!-- <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','sell')]</field> -->
+        <field name="view_id" ref="tap_hoa_list"></field>
+        <field name="search_id" ref="bds_search"/>
+    </record>
+
+
+
+
+
+    
+</odoo>

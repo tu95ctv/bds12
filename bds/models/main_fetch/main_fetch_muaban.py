@@ -77,11 +77,11 @@ class MuabanFetch(models.AbstractModel):
         return topic_dict
 
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        copy_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
+        filtered_page_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
         if self.site_name =='muaban':
-            copy_topic_dict['area'] = topic_data_from_page.get('area',False)
-            copy_topic_dict['thumb'] = topic_data_from_page.get('thumb',False)
-        return copy_topic_dict
+            filtered_page_topic_dict['area'] = topic_data_from_page.get('area',False)
+            filtered_page_topic_dict['thumb'] = topic_data_from_page.get('thumb',False)
+        return filtered_page_topic_dict
 
     def create_page_link(self, format_page_url, page_int):
         page_url = super(MuabanFetch, self).create_page_link(format_page_url, page_int)
@@ -95,11 +95,11 @@ class MuabanFetch(models.AbstractModel):
             
         return page_url
 
-    def fetch_topics_info_in_page_handle(self, page_int, format_page_url):
-        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_in_page_handle(page_int, format_page_url)
+    def fetch_topics_info_per_page(self, html_page):
+        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_per_page(html_page)
         if self.site_name == 'muaban':
-            page_url = self.create_page_link(format_page_url, page_int)
-            html_page = request_html(page_url)
+            # page_url = self.create_page_link(format_page_url, page_int)
+            # html_page = request_html(page_url)
             a_page_html_soup = BeautifulSoup(html_page, 'html.parser')
             title_and_icons = a_page_html_soup.select('div.list-item-container')
             if not title_and_icons:

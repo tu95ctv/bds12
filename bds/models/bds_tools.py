@@ -5,12 +5,15 @@ from odoo import fields
 from odoo.osv import expression
 import datetime
 from unidecode import unidecode
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class FetchError(Exception):
     pass
 headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
 def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
+    # print ('***request_html***', url)
+    _logger.warning('***request_html***' + url)
     count_fail = 0
     def in_try():
         req =request.Request(url, None, headers)

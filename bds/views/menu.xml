@@ -10,6 +10,8 @@
 
 
     <menuitem name="BDS Sell" id="main_bds_menu" parent="bds_icon" action="main_bds_action"  sequence="1"/>
+    <menuitem name="Tạp Hóa" id="tap_hoa_menu" parent="bds_icon" action="tap_hoa_action"  sequence="1"/>
+    <menuitem name="haha Demo Tạp Hóa" id="demo_tap_hoa_menu" parent="bds_icon" action="demo_tap_hoa_action"  sequence="1"/>
     <menuitem name="BDS Rent" id="rent_bds_menu" parent="bds_icon" action="rent_bds_action"  sequence="1"/>
     <menuitem name="Fetch" id="fetch_menu" parent="bds_icon" action="bds.fetch_action"  sequence="2"/>
     <menuitem name="Poster" id="poster_menu" parent="bds_icon" action="bds.poster_action"  sequence="3"/>

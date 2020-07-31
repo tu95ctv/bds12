@@ -52,7 +52,7 @@ class GetPhonePoster(models.Model):
             if r.not_in_phone:
                 not_in_phone = r.not_in_phone.split(',')
                 not_in_phone = [i.replace("'",'').replace(" ",'') for i in not_in_phone]
-                print ('***not_in_phone***', not_in_phone)
+                # print ('***not_in_phone***', not_in_phone)
                 phone_list = list(filter(lambda i: i not in not_in_phone , phone_list))
             phone_list_txt = ','.join(phone_list )
 

@@ -107,9 +107,7 @@
             <separator />
             <filter name="is_kw_mg_cap_2" string="is kw cò cấp 2" domain="[]" context="{'group_by':'is_kw_mg_cap_2'}" />
             <filter name="kw_mg_cap_2" string="keyword cò c2" domain="[]" context="{'group_by':'kw_mg_cap_2'}" />
-            <separator />
-            <filter name="is_mat_tien_or_trich_dia_chi" string="is_mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'is_mat_tien_or_trich_dia_chi'}" />
-            <filter name="mat_tien_or_trich_dia_chi" string="mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'mat_tien_or_trich_dia_chi'}" />
+            
             <separator />
             <filter name="dd_tin_cua_dau_tu" string="Có kw đầu tư" domain="[]" context="{'group_by':'dd_tin_cua_dau_tu'}" />
             <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
@@ -139,7 +137,11 @@
             <filter name="loai_hem_combine" string="loai_hem_combine" domain="[]" context="{'group_by':'loai_hem_combine'}" />
             <filter name="ti_le_don_gia_dat_con_lai" string="ti_le_don_gia_dat_con_lai" domain="[]" context="{'group_by':'ti_le_don_gia_dat_con_lai'}" />
             <filter name="don_gia_quan" string="don_gia_quan" domain="[]" context="{'group_by':'don_gia_quan'}" />
-        
+            <separator />
+            <filter name="is_mat_tien_or_trich_dia_chi" string="is_mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'is_mat_tien_or_trich_dia_chi'}" />
+            <filter name="mat_tien_or_trich_dia_chi" string="mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'mat_tien_or_trich_dia_chi'}" />
+            <filter name="mat_tien_address" string="mat_tien_address" domain="[]" context="{'group_by':'mat_tien_address'}" />
+            <filter name="trich_dia_chi" string="trich_dia_chi" domain="[]" context="{'group_by':'trich_dia_chi'}" />
         </group>
         
       </search>

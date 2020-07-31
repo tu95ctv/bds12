@@ -1,0 +1,42 @@
+<odoo>
+    <record model="ir.ui.view" id="demo_tap_hoa_list">
+        <field name="name">bds list</field>
+        <field name="model">tap.hoa</field>
+        <field name ="priority">1</field>
+        <field name="arch" type="xml">
+            <tree >
+                <field name="id"></field>
+                <field name="link"/>
+                <field name="address"/>
+                <field name="tinh"/>
+                <field name="quan"/>
+                <field name="phuong"/>
+                <field name="duong"/>
+                <field name="poster_id" />
+                <field name="title" />
+                <field name="public_date" />
+                <field name="ngay_thanh_lap" />
+                <field name="mst" />
+                <field name="name_of_poster"/>
+                <field name="nganh_nghe_kinh_doanh" />
+                <field name="is_full_topic" />
+            </tree>
+        </field>
+    </record>
+
+ 
+    <record model="ir.actions.act_window" id="demo_tap_hoa_action">
+        <field name="name">Tạp hóa</field>
+        <field name="res_model">tap.hoa</field>
+        <field name="view_mode">tree,form</field>
+        <!-- <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','sell')]</field> -->
+        <field name="view_id" ref="demo_tap_hoa_list"></field>
+        
+    </record>
+
+
+
+
+
+    
+</odoo>

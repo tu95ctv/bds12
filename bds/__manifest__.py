@@ -28,6 +28,7 @@
         'data/data_chotot.xml',
         'data/data_muaban.xml',
         'data/data_bdsvn.xml',
+        'data/data_taphoa.xml',
         'data/cronjob_data.xml',
         'data/email.xml',
         'data/data_config_parameter.xml',
@@ -38,6 +39,9 @@
         'views/bds_search.xml',
         'views/bds_form.xml',
         'views/bds_list.xml',
+        'views/tap_hoa_list.xml',
+        'views/tap_hoa.xml',
+
         'views/poster.xml',
         'views/quan.xml',
         'views/error.xml',
