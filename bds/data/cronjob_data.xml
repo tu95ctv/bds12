@@ -112,7 +112,7 @@
         <field name="code">model.tao_url_cho_tap_hoa_tinh_thanh()</field>
     </record>
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id1" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
@@ -126,7 +126,7 @@
         <field name="code">model.cronjob_1()</field>
     </record>
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id2" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
@@ -141,7 +141,7 @@
     </record>
 
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id3" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
@@ -155,7 +155,7 @@
         <field name="code">model.cronjob_3()</field>
     </record>
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id4" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
@@ -170,7 +170,7 @@
     </record>
 
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id5" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
@@ -185,7 +185,7 @@
     </record>
 
 
-    <record id="fetch_by_id" model="ir.cron">
+    <record id="fetch_by_id6" model="ir.cron">
         <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
