@@ -19,7 +19,10 @@
                         <!-- <field name="is_current_page_2" /> -->
                         <field name="is_next_if_only_finish" />
                         <field name="is_cronjob" />
-                        <field name="is_bo_sung_topic" />
+                        <!-- <field name=" " /> -->
+                        <field name="batch_not_request_topic" />
+                        <button name="set_batch_not_request_topic" string="set_batch_not_request_topic" type="object" class="btn-primary" />
+                        
                     </group>
                     <group>
 
@@ -52,6 +55,8 @@
                                 <field name="current_page" />
                                 <field name="interval" />
                                 <field name="write_date" />
+                                <field name="fetched_number" />
+                                <field name="not_request_topic" />
                             </tree>
                         </field>
                     </page>
@@ -78,11 +83,63 @@
             <tree>
                 <field name="id" />
                 <field name="name" />
+                <field name="des" />
                 <field name="url_ids" widget="many2many_tags"/>
                 <field name="is_cronjob" />
             </tree>
         </field>
     </record>
+
+    <record model="ir.ui.view" id="fetch_item_form">
+        <field name="name">bds fetch item</field>
+        <field name="model">bds.fetch.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="id" />
+                        <field name="model_id" />
+                        <field name="limit" />
+                        <field name="asc_or_desc" />
+                        <field name="url_id" />
+                        <field name="name" />
+                        <field name="web_last_page_number" />
+                        <field name="min_page" />
+                        <field name="set_leech_max_page" />
+                        <field name="fetched_number" />
+                    </group>
+                    <group>
+                        <field name="is_finished" />
+                        <field name="set_number_of_page_once_fetch" />
+                        <field name="link_number" />
+                        <field name="existing_link_number" />
+                        <field name="update_link_number" />
+                        <field name="create_link_number" />
+                        <field name="current_page" />
+                        <field name="interval" />
+                        <field name="write_date" />
+                        <field name="not_request_topic" />
+                    </group>
+                </group>
+                <group>
+                    <field name="fetch_item_history_ids">
+                        <tree>
+                            <!-- <field name="set_number_of_page_once_fetch" /> -->
+                            <field name="id" />
+                            <field name="link_number" />
+                            <field name="existing_link_number" />
+                            <field name="update_link_number" />
+                            <field name="create_link_number" />
+                            <field name="current_page" />
+                            <field name="interval" />
+                            <field name="write_date" />
+                        </tree>
+                    </field>
+                </group>
+            </form>
+        </field>
+    </record>
+
     <record model="ir.actions.act_window" id="fetch_action">
         <field name="name">fetch window</field>
         <field name="res_model">bds.fetch</field>

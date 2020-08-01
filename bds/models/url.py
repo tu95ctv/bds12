@@ -34,23 +34,6 @@ class URL(models.Model):
     cate = fields.Char( default='bds')
     siteleech_id = fields.Many2one('bds.siteleech',compute='siteleech_id_',store=True)
     web_last_page_number = fields.Integer()
-   
-   
-    # set_number_of_page_once_fetch = fields.Integer(default=5)
-    # set_number_of_page_once_fetch2 = fields.Integer(default=2)
-    # current_page = fields.Integer()
-    # current_page_2 = fields.Integer()
-    # update_link_number = fields.Integer(readonly=1)
-    # create_link_number = fields.Integer(readonly=1)
-    # existing_link_number = fields.Integer(readonly=1)
-    # link_number = fields.Integer(readonly=1)
-    # interval = fields.Integer(readonly=1)
-    # set_leech_max_page = fields.Integer()
-    # set_leech_max_page2 = fields.Integer()
-    # min_page = fields.Integer()
-    # is_finished = fields.Boolean()
-
-    
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
     priority = fields.Integer()
     minute_change =  fields.Integer(compute='_minute_change')
@@ -112,6 +95,5 @@ class URL(models.Model):
             url_obj = g_or_c_ss(self, {'url':url},
                 {'web_last_page_number':web_last_page_number,'description':description,'cate':'tap hoa' }, 
                 is_up_date=True)
-            print ('***url_obj', url_obj)
 
     

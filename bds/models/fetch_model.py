@@ -19,6 +19,22 @@ def div_part(total_page, number_of_part, nth_part):
     return (first, second, number_page)
 
 class BDSFetchLine(models.Model):
+    _name = 'bds.fetch.item.history'
+    _order = 'id desc'
+
+    fetch_item_id = fields.Many2one('bds.fetch.item')
+    current_page = fields.Integer()
+    update_link_number = fields.Integer(readonly=1)
+    create_link_number = fields.Integer(readonly=1)
+    existing_link_number = fields.Integer(readonly=1)
+    link_number = fields.Integer(readonly=1)
+    interval = fields.Integer(readonly=1)
+    set_number_of_page_once_fetch = fields.Integer()
+
+
+
+
+class BDSFetchLine(models.Model):
     _name = 'bds.fetch.item'
     
     name = fields.Char(related='url_id.description', store=True)
@@ -39,7 +55,9 @@ class BDSFetchLine(models.Model):
     model_id = fields.Many2one('ir.model')
     limit = fields.Integer(default=20)
     asc_or_desc = fields.Selection([('asc','asc'),('desc','desc')], default='asc')
-
+    not_request_topic = fields.Boolean()
+    fetch_item_history_ids = fields.One2many('bds.fetch.item.history','fetch_item_id')
+    fetched_number = fields.Integer()
 #lam gon lai ngay 23/02
 class Fetch(models.Model):
 
@@ -60,11 +78,63 @@ class Fetch(models.Model):
     nth_part = fields.Integer()
     batch_number_of_once_fetch = fields.Integer()
     is_cronjob = fields.Boolean()
-    is_bo_sung_topic = fields.Boolean()
+    batch_not_request_topic = fields.Boolean()
+    
+
+    def cronjob_1(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+
+    def cronjob_2(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], offset=1, limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+
+    def cronjob_3(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], offset=2, limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+
+    def cronjob_4(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], offset=3, limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+    
+    def cronjob_5(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], offset=4, limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+
+    def cronjob_6(self):
+        fetch_obj = self.search([('is_cronjob','=',True)], offset=5, limit=1)
+        if fetch_obj:
+            fetch_obj.fetch()
+        else:
+            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+
+   
+    
+
+
+    def set_batch_not_request_topic(self):
+        for item in self.fetch_item_ids:
+            item.not_request_topic = self.batch_not_request_topic
+
+
     def set_batch_number_of_once_fetch(self):
-        if self.batch_number_of_once_fetch:
-            for item in self.fetch_item_ids:
-                item.set_number_of_page_once_fetch = self.batch_number_of_once_fetch
+        for item in self.fetch_item_ids:
+            item.set_number_of_page_once_fetch = self.batch_number_of_once_fetch
 
     def batch_div_part(self):
         print ('***batch_div_part***')
@@ -78,7 +148,6 @@ class Fetch(models.Model):
                     item.set_leech_max_page = second
 
     def cronjob_1(self):
-        print ('cronjob_1')
         fetch_obj = self.search([('is_cronjob','=',True)], limit=1)
         if fetch_obj:
             fetch_obj.fetch()

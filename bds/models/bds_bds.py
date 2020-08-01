@@ -1,463 +1,16 @@
 # -*- coding: utf-8 -*-
 import re
 import base64
-from odoo import models, fields, api,sql_db, tools
+from odoo import models, fields, api
 from odoo.exceptions import UserError
 from unidecode import unidecode
 import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
 from odoo.exceptions import UserError
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
-
-def trim_street_name(street_name_may_be):
-    rs = re.sub(',|\.','', street_name_may_be, flags=re.I)
-    rs = rs.strip()
-    return rs
-
-def _compute_t1l1_detect(html):
-        t1l1_list = []
-        pt = '(1t[,\s]*(\d{1,2})l)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            t1l1_list.append(rs.group(1))
-        pt = '((\d{1,2})\s*pn)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            t1l1_list.append(rs.group(1))
-        pt = '(?:\W|^)(st)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            t1l1_list.append(rs.group(1))
-            
-        return t1l1_list
-
-
-def detect_mat_tien_address(html, p = None):
-    mat_tien_full_address_possibles = True
-    before_index = 0
-    deal_s = []
-    full_adress_list = []
-    while mat_tien_full_address_possibles:
-        html = html [before_index:]
-        # p = '(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-        mat_tien_full_address_possibles = re.search(p, html, re.I)  #((\S+(?:\s|\.|$|,)+){1,4})
-        if mat_tien_full_address_possibles:
-            before_index = mat_tien_full_address_possibles.span()[1] + 1
-            number = mat_tien_full_address_possibles.group(1)
-            ten_duong = mat_tien_full_address_possibles.group('ten_duong')
-            is_check_word = re.search('[a-zđ]',ten_duong, re.I)
-            if not is_check_word:
-                continue
-            full_address = number + ' ' +  ten_duong
-            full_address_unidecode = unidecode (full_address)
-            if number not in deal_s:
-                deal_s.append(number)
-                sxs = re.search('x(?: |$)|^[x\d\s]+$',ten_duong, re.I) # có x trong tên đường
-                if sxs:
-                    continue
-                ddm = re.search('(?:^|x|\*|\s)\s*\d+m',full_address, re.I)# check mét
-                if ddm:
-                    continue
-
-                check_co_word = re.search('\D', full_address)
-                if not check_co_word:
-                    continue
-                ten_duong_lower = ten_duong.strip().lower() 
-                if ten_duong_lower in ['căn']:
-                    continue
-                pt = 'MT|Lầu|tỷ|căn|phòng|tấm|PN|WC|mặt|trệt|tầng|sẹc|sẹt|xẹc|xẹt|lửng|lững|trục đường|\dt\s*\dl'
-                pt = unidecode(pt)
-                is_mt = re.search(pt, full_address_unidecode, re.I)
-                if is_mt:
-                    continue
-                bao_nhieu_met = re.search('\d+m|50/50', number)
-                if bao_nhieu_met:
-                    continue
-                co_format_sdt = re.search('[\d\W]{6,}|3 Tháng 2|đi |thẳng ', full_address)
-                if co_format_sdt:
-                    continue
-                if len(ten_duong) == 1:
-                    continue
-                index = mat_tien_full_address_possibles.span()[0]
-                pre_index = index - 12
-                if pre_index < 0:
-                    pre_index = 0
-                check_hem_string = html[pre_index:index]
-                if check_hem_string:
-                    is_hem = re.search('hẻm|hxt|đường|bđs|cty|nhà đất|vp|văn phòng|phường|quận', check_hem_string, re.I)
-                    if is_hem:
-                        continue
-                full_adress_list.append((number, full_address))
-    return full_adress_list
-
-def detect_mat_tien_address_sum(html):
-    full_adress_list_sum =  []
-    number_list_sum = []
-    addresses = {
-    'html':{'value':html,
-        'p':'(?<!cách )(?i:nhà|mt|mặt tiền|số)\s+(\d{1,4}[a-zA-Z]{0,2})[\s,]+(?i:đường)*\s*(?P<ten_duong>(?-i:[A-Z0-9Đ][\w|/]*\s*){1,4})(?:\.|\s|\,|$|<)'
-        }, 
-    }
-    for key,val in addresses.items():
-        html = val['value']
-        p = val['p']
-        if html:
-            mat_tien_adress_list = detect_mat_tien_address(html, p)
-            if mat_tien_adress_list:
-                for number, full_address in mat_tien_adress_list:
-                    if number not in number_list_sum:
-                        full_adress_list_sum.append(full_address)
-                        number_list_sum.append(number)
-    mat_tien_address = False                  
-    if full_adress_list_sum:
-        mat_tien_address = ','.join(full_adress_list_sum)
-    return mat_tien_address
-
-
-
-def detect_hem_address(address):
-    # posible_address_search = True
-    keys_street_has_numbers = ['3/2','30/4','19/5','3/2.','3/2,','23/9']
-    # keys_24_7 = ['24/24','24/7','24/24h', '24/24H','24/24/7']
-    pat_247 = '24h*/7|24h*/24|1/500'
-    trust_address_result_keys = []
-    only_number_trust_address_result_keys = []
-    co_date_247_result_keys=[]
-    index_before = 0
-    while 1:
-        address = address[index_before:]
-        posible_address_search = re.search('(?P<adress_number>\d+\w{0,2}/\d+\w{0,2}(?:/\d+\w{0,2})*)[\s,]+(?:đường[\s,]+)*(?P<ten_duong>(?:[\w|/]+\s*){1,4})(?:\.|\s|,|$)', address)
-        if posible_address_search:
-            index_before = posible_address_search.span()[1]
-            adress_number = posible_address_search.group('adress_number')
-            street_name = posible_address_search.group('ten_duong')
-            street_name = trim_street_name(street_name)
-            full_adress = adress_number +' ' + street_name
-            if adress_number not in only_number_trust_address_result_keys:
-                black_list = '23/23 Nguyễn Hữu Tiến|5 Độc Lập'
-                black_list_rs = re.search(black_list, address, re.I)
-                if black_list_rs:
-                    only_number_trust_address_result_keys.append(adress_number)
-                    continue
-                if adress_number in ['1/2','50/100','100/100']:
-                    continue
-                rs = re.search(pat_247, adress_number, re.I)
-                if rs:
-                    co_date_247_result_keys.append(rs.group(0))
-                    continue
-                if adress_number in keys_street_has_numbers:
-                    # street_result_keys.append(adress_number)
-                    continue
-                is_day = re.search('\d+/\d\d\d\d', adress_number)
-                if is_day:
-                    continue
-                pnwc = re.search('(?:pn|wc|x)', adress_number, re.I)
-                if pnwc:
-                    continue
-                is_ty_m2 =  re.search('tỷ|tr|m2', full_adress, re.I)
-                if is_ty_m2:
-                    continue
-                
-                index = posible_address_search.span()[0]
-                before_index = index -20
-                if before_index < 0:
-                    before_index = 0
-                before_string = address[before_index: index]
-                is_van_phong = re.search('văn phòng|vp|bđs|nhà đất|[\d\W]{4,}', before_string, re.I)
-                if is_van_phong:
-                    continue
-                trust_address_result_keys.append((adress_number, full_adress))
-                only_number_trust_address_result_keys.append(adress_number)
-        else:
-            break
-    return trust_address_result_keys, co_date_247_result_keys
-
-def detect_hem_address_list(address_list):
-    sum_full_hem_address = [] 
-    only_number_address_sum_full_hem_address = [] 
-    co_date_247_result_keys_sum = []
-    for ad in address_list:
-        trust_address_result_keys, co_date_247_result_keys = detect_hem_address(ad)
-        co_date_247_result_keys_sum.extend(co_date_247_result_keys)
-        for i in trust_address_result_keys:
-            number_address = i[0]
-            if number_address not in only_number_address_sum_full_hem_address:
-                sum_full_hem_address.append(i)
-                only_number_address_sum_full_hem_address.append(number_address)
-    return sum_full_hem_address, co_date_247_result_keys_sum
-
-def compute_kw_mg( html):
-        found_kw_mgs = []
-        pat_247 = '24h*/7|(?<!an ninh )24h*/24|1/500'
-        rs = re.search(pat_247, html, re.I)
-        kw_co_date = False #1
-        if rs:
-            found_kw_mgs.append(rs.group(0))
-            kw_co_date = rs.group(0)
-        nha_dat_kws_cap_1 = 'nhà đất(?! thánh)|uy tín|real|bds|bđs|cần tuyển|tuyển sale|tuyển dụng|bất động sản|bđs|ký gửi|kí gửi|'+\
-        '(?<!nova)land(?!mark|abc)|tư vấn|(?:thông tin|sản phẩm) (?:chính xác|thật)|' +\
-        'xem nhà miễn phí|(?:hổ|hỗ) trợ miễn phí|khách hàng|' +\
-        'hỗ trợ[\w\s]{0,20}pháp lý|hợp.{1,20}đầu tư|csht|tttm|'+\
-        'chưa qua đầu tư|cấp 1[,\- ]*2[,\- ]*3|'+\
-        'tiện kinh doanh[ ,]{1,2}buôn bán[ ,]{1,2}mở công ty[ ,]{1,2}văn phòng|nợ ngân hàng|hợp tác|thanh lý' 
-
-     
-        nha_dat_list_rs = re.findall(nha_dat_kws_cap_1, html, re.I)
-        if nha_dat_list_rs:
-            found_kw_mgs.extend(nha_dat_list_rs)
-
-        mtg_kws = 'mmg|mqc|mtg|(?-i:MTKD)|(?-i:BTCT)|(?-i:CHDV)|(?-i:DTSD)|(?:.{0,10}cho khách?:.{0,10})|(?:khu vực an ninh|dân trí cao)\W{1,3}(?:khu vực an ninh|dân trí cao)'
-        nha_dat_list_rs = re.findall(mtg_kws, html, re.I)
-        kw_mg_cap_2 = False #2
-        is_kw_mg_cap_2 = False#3
-        if nha_dat_list_rs:
-            kw_mg_cap_2 = ','.join(nha_dat_list_rs)
-            is_kw_mg_cap_2 = True
-
-        break_kw = '(\n✓|\n\*)'
-        break_rs = re.findall(break_kw, html, re.I)
-        kw_co_special_break = False # 4
-        if break_rs:
-            len_break_rs = len(break_rs)
-            kw_co_special_break = len_break_rs
-       
-        break_kw = '(\n)'
-        break_rs = re.findall(break_kw, html, re.I)
-        kw_co_break = False # 5
-        if break_rs:
-            len_break_rs = len(break_rs)
-            kw_co_break = len_break_rs
-        
-        number_char = len(html)
-        
-
-        hoa_la_canh_pt = '🏠|💥|✅|👉🏻|⭐️|💵|💰|☎️|⚡|📲|💎|🌹|☎|🌈|🍎|🍏|🏦|📣|🆘|☎️|🤝|👍|👉|' +\
-            '🏡|🗽|🎠|🏖|😍|🔥'
-        nha_dat_list_rs = re.findall(hoa_la_canh_pt, html, re.I)
-        hoa_la_canh = False # 6
-        if nha_dat_list_rs:
-            hoa_la_canh = len(nha_dat_list_rs)
-        t1l1_list = _compute_t1l1_detect(html)
-        t1l1 = False #7
-        if t1l1_list:
-            t1l1 = ','.join(t1l1_list)
-        kw_mg = False #8
-        dd_tin_cua_co = 'no_kw_co_cap_1' # 9
-        if found_kw_mgs:
-            kw_mg = ','.join(found_kw_mgs)
-            dd_tin_cua_co = 'kw_co_cap_1'
-
-        return kw_co_date, kw_mg_cap_2, is_kw_mg_cap_2, kw_co_special_break, kw_co_break,\
-                hoa_la_canh, t1l1, kw_mg, dd_tin_cua_co
-
-def tim_dien_tich_trong_bai(html):
-    p ='(?:diện tích|dt|dtcn)[\W]*([1-9]+[\.,]\d+)\s*m2'
-    rs = re.search(p, html, re.I)
-    dt = 0
-    if rs:
-        dt = rs.group(1)
-        dt = dt.replace(',','.')
-        dt = float(dt)
-    return dt
-
-def tim_dien_tich_sd_trong_bai(html):
-    dt = 0
-    while 1:
-        p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn|xd))[\W]*([0-9]+[\.,]*\d*)\s*m2'
-        rs = re.search(p, html, re.I)
-        if rs:
-            span0 = rs.span(0)[0]
-            span1 =  rs.span(0)[1]
-            pre_index = span0-50
-            if pre_index<0:
-                pre_index = 0
-            pre = html[pre_index:span0]
-            gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
-            gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
-            if gpxd_search:
-                before_index = span1 + 1
-                html = html[before_index:]
-                continue
-            else:
-                dt = rs.group(1)
-                dt = dt.replace(',','.')
-                dt = float(dt)
-                return dt
-        else:
-            return dt
-
-def tim_dai_rong(html):
-    auto_ngang, auto_doc = 0,0
-    pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}[x*] {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
-    rs = re.search(pt, html,flags = re.I)
-    
-    if rs:
-        auto_ngang, auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
-    elif not rs:
-        pt= '(dài|rộng|ngang)[: ]{1,2}(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(([\W]{1,3}(dài|rộng|ngang)[: ]{1,2}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
-        rs = re.search(pt, html,flags = re.I)
-        if rs:
-            auto_ngang, auto_doc = float(rs.group(2).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(6).replace(',','.').replace('m','.').replace('M','.'))
-    return auto_ngang, auto_doc
-
-def auto_ngang_doc_compute(html,rarea):
-    auto_ngang, auto_doc = tim_dai_rong(html)
-    dien_tich_trong_topic = tim_dien_tich_trong_bai(html)
-    choose_area = 0
-    auto_dien_tich = 0
-    ti_le_dien_tich_web_vs_auto_dien_tich = 0
-    if auto_ngang and auto_doc:
-        auto_dien_tich = auto_ngang*auto_doc
-        ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
-        if rarea ==0:
-            choose_area = auto_dien_tich 
-        elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.4 and ti_le_dien_tich_web_vs_auto_dien_tich < 5:
-            choose_area = auto_dien_tich
-        else:
-            choose_area = rarea
-    else:
-        choose_area = rarea or dien_tich_trong_topic
-    return auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic
-
-def detect_hxh(html):
-    p = '(?:h|hẻm|hẽm|d|đ|đường)\s{0,1}(?:xh|xe hơi|oto|ô tô)'
-    rs = re.search(p, html, re.I)
-    hxh_str, full_hxh = False,False
-    if rs:
-        span0 = rs.span(0)[0]
-        pre_index = span0-30
-        if pre_index<0:
-            pre_index = 0
-        pre = html[pre_index:span0]
-        gan_sat_cach_pt = 'gần|sát|cách'
-        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
-        if gan_sat_cach_search:
-            return hxh_str, full_hxh
-        before_index = span0 + 10
-        full_hxh = html[pre_index:before_index]
-        hxh_str = rs.group(0)
-    return hxh_str, full_hxh
-
-def detect_is_mat_tien(html):
-    # is_loop = True
-    while 1:
-        p = '(?:(?<!2 )mặt tiền|nhà mt|mặt phố)(?! hẻm)'
-        rs = re.search(p, html, re.I)
-        hxh_str, full_hxh,is_mat_tien = False,False,False
-        if rs:
-            span0 = rs.span(0)[0]
-            pre_index = span0-10
-            if pre_index<0:
-                pre_index = 0
-            pre = html[pre_index:span0]
-            gan_sat_cach_pt = 'gần|sát|cách|hai|từ|ra|sau lưng|hai'
-            gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
-            if gan_sat_cach_search:
-                before_index = rs.span()[1] + 1
-                html = html[before_index:]
-                continue
-            hxh_str = rs.group(0)
-            full_before_index = rs.span(0)[1] + 10
-            full_hxh = html[pre_index:full_before_index]
-            is_mat_tien = True
-            return hxh_str, full_hxh, is_mat_tien
-        else:
-            return hxh_str, full_hxh, is_mat_tien
-
-def detect_hxt(html):
-    p = '(?:h|hẻm|hẽm|d|đ|đường)\s{0,1}(?:xt|xe (?:tải|tãi))'
-    rs = re.search(p, html, re.I)
-    hxh_str, full_hxh = False,False
-    if rs:
-        span0 = rs.span(0)[0]
-        pre_index = span0-30
-        pre = html[pre_index:span0]
-        gan_sat_cach_pt = 'gần|sát|cách'
-        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
-        if gan_sat_cach_search:
-            return hxh_str, full_hxh
-        before_index = span0 + 10
-        full_hxh = html[pre_index:before_index]
-        hxh_str = rs.group(0)
-    return hxh_str, full_hxh
-    
-def detect_hxm(html):
-    p = '(?:h|hẻm|hẽm)\s{0,1}(?:xm|xe (?:máy))'
-    rs = re.search(p, html, re.I)
-    hxh_str, full_hxh = False,False
-    if rs:
-        span0 = rs.span(0)[0]
-        pre_index = span0-30
-        pre = html[pre_index:span0]
-        gan_sat_cach_pt = 'gần|sát|cách'
-        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
-        if gan_sat_cach_search:
-            return hxh_str, full_hxh
-        before_index = span0 + 10
-        full_hxh = html[pre_index:before_index]
-        hxh_str = rs.group(0)
-    return hxh_str, full_hxh
-    
-def detect_hbg(html):
-    p = '(?:h|hẻm|hẽm)\s{0,1}(?:bg|ba (?:gát|gác))'
-    rs = re.search(p, html, re.I)
-    hxh_str, full_hxh = False,False
-    if rs:
-        span0 = rs.span(0)[0]
-        pre_index = span0-30
-        pre = html[pre_index:span0]
-        gan_sat_cach_pt = 'gần|sát|cách'
-        gan_sat_cach_search = re.search(gan_sat_cach_pt,pre, re.I)
-        if gan_sat_cach_search:
-            return hxh_str, full_hxh
-        before_index = span0 + 10
-        full_hxh = html[pre_index:before_index]
-        hxh_str = rs.group(0)
-    return hxh_str, full_hxh
-
-
-def detect_loai_hem(html):
-    loai_hem_selection = False
-    loai_hem, full_loai_hem = detect_hxh(html)
-    if loai_hem:
-        loai_hem_selection = 'hxh'
-    else:
-        loai_hem,  full_loai_hem = detect_hxt(html)
-        if loai_hem:
-            loai_hem_selection = 'hxt'
-        else:
-            loai_hem,  full_loai_hem = detect_hxm(html)
-            if loai_hem:
-                loai_hem_selection = 'hxm'
-            else:
-                loai_hem,  full_loai_hem = detect_hbg(html)
-                if loai_hem:
-                    loai_hem_selection = 'hbg'
-    return full_loai_hem, loai_hem_selection
-
-
-def _compute_loai_hem_combine(html):
-        mat_tien, full_mat_tien, is_mat_tien = detect_is_mat_tien(html)
-        hem_rong_char, hem_rong = detect_hem_rong(html)
-        full_loai_hem, loai_hem_selection = detect_loai_hem(html)
-        loai_hem_combine = loai_hem_selection
-        if not loai_hem_selection:
-            if is_mat_tien:
-                loai_hem_combine = 'mt'
-            elif hem_rong:
-                if hem_rong > 10:
-                    loai_hem_combine = 'mt'
-                elif hem_rong >= 6:
-                    loai_hem_combine = 'hxt'
-                elif hem_rong >= 4:
-                    loai_hem_combine = 'hxh'
-                elif hem_rong >= 2.5:
-                    loai_hem_combine = 'hbg'
-                elif hem_rong:
-                    loai_hem_combine = 'hxm'
-        return mat_tien, full_mat_tien, is_mat_tien,hem_rong_char, hem_rong, full_loai_hem, loai_hem_selection, loai_hem_combine
-            
-
+from odoo.addons.bds.models.compute_bds  import  _compute_so_phong_ngu, _compute_mat_tien_or_trich_dia_chi,\
+    _compute_dd_tin_cua_dau_tu, _compute_loai_hem_combine, _compute_kw_mg
+from odoo.addons.bds.models.compute_choosed_area  import _compute_choosed_area_muc_gia
 
 
 def skip_if_cate_not_bds(depend_func):
@@ -468,279 +21,13 @@ def skip_if_cate_not_bds(depend_func):
                 depend_func(r)
     return wrapper
 
-def skip_depends(depend_func):
-    def wrapper(*args,**kargs):
-        self = args[0]
-        for r in self:
-            return 
-            # if r.cate ==u'bds':
-            #     depend_func(r)
-    return wrapper
-
-def previous_of_match(html, rs_group, previous_char_number = 30):
-    span0 = rs_group.span(0)[0]
-    pre_index = span0-previous_char_number
-    pre = html[pre_index:span0]
-    return pre
-
-def gpxd_search(pre):
-    gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
-    gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
-    return gpxd_search
-
-def cach_search(pre):
-    gan_sat_cach_pt = 'cách'
-    gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
-    return gpxd_search
-
-def detect_only_lau(html, pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'):
-    while 1:
-        rs = re.search(pt, html, re.I)
-        so_lau = 0
-        so_lau_char = False
-        if rs:
-            pre = previous_of_match(html, rs)
-            gpxd_search_rs = gpxd_search(pre)
-            if gpxd_search_rs:
-                before_index = rs.span(0)[1] + 1
-                html = html[before_index:]
-                continue
-            else:
-                so_lau = rs.group(1)
-                so_lau_char = rs.group(0)
-                try:
-                    so_lau = int(so_lau)
-                except:
-                    so_lau = 0
-                return so_lau, so_lau_char
-        else:
-            return so_lau, so_lau_char
-
-def detect_lung_only(html, pt = 'lửng|lững'):
-    while 1:
-        is_lung = False
-        rs = re.search(pt, html, re.I)
-        so_lau = 0
-        so_lau_char = False
-        if rs:
-            pre = previous_of_match(html, rs)
-            gpxd_search_rs = gpxd_search(pre)
-            if gpxd_search_rs:
-                before_index = rs.span(0)[1] + 1
-                html = html[before_index:]
-                continue
-            else:
-                is_lung = True
-                return is_lung
-        else:
-            return is_lung
-
-def detect_lau_tranh_gpxd(html):
-    so_lau, so_lau_char = detect_only_lau(html)
-    if not so_lau:
-        so_lau, so_lau_char = detect_only_lau(html, pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)')
-        if so_lau:
-            so_lau = so_lau -1
-    so_lau_he_so = so_lau
-    is_lung = detect_lung_only(html)
-    if is_lung:
-        so_lau +=0.5
-        so_lau_he_so +=0.7
-
-    is_st = detect_lung_only(html, pt = 'sân thượng')
-    if is_st:
-        so_lau +=1
-        so_lau_he_so +=0.5
-    return so_lau, so_lau_char, so_lau_he_so
-
-def detect_hem_rong(html):
-    while 1:
-        pt = '(?<!cách )(?:hẻm|hẽm|đường)\s+(?:trước nhà)*\s*(?:xh|xe hơi|ô tô|xe máy|kia|ba gác|ba gát)*\s*(?:trước nhà)*\s*(?:nhỏ)*\s*(?:rộng)*\s*(?:khoảng|tầm)*\s*(\d+(?:\.|m|mét|,)*\d*)\s*(?:m|mét)*(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            pre = previous_of_match(html, rs)
-            cach_search_rs = cach_search(pre)
-            if cach_search_rs:
-                before_index = rs.span(0)[1] + 1
-                html = html[before_index:]
-                continue
-            else:
-                hem_rong_char, hem_rong = rs.group(0), rs.group(1)
-                # print ('***hem_rong**', hem_rong)
-                hem_rong = re.sub('mét|mét|m|,','.',hem_rong, flags=re.I)
-                hem_rong = re.sub('\.+','.',hem_rong)
-                hem_rong = float(hem_rong)
-                return hem_rong_char, hem_rong
-        else:
-            return False, False
-
-def detect_lau(html):
-
-    pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
-    rs = re.search(pt, html, re.I)
-    so_lau = 0
-    so_lau_char = False
-    
-    if rs:
-        so_lau = rs.group(1)
-        so_lau_char = rs.group(0)
-        try:
-            so_lau = int(so_lau)
-        except:
-            so_lau = 0
-    else:
-        pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            so_lau = rs.group(1)
-            so_lau_char = rs.group(0)
-            try:
-                so_lau = int(so_lau)
-            except:
-                so_lau = 0
-        else:
-            pt = '(cấp 4|c4|c4)\W'
-            rs = re.search(pt, html, re.I)
-            if rs:
-                so_lau = 0.1
-                so_lau_char = rs.group(1)
-
-
-                
-    so_lau_he_so = so_lau
-    pt = 'lửng|lững'
-    rs = re.search(pt, html, re.I)
-    if rs:
-        so_lau +=0.5
-        so_lau_he_so +=0.7
-
-    pt = 'sân thượng'
-    rs = re.search(pt, html, re.I)
-    if rs:
-        so_lau +=1
-        so_lau_he_so +=0.5
-
-    return so_lau, so_lau_char, so_lau_he_so
-
-def _compute_muc_gia(gia):
-        muc_gia_list = [('0','0'),('<1','<1'),('1-2','1-2'),('2-3','2-3'),
-            ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')]
-        selection = None
-        for muc_gia_can_tren in range(0,len(muc_gia_list)):
-            if gia <= muc_gia_can_tren:
-                selection = muc_gia_list[muc_gia_can_tren][0]
-                break
-        if not selection:
-            selection = muc_gia_list[-1][0]
-        return selection
-
-def muc_don_gia_(don_gia):
-    muc_dt_list =[('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
-                                ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),('180-210','180-210'),('>210','>210')]
-    selection = None
-    for muc_gia_can_tren in range(0,8):
-        if don_gia <= muc_gia_can_tren*30:
-            selection = muc_dt_list[muc_gia_can_tren][0]
-            break
-    if not selection:
-        selection = muc_dt_list[-1][0]
-    return selection
-
-def muc_ti_le_don_gia_(ti_le_don_gia):
-    muc_dt_list =[('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
-                                ('1.2-1.6','1.2-1.6'), ('1.6-2.0','1.6-2.0'), ('2.0-2.4','2.0-2.4'), ('2.4-2.8','2.4-2.8'), ('>2.8','>2.8')]
-    selection = None
-    for muc_gia_can_tren in range(0,8):
-        if ti_le_don_gia <= muc_gia_can_tren*0.4:
-            selection = muc_dt_list[muc_gia_can_tren][0]
-            break
-    if not selection:
-        selection = muc_dt_list[-1][0]
-    return selection
-    
-def _muc_dt(choose_area):
-        muc_dt_list = [('0','0'), ('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')]
-        selection = None
-        for muc_gia_can_tren in range(0,8):
-            if choose_area <= muc_gia_can_tren*10:
-                selection = muc_dt_list[muc_gia_can_tren][0]
-                break
-        if not selection:
-            selection = muc_dt_list[-1][0]
-        return selection
-
-def _so_phong_ngu_detect( html):
-        so_phong_ngu = 0
-        pt = '(\d{1,2})\s*(?:pn|phòng ngủ)(?:\W|$)'
-        rs = re.search(pt, html, re.I)
-        if rs:
-            so_phong_ngu = rs.group(1)
-            try:
-                so_phong_ngu = int(so_phong_ngu)
-            except: 
-                so_phong_ngu = 0
-        return so_phong_ngu
-
-def str_before_index(index, input_str):
-    pre_index = index - 30
-    if pre_index < 0:
-        pre_index = 0
-    pre_str = input_str[pre_index:index]
-    return pre_str
-
-def _compute_hoa_hong(html):
-        p = '((?<=\W)(?:hoa hồng|hh(?!t)|huê hồng|🌹)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*(?:\D|\s){0,31}((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
-        rs = re.search(p, html, re.I)
-        if not rs:
-            p = '((?:phí(?! hh| hoa hồng| huê hồng|\w)|chấp nhận)\s*(?:cho)*\s*(?:mg|môi giới|mô giới|TG|Trung gian)*\s*((\d|\.)+\s*(%|triệu|tr))*)(?:\s+|$|<|\.|)'
-            rs = re.search(p, html, re.I)
-        kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu = False, False, False
-        if rs:
-            for i in [1]:
-                index = rs.span()[0]
-                pre_str = str_before_index(index, html)
-                khong_cho_mg = re.search('không|ko', pre_str, re.I)
-                if khong_cho_mg:
-                    continue
-                kw_hoa_hong_tach = rs.group(1)
-                kw_hoa_hong_tach = kw_hoa_hong_tach.strip().lower()
-                if kw_hoa_hong_tach in  ['phí', 'chấp nhận']:
-                    continue
-                kw_hoa_hong = kw_hoa_hong_tach
-                kw_so_tien_hoa_hong = rs.group(2)
-                dd_tin_cua_dau_tu = True
-        else:
-            rs = re.search('((1)%)', html, re.I)
-            if rs:
-                kw_hoa_hong = rs.group(1)
-                kw_so_tien_hoa_hong = rs.group(2)
-                dd_tin_cua_dau_tu = True
-        return kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu
-
-
-def _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r):
-        mat_tien_address = detect_mat_tien_address_sum(html)
-        trich_dia_chi = False
-        address_list = [html_trich_dia_chi]
-        sum_full_hem_address, co_date_247_result_keys_sum = detect_hem_address_list(address_list)
-        if sum_full_hem_address:
-            trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
-        mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
-        is_mat_tien_or_trich_dia_chi ='1' if  bool(mat_tien_or_trich_dia_chi) else '0'
-        
-        if trich_dia_chi:
-            same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',trich_dia_chi),('id','!=',r.id)])
-            same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
-        else:
-            same_address_bds_ids = False
-        return mat_tien_address, trich_dia_chi, mat_tien_or_trich_dia_chi, is_mat_tien_or_trich_dia_chi, same_address_bds_ids
-
 
 class UserReadMark(models.Model):
     _name = 'user.read.mark'
 
     user_id = fields.Many2one('res.users')
     bds_id = fields.Char('bds.bds')
+
 
 class UserQuanTamMark(models.Model):
     _name = 'user.quantam.mark'
@@ -856,7 +143,6 @@ class bds(models.Model):
     hoa_la_canh = fields.Char(compute='_compute_kw_mg',store=True)
     t1l1 = fields.Char(compute='_compute_kw_mg', store=True)
     #!_compute_kw_mg
-
     #_compute_dd_tin_cua_dau_tu
     dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
     kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
@@ -872,46 +158,42 @@ class bds(models.Model):
     mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
     full_mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
     is_mat_tien = fields.Boolean(compute='_compute_loai_hem_combine', store = True)
-
-
     #auto_ngang_doc_
     muc_gia = fields.Selection([('0','0'), ('<1','<1'),('1-2','1-2'),('2-3','2-3'),
                                 ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
                                 ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
                                 ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
-                               compute='auto_ngang_doc_', store = True, string=u'Mức Giá')
+                               compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức Giá')
     muc_dt = fields.Selection(
         [('0','0'), ('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),
         ('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
-        compute='auto_ngang_doc_', store = True, string=u'Mức diện tích')
+        compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức diện tích')
     muc_don_gia = fields.Selection([('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
                                     ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
-                                    ('180-210','180-210'),('>210','>210')], compute='auto_ngang_doc_', store=True )
-    ti_le_don_gia = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True )
+                                    ('180-210','180-210'),('>210','>210')], compute='_compute_choosed_area_muc_gia', store=True )
+    ti_le_don_gia = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True )
     muc_ti_le_don_gia = fields.Selection([('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
                                     ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
-                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')], compute='auto_ngang_doc_', store=True)
-    auto_ngang = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    auto_doc = fields.Float(compute = 'auto_ngang_doc_',store=True)
-    auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
-    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_',store=True)
-    don_gia = fields.Float(digit=(6,2),compute='auto_ngang_doc_',store=True,string=u'Đơn giá')
-    choose_area = fields.Float(digits=(6,2), compute = 'auto_ngang_doc_', store=True)#,store=True
-    so_lau = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
-    so_lau_he_so = fields.Float(digits=(6,1),compute ='auto_ngang_doc_',store=True)
-    so_lau_char = fields.Char(compute ='auto_ngang_doc_',store=True)
-    dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    ti_le_dtsd = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    dtsd_combine = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    gia_xac_nha = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
-    don_gia_quan = fields.Float(digits=(6,2), compute='auto_ngang_doc_', store=True)
- 
+                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')], compute='_compute_choosed_area_muc_gia', store=True)
+    auto_ngang = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
+    auto_doc = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
+    auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
+    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
+    don_gia = fields.Float(digit=(6,2),compute='_compute_choosed_area_muc_gia',store=True,string=u'Đơn giá')
+    choose_area = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia', store=True)#,store=True
+    so_lau = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
+    so_lau_he_so = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
+    so_lau_char = fields.Char(compute ='_compute_choosed_area_muc_gia',store=True)
+    dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    ti_le_dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    dtsd_combine = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    gia_xac_nha = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    don_gia_quan = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
     
-
     # function not depends
     def search(self, args, **kwargs):
         try:
@@ -1101,11 +383,6 @@ class bds(models.Model):
 
     # ! depend no store
 
-    # @api.depends('trigger')
-    # def _detect_is_mat_tien(self):
-    #     for r in self:
-    #         r.mat_tien, r.full_mat_tien, r.is_mat_tien = detect_is_mat_tien(r.title + ' ' + r.html)
-
 
     @api.depends('html')
     @skip_if_cate_not_bds
@@ -1116,26 +393,6 @@ class bds(models.Model):
             r.mat_tien, r.full_mat_tien, r.is_mat_tien, r.hem_rong_char, r.hem_rong, full_loai_hem,\
             r.loai_hem_selection, r.loai_hem_combine = \
                 _compute_loai_hem_combine(html)
-
-            
-
-    # @api.depends('html','title','address')
-    # def _mat_tien_address(self):
-    #     for r in self:
-    #         html = r.title + ' ' + r.html
-    #         r.mat_tien_address = detect_mat_tien_address_sum(html)
-
-    # @api.depends('html')
-    # @skip_if_cate_not_bds 
-    # def trich_dia_chi_(self):
-    #     for r in self:
-    #         html = r.title or '' +  r.html or '' + r.address or ''
-    #         address_list = [html]
-    #         sum_full_hem_address, co_date_247_result_keys_sum = detect_hem_address_list(address_list)
-    #         if sum_full_hem_address:
-    #             trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
-    #             r.trich_dia_chi = trich_dia_chi
-    
 
 
     @api.depends('html','title')
@@ -1154,13 +411,8 @@ class bds(models.Model):
     def _compute_so_phong_ngu(self):
         for r in self:
             html = (r.title or '' ) + ' ' + (r.html or '')
-            so_phong_ngu = _so_phong_ngu_detect(html)
+            so_phong_ngu = _compute_so_phong_ngu(html)
             r.so_phong_ngu = so_phong_ngu
-
-    # @api.depends('html')
-    # def _compute_hem_rong(self):
-    #     for r in self:
-    #         r.hem_rong_char, r.hem_rong = detect_hem_rong(r.title  +  r.html)
 
 
     @api.depends('html', 'title')
@@ -1169,88 +421,30 @@ class bds(models.Model):
         for r in self:
             html = r.title + ' ' + r.html
             r.kw_co_date, r.kw_mg_cap_2, r.is_kw_mg_cap_2, r.kw_co_special_break, r.kw_co_break,\
-                r.hoa_la_canh, r.t1l1, r.kw_mg, r.dd_tin_cua_co = compute_kw_mg(html)
+                r.hoa_la_canh, r.t1l1, r.kw_mg, r.dd_tin_cua_co = _compute_kw_mg(html)
             
-    # @api.depends('trich_dia_chi')
-    # def same_address_bds_ids_(self):
-    #     for r in self:
-    #         if r.trich_dia_chi:
-    #             same_address_bds_ids  = self.env['bds.bds'].search([('trich_dia_chi','=ilike',r.trich_dia_chi),('id','!=',r.id)])
-    #             r.same_address_bds_ids = [(6,0,same_address_bds_ids.mapped('id'))]
+    
 
-    @api.depends('html','cate','area','trigger','gia')
+
+
+    @api.depends('html','cate','area','trigger','gia','loai_hem_combine')
     @skip_if_cate_not_bds            
-    def auto_ngang_doc_(self):
+    def _compute_choosed_area_muc_gia(self):
         for r in self:
             html = r.title + r.html
-            auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic = \
-                auto_ngang_doc_compute(html, r.area)
-            dtsd = tim_dien_tich_sd_trong_bai(html)
-            so_lau, so_lau_char, so_lau_he_so =  detect_lau_tranh_gpxd(html)
-            ti_le_dtsd = False
-            dtsd_tu_so_lau = 0
-            dtsd_he_so_lau = 0
+            gia = r.gia
+            quan_id = r.quan_id
+            loai_hem_combine = r.loai_hem_combine
+            area = r.area
 
-            allow_loop = 2
-            while allow_loop:
-                allow_loop -=1
-                if so_lau:
-                    dtsd_tu_so_lau = (so_lau + 1) * choose_area * 0.9
-                    dtsd_he_so_lau = (so_lau_he_so + 1) * choose_area * 0.9 
-                    if so_lau_he_so < 2:
-                        dtsd_he_so_lau = dtsd_he_so_lau * 0.5
-                    if dtsd and choose_area:
-                        ti_le_dtsd = dtsd_tu_so_lau / dtsd
-                dtsd_combine = dtsd or dtsd_tu_so_lau
 
-                dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
-                if not dtsd_combine_he_so_lau:
-                    dtsd_combine_he_so_lau =  choose_area * 0.5
-                gia_xac_nha = dtsd_combine_he_so_lau * 0.006
-                gia_dat_con_lai = 0
-                don_gia_dat_con_lai = 0
-                if r.gia > 0.2 and gia_xac_nha:
-                    gia_dat_con_lai = r.gia - gia_xac_nha
-                    if choose_area:
-                        don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
-                don_gia = 0
-                if r.gia > 0.5 and choose_area:
-                    don_gia = r.gia*1000/choose_area
+            don_gia_quan, ti_le_don_gia_dat_con_lai, ti_le_don_gia, \
+            auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich, \
+            dtsd, choose_area, so_lau, so_lau_char, so_lau_he_so,\
+            dtsd_tu_so_lau, ti_le_dtsd, dtsd_combine, gia_xac_nha,\
+            gia_dat_con_lai, don_gia_dat_con_lai, don_gia, muc_don_gia,\
+            muc_ti_le_don_gia, muc_dt, muc_gia = _compute_choosed_area_muc_gia(html, gia, area, quan_id, loai_hem_combine)
 
-                # muc gia quan vao day
-                don_gia_quan = 0
-                ti_le_don_gia_dat_con_lai = 0
-
-                if r.loai_hem_combine and don_gia_dat_con_lai:
-                    if r.loai_hem_combine =='mt':
-                        loai_hem_combine = 'mat_tien'
-                    else:
-                        loai_hem_combine = r.loai_hem_combine
-                    attr = 'don_gia_%s'%loai_hem_combine
-                    don_gia_quan = getattr(r.quan_id, attr)
-                    if not don_gia_quan:
-                        don_gia_quan = getattr(r.quan_id, attr + '_tc')
-
-                
-                if not don_gia_quan:
-                    don_gia_quan = r.quan_id.muc_gia_quan or r.quan_id.don_gia_hbg_tc
-
-                if don_gia_quan:
-                    ti_le_don_gia_dat_con_lai = don_gia_dat_con_lai/don_gia_quan
-
-                if ti_le_don_gia_dat_con_lai != 0 and ti_le_don_gia_dat_con_lai < 0.3:
-                    if choose_area and so_lau:
-                        choose_area = choose_area/(so_lau + 1) # cho lập lại khi choose_area được gán lại
-                        continue
-                    else:
-                        break
-                else:
-                    break
-            ti_le_don_gia = ti_le_don_gia_dat_con_lai
-            muc_ti_le_don_gia = muc_ti_le_don_gia_(ti_le_don_gia)   
-            muc_don_gia = muc_don_gia_(don_gia)  
-            muc_dt = _muc_dt(choose_area)
-            muc_gia = _compute_muc_gia(r.gia)
 
             r.don_gia_quan = don_gia_quan
             r.ti_le_don_gia_dat_con_lai = ti_le_don_gia_dat_con_lai
@@ -1262,10 +456,12 @@ class bds(models.Model):
             r.so_lau = so_lau
             r.so_lau_char = so_lau_char
             r.so_lau_he_so = so_lau_he_so
+
             r.dtsd_tu_so_lau = dtsd_tu_so_lau
             r.ti_le_dtsd = ti_le_dtsd
             r.dtsd_combine = dtsd_combine 
             r.gia_xac_nha = gia_xac_nha
+
             r.gia_dat_con_lai = gia_dat_con_lai
             r.don_gia_dat_con_lai = don_gia_dat_con_lai
             r.don_gia = don_gia
@@ -1278,7 +474,7 @@ class bds(models.Model):
     @skip_if_cate_not_bds               
     def _compute_dd_tin_cua_dau_tu(self):
         for r in self:
-            r.kw_hoa_hong, r.kw_so_tien_hoa_hong, r.dd_tin_cua_dau_tu =  _compute_hoa_hong(r.html)
+            r.kw_hoa_hong, r.kw_so_tien_hoa_hong, r.dd_tin_cua_dau_tu =  _compute_dd_tin_cua_dau_tu(r.html)
                     
     
     @api.depends('html')
@@ -1286,18 +482,6 @@ class bds(models.Model):
         for r in self:
             r.html_khong_dau = unidecode(r.html) if r.html else r.html
   
-    
-    # @api.depends('choose_area')
-    # def muc_dt_(self):
-    #     for r in self:
-    #         r.muc_dt = _muc_dt(r.choose_area)
-
-
-    # @api.depends('gia')
-    # def muc_gia_(self):
-    #     for r in self:
-    #         r.muc_gia = _compute_muc_gia(r.gia)
-    
 
     # out function 
     def send_mail_chinh_chu(self):
@@ -1346,7 +530,6 @@ class bds(models.Model):
             update_dict = {'tieu_chi_int_1':rs[0]}#tieu_chi_int_1: count
             quan = g_or_c_ss(self.env['bds.tieuchi'],search_dict, update_dict )
         
-    
 
     def test(self):
         readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 20), ('don_gia','<=', 300),('poster_id','=',18)],['quan_id','siteleech_id','avg_gia:avg(gia)','count(quan_id)'],['quan_id','siteleech_id'], lazy=False)
@@ -1464,13 +647,9 @@ class bds(models.Model):
             if du_doan_cc_or_mg !='dd_mg':
                 if  dd_tin_cua_dau_tu:
                     du_doan_cc_or_mg= 'dd_dt'
-                    
-                  
             poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
             poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
             r.write(poster_dict)
-            # bds_id.du_doan_cc_or_mg = du_doan_cc_or_mg
-            # bds_id.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
 
 
 

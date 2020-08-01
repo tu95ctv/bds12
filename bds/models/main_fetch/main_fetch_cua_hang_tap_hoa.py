@@ -57,15 +57,10 @@ class MuabanFetch(models.AbstractModel):
 
     def get_main_obj(self):
         rs = super().get_main_obj()
-        if self.site_name =='cuahangtaphoa':
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             return self.env['tap.hoa']
         return rs
 
-    def save_to_disk(self, ct, name_file ):
-        path = os.path.dirname(os.path.abspath(__file__))
-        f = open(os.path.join(path,'%s.html'%name_file), 'w')
-        f.write(ct)
-        f.close()
 
     def get_last_page_number(self, url_id):
         if self.site_name =='cuahangtaphoa':
@@ -83,11 +78,12 @@ class MuabanFetch(models.AbstractModel):
         return ngay_cap
 
 
+
+
     def request_topic (self, link, url_id):
-        topic_dict = super(MuabanFetch, self).request_topic(link, url_id)
-        if self.site_name =='cuahangtaphoa':
+        
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name')=='tap.hoa':
             topic_dict = {}
-            # print ('tra về luôn')
             # return topic_dict
             topic_html_or_json = request_html(link)
             a_page_html_soup = BeautifulSoup(topic_html_or_json, 'html.parser')
@@ -104,61 +100,20 @@ class MuabanFetch(models.AbstractModel):
             # mobile = topic_soups.select('font[color="red"]')
             # mobile = mobile[0].get_text()
             # topic_dict['html'] = topic_soups.get_text()
+
             # ngay_cap_soup = topic_soups.select("li:contains('Ngày cấp')")[0]
             # ngay_cap = ngay_cap_soup.get_text().split(':')[1].strip()
             # format_str = '%d/%m/%Y' # The format
             # datetime_obj = datetime.datetime.strptime(ngay_cap, format_str)
             # topic_dict['public_date'] = datetime_obj
-
-            # topic_dict['address'] = self.get_dia_chi(topic_soups, dia_chi_str= 'Địa chỉ:')
-            # topic_dict['name_of_poster'] = self.get_dia_chi(topic_soups, dia_chi_str= 'Chủ sở hữu: ')
-            try:
-                nghanh_nghe_soup = topic_soups.select("li:contains('Ngành nghề chính: ')")[0]
-                nghanh_nghe = nghanh_nghe_soup.get_text().split(':')[1].strip()
-            except IndexError:
-                nghanh_nghe = False
-            topic_dict['nganh_nghe_kinh_doanh'] = nghanh_nghe
-            print ('***nghanh_nghe', nghanh_nghe)
-            # topic_dict['link'] = link
-            # user = get_or_create_user_and_posternamelines(self.env, mobile, mobile, self.siteleech_id_id)
-            # topic_dict['poster_id'] = user.id
-            # topic_dict['title'] = 'tạp hóa của: %s'%mobile
-        return topic_dict
-
-
-
-    def request_topic (self, link, url_id):
-        
-        if self.site_name =='cuahangtaphoa':
-            topic_dict = {}
-            # return topic_dict
-            topic_html_or_json = request_html(link)
-            a_page_html_soup = BeautifulSoup(topic_html_or_json, 'html.parser')
-            # quan_huyen = a_page_html_soup.select('ul.breadcrumb > li')
-            # tinh = quan_huyen[1].get_text()
-            # quan = quan_huyen[2].get_text()
-            # country_obj = self.env['res.country'].search([('name','ilike','viet')])[0]
-            # tinh_obj = g_or_c_ss(self.sudo().env['res.country.state'],
-            #      {'name': tinh}, {'country_id':country_obj.id, 'code':tinh}, is_up_date=False)
-            # quan_obj = g_or_c_ss(self.sudo().env['res.country.district'], {'name': quan, 
-            #     'state_id':  tinh_obj.id})
-            # topic_dict['quan_id'] = quan_obj.id
-            topic_soups = a_page_html_soup.select('div.item-page')[0]
-            # mobile = topic_soups.select('font[color="red"]')
-            # mobile = mobile[0].get_text()
-            # topic_dict['html'] = topic_soups.get_text()
-            ngay_cap_soup = topic_soups.select("li:contains('Ngày cấp')")[0]
-            ngay_cap = ngay_cap_soup.get_text().split(':')[1].strip()
-            format_str = '%d/%m/%Y' # The format
-            datetime_obj = datetime.datetime.strptime(ngay_cap, format_str)
-            topic_dict['public_date'] = datetime_obj
             
             
             # topic_dict['address'] = self.get_dia_chi(topic_soups, dia_chi_str= 'Địa chỉ:')
             # topic_dict['name_of_poster'] = self.get_dia_chi(topic_soups, dia_chi_str= 'Chủ sở hữu: ')
             try:
                 nghanh_nghe_soup = topic_soups.select("li:contains('Ngành nghề chính: ')")[0]
-                nghanh_nghe = nghanh_nghe_soup.get_text().split(':')[1].strip()
+                nghanh_nghe = nghanh_nghe_soup.get_text().split(':')[1]
+                nghanh_nghe = nghanh_nghe.replace('./.','').strip()
             except IndexError:
                 nghanh_nghe = False
             print ('***nghanh_nghe***', nghanh_nghe)
@@ -168,9 +123,7 @@ class MuabanFetch(models.AbstractModel):
             # topic_dict['poster_id'] = user.id
             # topic_dict['title'] = 'tạp hóa của: %s'%mobile
             return topic_dict
-        return topic_dict = super(MuabanFetch, self).request_topic(link, url_id)
-
-
+        return super().request_topic(link, url_id)
 
 
     def create_page_link(self, format_page_url, page_int):
@@ -180,25 +133,44 @@ class MuabanFetch(models.AbstractModel):
             repl = 'page-%s-danh-sach'%page_int
             page_url =  re.sub('danh-sach', repl, format_page_url)
             page_url = re.sub('/$','.aspx',page_url)
-        # print ('***page_url***', page_url)
         return page_url
 
 
-    def topic_handle(self, link, url_id, topic_data_from_page={}):
+    def create_dict_for_topic_handle(self, topic_data_from_page, url_id, link):
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+            return {}
+        return super().create_dict_for_topic_handle(topic_data_from_page, url_id, link)
 
-        if self.site_name == 'cuahangtaphoa':
-            self.allow_update =  False
-        return super().topic_handle(link, url_id, topic_data_from_page=topic_data_from_page)
+    def write_dict_for_topic_handle(self, search_bds_obj, topic_data_from_page):
+
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+            return {}
+        return super().write_dict_for_topic_handle(search_bds_obj, topic_data_from_page)
+
+    def request_write(self, fetch_item_id, link, url_id):
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+            if not fetch_item_id.not_request_topic or fetch_item_id.model_id:
+                rq_topic_dict = self.request_topic(link, url_id)
+                if rq_topic_dict:
+                    rq_topic_dict['is_full_topic'] =  True
+                return rq_topic_dict
+        return {}
+
+    # def topic_handle(self, link, url_id, topic_data_from_page={}):
+
+    #     if self.site_name == 'cuahangtaphoa':
+    #         self.allow_update =  False
+    #     return super().topic_handle(link, url_id, topic_data_from_page=topic_data_from_page)
 
 
     def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        filtered_page_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
+        filtered_page_topic_dict = super().copy_page_data_to_rq_topic(topic_data_from_page)
         if self.site_name =='cuahangtaphoa':
             filtered_page_topic_dict = topic_data_from_page
         return filtered_page_topic_dict
 
     def fetch_topics_info_per_page(self,html_page):
-        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_per_page(html_page)
+        topic_data_from_pages_of_a_page = super().fetch_topics_info_per_page(html_page)
         if self.site_name == 'cuahangtaphoa':
             # page_url = self.create_page_link(format_page_url, page_int)
             # html_page = request_html(page_url)

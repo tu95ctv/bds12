@@ -19,5 +19,7 @@ access_bds_error,access_bds_error,model_bds_error,,1,1,1,1
 access_bds_tieuchi,access_bds_tieuchi,model_bds_tieuchi,,1,1,1,1
 access_tap_hoa,access_tap_hoa,model_tap_hoa,,1,1,1,1
 access_bds_fetch_item,access_bds_fetch_item,model_bds_fetch_item,,1,1,1,1
+access_bds_fetch_item_history,access_bds_fetch_item_history,model_bds_fetch_item_history,,1,1,1,1
+
 
 

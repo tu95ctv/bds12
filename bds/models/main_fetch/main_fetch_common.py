@@ -57,88 +57,103 @@ class CommonMainFetch(models.AbstractModel):
    
     def get_main_obj(self):
         return self.env['bds.bds']
-        
     
-    
-    def topic_handle(self, link, url_id, topic_data_from_page={}):
+    def get_public_date(self, topic_data_from_page):
+        public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
+        gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
+        public_date  = gmt7_public_datetime.date()
+        return public_datetime, public_date
+
+
+    def write_dict_for_topic_handle(self, search_bds_obj, topic_data_from_page):
+        # public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
+        # now = datetime.datetime.now()
+        # gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
+        # public_date  = gmt7_public_datetime.date()
+        #tách ra hàm riêng
+        public_datetime, public_date = self.get_public_date(topic_data_from_page)
         update_dict = {}
-        if self.allow_update:
-            public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
-            now = datetime.datetime.now()
-            gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
-            public_date  = gmt7_public_datetime.date()
+        now = datetime.datetime.now()
+        diff_day_public_from_now =  (now - public_datetime).days
+        if diff_day_public_from_now==0:
+            public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
+            diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
+            if diff_public_datetime_in_hours > 2 :
+                public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
+                diff_public_date = (public_date - public_date_cu).days
+                so_lan_diff_public_update = search_bds_obj.so_lan_diff_public_update + 1
+                update_dict.update({
+                    'public_datetime': public_datetime, 
+                    'public_datetime_cu':public_datetime_cu,
+                    'diff_public_datetime':diff_public_datetime_in_hours,
+                    'public_date':public_date, 
+                    'public_date_cu':public_date_cu,
+                    'diff_public_date':diff_public_date, 
+                    'so_lan_diff_public_update':so_lan_diff_public_update,
+                    'publicdate_ids':[(0,False,{
+                                'public_datetime': public_datetime, 
+                                'public_datetime_cu':public_datetime_cu,
+                                'diff_public_datetime':diff_public_datetime_in_hours,
+                                'public_date':public_date, 
+                                'public_date_cu':public_date_cu,
+                                'diff_public_date':diff_public_date, 
+                                }
+                                )]
+                    })
+            gia=topic_data_from_page['gia']
+            gia_cu = search_bds_obj.gia
+            diff_gia = gia - gia_cu
+            if diff_gia != 0.0:
+                so_lan_gia_update = search_bds_obj.so_lan_gia_update + 1
+                update_dict.update({
+                    'so_lan_gia_update':so_lan_gia_update,
+                    'ngay_update_gia':datetime.datetime.now(),
+                    'diff_gia':diff_gia,
+                    'gialines_ids':[(0,False,{'gia':gia, 'gia_cu':gia_cu, 'diff_gia':diff_gia})]
+                    })
+        return update_dict
+
+
+    def create_dict_for_topic_handle(self, topic_data_from_page, url_id, link):
+        public_datetime, public_date = self.get_public_date(topic_data_from_page)
+        create_dict = {}
+        create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
+        create_dict['siteleech_id'] = self.siteleech_id_id
+        create_dict['link'] = link
+        create_dict['cate'] = url_id.cate
+        create_dict['sell_or_rent'] = url_id.sell_or_rent
+        return create_dict
+
+    def topic_handle(self, link, url_id, topic_data_from_page={}, search_bds_obj = None, fetch_item_id = None):
         main_obj = self.get_main_obj()
-        
         search_bds_obj= main_obj.search([('link','=',link)])
+        is_link_number = 0
         is_existing_link_number = 0
         is_update_link_number = 0
         is_create_link_number = 0
-        if search_bds_obj:
-            if self.allow_update:
-                diff_day_public_from_now =  (now - public_datetime).days
-                if diff_day_public_from_now==0:
-                    public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
-                    diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
-                    if diff_public_datetime_in_hours > 2 :
-                        public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
-                        diff_public_date = (public_date - public_date_cu).days
-                        so_lan_diff_public_update = search_bds_obj.so_lan_diff_public_update + 1
-                        update_dict.update({
-                            'public_datetime': public_datetime, 
-                            'public_datetime_cu':public_datetime_cu,
-                            'diff_public_datetime':diff_public_datetime_in_hours,
-                            'public_date':public_date, 
-                            'public_date_cu':public_date_cu,
-                            'diff_public_date':diff_public_date, 
-                            'so_lan_diff_public_update':so_lan_diff_public_update,
-                            'publicdate_ids':[(0,False,{
-                                        'public_datetime': public_datetime, 
-                                        'public_datetime_cu':public_datetime_cu,
-                                        'diff_public_datetime':diff_public_datetime_in_hours,
-                                        'public_date':public_date, 
-                                        'public_date_cu':public_date_cu,
-                                        'diff_public_date':diff_public_date, 
-                                        }
-                                        )]
-                            })
-                gia=topic_data_from_page['gia']
-                gia_cu = search_bds_obj.gia
-                diff_gia = gia - gia_cu
-                if diff_gia != 0.0:
-                    so_lan_gia_update = search_bds_obj.so_lan_gia_update + 1
-                    update_dict.update({
-                        'so_lan_gia_update':so_lan_gia_update,
-                        'ngay_update_gia':datetime.datetime.now(),
-                        'diff_gia':diff_gia,
-                        'gialines_ids':[(0,False,{'gia':gia, 'gia_cu':gia_cu, 'diff_gia':diff_gia})]
-                        })
+        try:
+            if search_bds_obj:
+                update_dict = self.write_dict_for_topic_handle(search_bds_obj, topic_data_from_page)
+                request_write_dict = self.request_write(fetch_item_id, link, url_id)
+                update_dict.update(request_write_dict)
                 if update_dict:
                     search_bds_obj.write(update_dict)
                     is_update_link_number = 1
-            is_existing_link_number = 1
-        else:
-            write_dict = {}
-            if self.allow_update:
-                write_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
+                is_existing_link_number = 1
+            else:
+                create_dict = self.create_dict_for_topic_handle(topic_data_from_page, url_id, link)
+                if not fetch_item_id.not_request_topic:
+                    rq_topic_dict = self.request_topic(link, url_id)
+                    create_dict.update(rq_topic_dict)
+                filtered_page_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
+                create_dict.update(filtered_page_topic_dict)
+                main_obj.create(create_dict) 
+                is_create_link_number = 1
+            is_link_number = 1
+        except FetchError as e:
+            self.env['bds.error'].create({'name':str(e),'des':str(e)})
 
-            rq_topic_dict = self.request_topic(link, url_id)# quan trong nhất
-            filtered_page_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
-            write_dict.update(rq_topic_dict)
-            write_dict.update(filtered_page_topic_dict)
-            write_dict['siteleech_id'] = self.siteleech_id_id
-            write_dict['link'] = link
-            write_dict['cate'] = url_id.cate
-            write_dict['sell_or_rent'] = url_id.sell_or_rent
-            main_obj.create(write_dict) 
-            is_create_link_number = 1
-        return is_existing_link_number, is_update_link_number, is_create_link_number
-
-    def write_dict_for_topic_handle(self):
-        pass
-
-    def write_dict_for_topic_handle(self):
-        pass
-
+        return is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number
 
 
     def make_topic_link_from_list_id(self, list_id):
@@ -148,7 +163,7 @@ class CommonMainFetch(models.AbstractModel):
     def page_header_request(self):
         return None
 
-    def page_handle(self, page_int, url_id):
+    def page_handle(self, page_int, url_id, fetch_item_id):
         format_page_url = url_id.url  
         existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
         remain_retry_bds = 1
@@ -176,16 +191,18 @@ class CommonMainFetch(models.AbstractModel):
                 else:
                     raise
         
-        link_number = len(topic_data_from_pages_of_a_page)
+        # link_number = len(topic_data_from_pages_of_a_page)
         for topic_data_from_page in topic_data_from_pages_of_a_page:
             list_id = topic_data_from_page['list_id']
             link = self.make_topic_link_from_list_id(list_id)
             try:
-                is_existing_link_number, is_update_link_number, is_create_link_number = \
-                    self.topic_handle(link, url_id, topic_data_from_page=topic_data_from_page)
+                is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number = \
+                    self.topic_handle(link, url_id, topic_data_from_page=topic_data_from_page, 
+                            fetch_item_id=fetch_item_id)
                 existing_link_number += is_existing_link_number
                 update_link_number += is_update_link_number
                 create_link_number += is_create_link_number
+                link_number +=is_link_number
             except FetchError as e:
                 self.env['bds.error'].create({'name':str(e),'des':str(e)})
             except Exception as e:
@@ -197,27 +214,19 @@ class CommonMainFetch(models.AbstractModel):
 
     def gen_page_number_list(self, fetch_item_id ): 
         url_id = fetch_item_id
-        # is_current_page_2 = getattr(self, 'is_current_page_2', False)
-        # if is_current_page_2:
-        #     current_page_field_name = 'current_page_2'
-        #     set_number_of_page_once_fetch_name = 'set_number_of_page_once_fetch2'
-        #     set_leech_max_page_name = 'set_leech_max_page2'
-        # else:
-
-        current_page_field_name = 'current_page'
+        # current_page_field_name = 'current_page'
         set_number_of_page_once_fetch_name = 'set_number_of_page_once_fetch'
         set_leech_max_page_name = 'set_leech_max_page'
-
-        self.current_page_field_name = current_page_field_name
-        current_page = getattr(url_id, current_page_field_name)
+        # self.current_page_field_name = current_page_field_name
+        current_page = fetch_item_id.current_page
         set_number_of_page_once_fetch = getattr(url_id, set_number_of_page_once_fetch_name)
         url_set_leech_max_page = getattr(url_id, set_leech_max_page_name)
         set_leech_max_page = self.max_page or url_set_leech_max_page
         fetch_error = False
         try:
-            web_last_page_number =  self.get_last_page_number(url_id)
+            web_last_page_number =  self.get_last_page_number(fetch_item_id.url_id)
         except FetchError as e:
-            web_last_page_number = url_id.web_last_page_number or 200
+            web_last_page_number = fetch_item_id.url_id.web_last_page_number or 200
             fetch_error = True
 
         if set_leech_max_page and  set_leech_max_page < web_last_page_number:
@@ -225,7 +234,7 @@ class CommonMainFetch(models.AbstractModel):
         else:
             max_page = web_last_page_number
         if fetch_error == False:
-            url_id.web_last_page_number = web_last_page_number
+            fetch_item_id.url_id.web_last_page_number = web_last_page_number
         begin = current_page + 1
         min_page = url_id.min_page or 1
         if begin > max_page:
@@ -241,52 +250,62 @@ class CommonMainFetch(models.AbstractModel):
 
 
     def fetch_bo_sung_da_co_link(self, fetch_item_id):
-        print ('****hahahah*** fetch_bo_sung_da_co_link')
         model = fetch_item_id.model_id.name
         objs = self.env[model].search([('is_full_topic','=',False)],limit=fetch_item_id.limit)
-        len_objs = len(objs)
-        print ('***len_objs***', len_objs)
+        # len_objs = len(objs)
+        existing_link_number, update_link_number, create_link_number, link_number = 0,0,0,0
         for r in objs:
+            # url_id = False
+            # rq_topic_dict = self.request_topic(r.link, url_id)
+            # r.write(rq_topic_dict)
             url_id = False
-            rq_topic_dict = self.request_topic(r.link, url_id)# quan trong nhất
-            r.write(rq_topic_dict)
-            is_existing_link_number, is_update_link_number, is_create_link_number = \
-                len_objs, len_objs, 0
-        return is_existing_link_number, is_update_link_number, is_create_link_number
+            try:
+                is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number= \
+                    self.topic_handle(r.link, url_id, topic_data_from_page={}, search_bds_obj = r, fetch_item_id = fetch_item_id)
+                existing_link_number += is_existing_link_number
+                update_link_number += is_update_link_number
+                create_link_number += is_create_link_number
+                link_number +=is_link_number
+            except FetchError as e:
+                self.env['bds.error'].create({'name':str(e),'des':str(e)})
+          
+        # is_existing_link_number, is_update_link_number, is_create_link_number = \
+        #     len_objs, len_objs, 0
+        return existing_link_number, update_link_number, create_link_number, link_number
 
 
     # MỚI THÊM NGÀY 11/04
     def fetch_a_url_id (self, fetch_item_id):
-        
+        begin_time = datetime.datetime.now()
+        is_finished = False
         url_id = fetch_item_id.url_id
         self.site_name = url_id.siteleech_id.name
-        if self.is_bo_sung_topic:
-            existing_link_number, update_link_number, create_link_number = \
+        if  fetch_item_id.model_id:
+            self.model_name = fetch_item_id.model_id.name
+            existing_link_number, update_link_number, create_link_number, link_number = \
                 self.fetch_bo_sung_da_co_link(fetch_item_id)
-            link_number = create_link_number
+            link_number = update_link_number
             end_page_number_in_once_fetch = False
             is_finished = False
         else:
             self.siteleech_id_id = url_id.siteleech_id.id
             end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
-            
-            begin_time = datetime.datetime.now()
             existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
             for page_int in page_lists:
                 existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page, link_number_one_page = \
-                    self.page_handle( page_int, url_id)
+                    self.page_handle( page_int, url_id, fetch_item_id)
 
                 existing_link_number += existing_link_number_one_page
                 update_link_number += update_link_number_one_page
                 create_link_number += create_link_number_one_page
                 link_number += link_number_one_page
-            self.last_fetched_item_id = fetch_item_id
-            interval = (datetime.datetime.now() - begin_time).total_seconds()
-            fetch_item_id.interval = interval
-            is_finished = False
-            if end_page_number_in_once_fetch == self.max_page_assign_again:
-                is_finished = True
-
+                if end_page_number_in_once_fetch == self.max_page_assign_again:
+                    is_finished = True
+        
+        
+        self.last_fetched_item_id = fetch_item_id
+        interval = (datetime.datetime.now() - begin_time).total_seconds()
+        fetch_item_id.interval = interval
         fetch_item_id.write({'current_page': end_page_number_in_once_fetch,
                     'create_link_number': create_link_number,
                     'update_link_number': update_link_number,
@@ -294,6 +313,20 @@ class CommonMainFetch(models.AbstractModel):
                     'existing_link_number': existing_link_number,
                     'is_finished':is_finished,
                     })
+        can_xoa = self.env['bds.fetch.item.history'].search([('fetch_item_id','=', fetch_item_id.id)], offset=4)
+        can_xoa.unlink()
+
+        self.env['bds.fetch.item.history'].create({
+            'current_page': end_page_number_in_once_fetch,
+            'create_link_number': create_link_number,
+            'update_link_number': update_link_number,
+            'link_number': link_number,
+            'existing_link_number': existing_link_number,
+            'fetch_item_id':fetch_item_id.id,
+            'interval':interval,
+        })
+        fetch_item_id.fetched_number +=1
+
         return None
 
     def look_next_fetched_url_id(self):
@@ -303,8 +336,9 @@ class CommonMainFetch(models.AbstractModel):
             object_url_ids = fetch_item_ids.filtered(lambda r: not r.is_finished)
         else:
             object_url_ids = fetch_item_ids
-        if not self.is_bo_sung_topic:
-            current_fetched_url_id = self.last_fetched_item_id
+       
+        current_fetched_url_id = self.last_fetched_item_id
+        if not current_fetched_url_id.model_id:
             if current_fetched_url_id not in fetch_item_ids:
                 current_fetched_url_id = False
             if current_fetched_url_id and self.is_next_if_only_finish:

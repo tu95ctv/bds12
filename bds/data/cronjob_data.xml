@@ -1,6 +1,6 @@
 <odoo>
     <record id="cronjob_fetch" model="ir.cron">
-        <field name="name">Fetch CronJob </field>
+        <field name="name">Loop Fetch CronJob </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -113,7 +113,7 @@
     </record>
 
     <record id="fetch_by_id" model="ir.cron">
-        <field name="name">Fetch By Id </field>
+        <field name="name">Fetch object cronjob 1 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -125,5 +125,82 @@
         <field name="state">code</field>
         <field name="code">model.cronjob_1()</field>
     </record>
+
+    <record id="fetch_by_id" model="ir.cron">
+        <field name="name">Fetch object cronjob 1 </field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.fetch'" name="model"/>
+        <field ref="model_bds_fetch" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.cronjob_2()</field>
+    </record>
+
+
+    <record id="fetch_by_id" model="ir.cron">
+        <field name="name">Fetch object cronjob 1 </field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.fetch'" name="model"/>
+        <field ref="model_bds_fetch" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.cronjob_3()</field>
+    </record>
+
+    <record id="fetch_by_id" model="ir.cron">
+        <field name="name">Fetch object cronjob 1 </field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.fetch'" name="model"/>
+        <field ref="model_bds_fetch" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.cronjob_4()</field>
+    </record>
+
+
+    <record id="fetch_by_id" model="ir.cron">
+        <field name="name">Fetch object cronjob 1 </field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.fetch'" name="model"/>
+        <field ref="model_bds_fetch" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.cronjob_5()</field>
+    </record>
+
+
+    <record id="fetch_by_id" model="ir.cron">
+        <field name="name">Fetch object cronjob 1 </field>
+        <field name="active">False</field> 
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field eval="False" name="doall"/>
+        <field eval="'bds.fetch'" name="model"/>
+        <field ref="model_bds_fetch" name="model_id"/>
+        <field name="state">code</field>
+        <field name="code">model.cronjob_6()</field>
+    </record>
+
+
+
+
 
 </odoo>

@@ -39,14 +39,8 @@
         <filter name="Có trích địa chỉ hẻm hoặc mặt tiền" domain ="['|',('trich_dia_chi','!=',False), ('mat_tien_address','!=',False)]"></filter>
         <separator />
         <filter name="Dự đoán tin của cò" domain ="[('dd_tin_cua_co','!=',False)]"></filter>
-        
-
-        
         <separator />
         <filter name="kw_co_break" domain ="[('kw_co_break','!=',False)]"></filter>
-       
-
-
         <separator />
         <filter name="Có keyword đầu tư" domain ="[('dd_tin_cua_dau_tu','!=',False)]"></filter>
         <separator />
@@ -100,14 +94,12 @@
             <filter name="cate" string="cate" domain="[]" context="{'group_by':'cate'}" />
             <filter name="loai_nha" domain="[]" context="{'group_by':'loai_nha'}" />
             <filter name="quan_id" string="group_quan" domain="[]" context="{'group_by':'quan_id'}" />
-            
             <separator />
             <filter name="dd_tin_cua_co" string="is kw cò cấp 1" domain="[]" context="{'group_by':'dd_tin_cua_co'}" />
             <filter name="kw_mg" string="keyword cò c1" domain="[]" context="{'group_by':'kw_mg'}" />
             <separator />
             <filter name="is_kw_mg_cap_2" string="is kw cò cấp 2" domain="[]" context="{'group_by':'is_kw_mg_cap_2'}" />
             <filter name="kw_mg_cap_2" string="keyword cò c2" domain="[]" context="{'group_by':'kw_mg_cap_2'}" />
-            
             <separator />
             <filter name="dd_tin_cua_dau_tu" string="Có kw đầu tư" domain="[]" context="{'group_by':'dd_tin_cua_dau_tu'}" />
             <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
@@ -129,7 +121,6 @@
             <filter name="so_phong_ngu" string="so_phong_ngu" domain="[]" context="{'group_by':'so_phong_ngu'}" />
             <filter name="kw_hoa_hong" string="kw_hoa_hong" domain="[]" context="{'group_by':'kw_hoa_hong'}" />
             <filter name="dtsd" string="dtsd" domain="[]" context="{'group_by':'dtsd'}" />
-            
             <filter name="dtsd_combine" string="dtsd_combine" domain="[]" context="{'group_by':'dtsd_combine'}" />
             <filter name="gia_xac_nha" string="gia_xac_nha" domain="[]" context="{'group_by':'gia_xac_nha'}" />
             <filter name="gia_dat_con_lai" string="gia_dat_con_lai" domain="[]" context="{'group_by':'gia_dat_con_lai'}" />
@@ -142,8 +133,12 @@
             <filter name="mat_tien_or_trich_dia_chi" string="mat_tien_or_trich_dia_chi" domain="[]" context="{'group_by':'mat_tien_or_trich_dia_chi'}" />
             <filter name="mat_tien_address" string="mat_tien_address" domain="[]" context="{'group_by':'mat_tien_address'}" />
             <filter name="trich_dia_chi" string="trich_dia_chi" domain="[]" context="{'group_by':'trich_dia_chi'}" />
+            <separator />
+            <filter name="muc_gia" string="muc_gia" domain="[]" context="{'group_by':'muc_gia'}" />
+            <filter name="muc_dt" string="muc_dt" domain="[]" context="{'group_by':'muc_dt'}" />
+            <filter name="muc_don_gia" string="muc_don_gia" domain="[]" context="{'group_by':'muc_don_gia'}" />
+            <filter name="muc_ti_le_don_gia" string="muc_ti_le_don_gia" domain="[]" context="{'group_by':'muc_ti_le_don_gia'}" />
         </group>
-        
       </search>
     </field>
   </record>
