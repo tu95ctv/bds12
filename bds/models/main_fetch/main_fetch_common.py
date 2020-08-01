@@ -237,6 +237,8 @@ class CommonMainFetch(models.AbstractModel):
             fetch_item_id.url_id.web_last_page_number = web_last_page_number
         begin = current_page + 1
         min_page = url_id.min_page or 1
+        if begin < min_page:
+            begin = min_page
         if begin > max_page:
             begin  = min_page
         end = begin   + set_number_of_page_once_fetch - 1

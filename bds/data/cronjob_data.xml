@@ -127,7 +127,7 @@
     </record>
 
     <record id="fetch_by_id2" model="ir.cron">
-        <field name="name">Fetch object cronjob 1 </field>
+        <field name="name">Fetch object cronjob 2 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -142,7 +142,7 @@
 
 
     <record id="fetch_by_id3" model="ir.cron">
-        <field name="name">Fetch object cronjob 1 </field>
+        <field name="name">Fetch object cronjob 3 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -156,7 +156,7 @@
     </record>
 
     <record id="fetch_by_id4" model="ir.cron">
-        <field name="name">Fetch object cronjob 1 </field>
+        <field name="name">Fetch object cronjob 4 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -171,7 +171,7 @@
 
 
     <record id="fetch_by_id5" model="ir.cron">
-        <field name="name">Fetch object cronjob 1 </field>
+        <field name="name">Fetch object cronjob 5 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
@@ -186,7 +186,7 @@
 
 
     <record id="fetch_by_id6" model="ir.cron">
-        <field name="name">Fetch object cronjob 1 </field>
+        <field name="name">Fetch object cronjob 6 </field>
         <field name="active">False</field> 
         <field name="user_id" ref="base.user_root"/>
         <field name="interval_number">1</field>
