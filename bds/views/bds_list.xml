@@ -13,7 +13,17 @@
                 <field name="is_user_read_mark"></field>
                 <field name="is_user_quantam_mark"></field>
                 <field name="id"></field>
+                <field name="loai_nha"/>
+                <field name="sell_or_rent"/>
                 <field name="gia"/>
+                <field name="gia_trieu"/>
+                <field name="price"/>
+                <field name="price_unit"/>
+                <field name="quan_id"/>
+                <field name="state_id"/>
+                <field name="public_datetime" />
+                <field name="public_date" />
+                <field name="images_ids"/>
                 <!-- <field name="trigger"/> -->
                 <!-- <field name="don_gia"></field> -->
                 <!-- <field name="ti_le_don_gia" /> -->
@@ -29,7 +39,6 @@
                 <!-- <field name="loai_nha"/>
                 <field name="sell_or_rent"/> -->
                 <!-- <field name="phuong_id"/> -->
-                <field name="quan_id"/>
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
                 <!-- <field name="site_ids" /> -->
                 <field name="diff_gia" />
@@ -55,7 +64,7 @@
                 <field name="ti_le_dien_tich_web_vs_auto_dien_tich" />
                 <field name="date_text" />
                 <field name="create_date" />
-                <field name="public_datetime" />
+                
                 <field name="diff_public_days_from_now" />
                 <!-- <field name="cate"/> -->
                 <field name="number_char"/>
@@ -96,6 +105,7 @@
                 <field name="don_gia_quan" />
                 <field name="muc_don_gia" />
                 <field name="muc_ti_le_don_gia" />
+                <field name="write_date" />
             </tree>
         </field>
     </record>
@@ -129,6 +139,16 @@
         <field name="view_id" ref="bds_list_main"></field>
         <field name="search_id" ref="bds_search"/>
     </record>
+
+    <record model="ir.actions.act_window" id="need_bds_action">
+        <field name="name">BDS</field>
+        <field name="res_model">bds.bds</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','need_to_buy')]</field>
+        <field name="view_id" ref="bds_list_main"></field>
+        <field name="search_id" ref="bds_search"/>
+    </record>
+
 
 
 

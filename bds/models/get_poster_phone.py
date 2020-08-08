@@ -52,13 +52,11 @@ class GetPhonePoster(models.Model):
             if r.not_in_phone:
                 not_in_phone = r.not_in_phone.split(',')
                 not_in_phone = [i.replace("'",'').replace(" ",'') for i in not_in_phone]
-                # print ('***not_in_phone***', not_in_phone)
                 phone_list = list(filter(lambda i: i not in not_in_phone , phone_list))
             phone_list_txt = ','.join(phone_list )
 
 
             r.len_poster = len(phone_list)
-            # poster_ids = [i[2] for i in rs]
             r.phone_list = phone_list_txt
             # r.poster_ids = poster_ids
 

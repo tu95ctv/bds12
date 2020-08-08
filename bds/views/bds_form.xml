@@ -42,7 +42,7 @@
                                 </group>
                             </group>
                             <group>
-                                <!-- <field name="images_ids"/> -->
+                                <field name="images_ids"/>
 
                                 <field name="gialines_ids">
                                     <tree>

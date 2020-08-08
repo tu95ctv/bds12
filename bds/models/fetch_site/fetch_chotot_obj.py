@@ -10,6 +10,9 @@ import datetime
 import json
 import pytz
 from dateutil.relativedelta import relativedelta
+
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import convert_gia_from_string_to_float
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_or_create_quan_include_state
 ##############Cho tot###############
 
 def create_cho_tot_page_link(url_input, page_int):
@@ -53,12 +56,6 @@ def convert_chotot_date_to_datetime(string):
     if rs1=='':
         rs1 =1
     rs1 = int (rs1)
-    # if rs2==u'tháng':
-    #     rs1 = rs1*365/12
-    # elif rs2==u'năm':
-    #     rs1 = rs1*365
-    # elif rs2=='tuần':
-    #     rs1 = rs1*7
     rs2 = MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA[rs2]
     dt = datetime.datetime.now() - relativedelta(**{rs2:rs1})
     return dt
@@ -77,13 +74,56 @@ def get_mobile_name_cho_tot(html):
 
 def convert_chotot_price(html):
     try:
-        price = float(html['price'])/1000000000
-        price_trieu = float(html['price'])/1000000
+        gia_ty = float(html['price'])/1000000000
+        trieu_gia = float(html['price'])/1000000
     except KeyError:
-        price = 0
-        price_trieu = 0
-    return price, price_trieu
+        gia_ty = 0
+        trieu_gia = 0
+    return gia_ty, trieu_gia
     
+def write_ty_trieu_gia(ad):
+        update_dict = {}
+        gia_ty, price_trieu = convert_chotot_price(ad)
+        update_dict['gia'] = gia_ty
+        update_dict['gia_trieu'] = price_trieu
+        return update_dict
+
+def deal_gia_chotot(ad):
+    gia_dict = {}
+    price_string = ad['price_string']
+    print ('***price_string***', price_string)
+    gia_ty, trieu_gia, price, price_unit = convert_gia_from_string_to_float(price_string)
+    gia_dict['price'] = ad['price']
+    gia_dict['price_unit'] = price_unit # tháng/m2
+    gia_dict.update(write_ty_trieu_gia(ad))
+    return gia_dict
+
+def create_quan_for_chotot(self, ad):
+    tinh = ad['region_name']
+    quan_name = ad['area_name']
+    quan = get_or_create_quan_include_state(self,tinh, quan_name)
+    return quan
+
+        # try:
+        #     ward =  ad['ward_name']
+        # except KeyError:
+        #     ward = None
+
+        # if quan_id and ward:
+        #     phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
+        #     update_dict['phuong_id'] = phuong_id.id
+        # return update_dict 
+
+def write_quan_phuong(self, ad):
+        update_dict = {}
+        quan = create_quan_for_chotot(self, ad)
+        quan_id = quan.id
+        update_dict['quan_id'] = quan_id
+        ward =  ad['ward_name']
+        # if quan_id and ward:
+        phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
+        update_dict['phuong_id'] = phuong_id.id
+        return update_dict
 class ChototFetch(models.AbstractModel):
     _name = 'abstract.topic.fetch'
 
@@ -101,9 +141,9 @@ class ChototGetTopic():
         if url:
             return g_or_c_ss(self.env['bds.images'],{'url':url})
 
-    def write_images(self, html):
+    def write_images(self, ad):
         update_dict = {}
-        images_urls = html.get('images',[])
+        images_urls = ad.get('images',[])
         if images_urls:
             object_m2m_list = list(map(self.create_or_get_one_in_m2m_value, images_urls))
             m2m_ids = list(map(lambda x:x.id, object_m2m_list))
@@ -112,31 +152,10 @@ class ChototGetTopic():
                 update_dict['images_ids'] = val
         return update_dict
 
-    def write_quan_phuong(self, ad_params):
-        update_dict = {}
-        try:
-            quan_name = ad_params['area']['value']
-            quan_id = g_or_c_quan(self.env, quan_name)
-            update_dict['quan_id'] = quan_id
-        except KeyError:
-            quan_id = None
+    
 
-        try:
-            ward =  ad_params['ward']['value']
-        except KeyError:
-            ward = None
 
-        if quan_id and ward:
-            phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
-            update_dict['phuong_id'] = phuong_id.id
-        return update_dict
-
-    def write_gia(self, ad):
-        update_dict = {}
-        price, price_trieu = convert_chotot_price(ad)
-        update_dict['gia'] = price
-        update_dict['gia_trieu'] = price_trieu
-        return update_dict
+    
 
     def write_poster(self, ad, siteleech_id_id):
         mobile, name = get_mobile_name_cho_tot(ad)
@@ -151,36 +170,38 @@ class ChototGetTopic():
             return {}
 
 
-    def get_topic(self, topic_html_or_json, siteleech_id_id):
+    def get_topic(self, topic_html_or_json, page_dict, siteleech_id_id, ad = None):
         update_dict = {}
-
-        topic_html_or_json = json.loads(topic_html_or_json) 
-        ad = topic_html_or_json['ad']
-        ad_params = topic_html_or_json['ad_params']
+        if not ad:
+            topic_html_or_json = json.loads(topic_html_or_json) 
+            ad = topic_html_or_json['ad']
+            ad_params = topic_html_or_json['ad_params']
+        else:
+            ad_params = ad
         
+        # date = ad['date']
+        # update_dict['date_text'] = date
 
-        date = ad['date']
-        update_dict['date_text'] = date
+        
+        # gia_dict = deal_gia_chotot(ad)
+        # update_dict.update(gia_dict)
+        if 'quan_id' not in page_dict:
+            update_dict.update(write_quan_phuong(self, ad))
+
+
         update_dict.update(self.write_images(ad))
-        update_dict.update(self.write_quan_phuong(ad_params))
-        update_dict.update(self.write_gia(ad))
         update_dict.update(self.write_poster(ad, siteleech_id_id))
         update_dict.update(self.write_address(ad_params))
-        # try:
-        #     address = ad['address']
-        #     update_dict['address'] = address
-        # except KeyError:
-        #     pass
-
-        
-
+       
         try:
-            update_dict['html'] = ad['body']
+            if not 'html' in page_dict:
+                update_dict['html'] = ad['body']
         except KeyError:
             pass
-        
+        # if 'area' not in page_dict:
         update_dict['area']= ad.get('size',0)
-        update_dict['title']= ad['subject']
+        if 'title' not in page_dict:
+            update_dict['title']= ad['subject']
         return update_dict
 
 

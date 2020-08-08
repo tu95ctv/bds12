@@ -13,6 +13,7 @@
                     <group>
                         <group>
                             <field name="url" />
+                            <field name="sell_or_rent" />
                             <field name="description" />
                             <field name="siteleech_id" />
                             <field name="priority" />

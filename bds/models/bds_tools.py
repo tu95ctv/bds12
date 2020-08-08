@@ -5,14 +5,19 @@ from odoo import fields
 from odoo.osv import expression
 import datetime
 from unidecode import unidecode
+import os
+
 import logging
 _logger = logging.getLogger(__name__)
 
 class FetchError(Exception):
     pass
+
+class SaveAndRaiseException(Exception):
+    pass
+
 headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
 def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
-    # print ('***request_html***', url)
     _logger.warning('***request_html***' + url)
     count_fail = 0
     def in_try():
@@ -102,8 +107,13 @@ def g_or_c_quan(env, quan_name):
     return quan.id
 
 
-def save_to_disk(self, ct, name_file ):
+def save_to_disk( ct, name_file ):
     path = os.path.dirname(os.path.abspath(__file__))
     f = open(os.path.join(path,'%s.html'%name_file), 'w')
     f.write(ct)
     f.close()
+
+def file_from_tuong_doi(tuong_doi_path):
+    path = os.path.dirname(os.path.abspath(__file__))
+    f = open(os.path.join(path,'%s.html'%tuong_doi_path), 'r')
+    return f.read()

@@ -60,10 +60,36 @@
         </record>
 
         <record model="bds.url" id="url_bds_quan_all">
-            <field name="description">bds batdongsan all hcm</field>
+            <field name="description">nhà bán all hcm</field>
+            <field name="sell_or_rent">sell</field>
             <field name="url">https://batdongsan.com.vn/ban-nha-dat-tp-hcm</field>
         </record>
 
+        <!-- nhà đất cho thuê -->
         
+        <record model="bds.url" id="url_bds_quan_all_thue">
+            <field name="description">Cho thuê nhà hcm all</field>
+            <field name="sell_or_rent">rent</field>
+            <field name="url">https://batdongsan.com.vn/nha-dat-cho-thue-tp-hcm</field>
+        </record>
+
+        <record model="bds.url" id="url_bds_quan_all_thue">
+            <field name="description">Cho thuê nhà all toàn quốc tq</field>
+            <field name="sell_or_rent">rent</field>
+            <field name="url">https://batdongsan.com.vn/nha-dat-cho-thue</field>
+        </record>
+
+
+
+        <record model="bds.url" id="url_bds_quan_all_need_buy">
+            <field name="description">bds Cần mua nhà toàn quốc</field>
+            <field name="sell_or_rent">need_to_buy</field>
+            <field name="url">https://batdongsan.com.vn/nha-dat-can-mua</field>
+        </record>
+
+        <record model="bds.url" id="url_bds_toan_quoc_ban_nha">
+            <field name="description">bds all Bán nhà toàn quốc</field>
+            <field name="url">https://batdongsan.com.vn/nha-dat-ban</field>
+        </record>
         
 </odoo>

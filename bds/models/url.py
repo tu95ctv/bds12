@@ -34,7 +34,7 @@ class URL(models.Model):
     cate = fields.Char( default='bds')
     siteleech_id = fields.Many2one('bds.siteleech',compute='siteleech_id_',store=True)
     web_last_page_number = fields.Integer()
-    sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
+    sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent'),('need_to_buy','need_to_buy')], default='sell')
     priority = fields.Integer()
     minute_change =  fields.Integer(compute='_minute_change')
 

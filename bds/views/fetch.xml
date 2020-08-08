@@ -42,6 +42,9 @@
                                 <field name="limit" />
                                 <field name="asc_or_desc" />
                                 <field name="url_id" />
+                                <field name="topic_link" />
+                                <field name="page_path" />
+                                <field name="topic_path" />
                                 <field name="name" />
                                 <field name="web_last_page_number" />
                                 <field name="min_page" />
@@ -52,11 +55,13 @@
                                 <field name="existing_link_number" />
                                 <field name="update_link_number" />
                                 <field name="create_link_number" />
+                                <field name="fail_link_number" />
                                 <field name="current_page" />
                                 <field name="interval" />
                                 <field name="write_date" />
                                 <field name="fetched_number" />
                                 <field name="not_request_topic" />
+                                <field name="is_must_update_topic" />
                             </tree>
                         </field>
                     </page>
@@ -136,6 +141,13 @@
                         </tree>
                     </field>
                 </group>
+
+                <group>
+                    <field name="error_ids">
+                    </field>
+                </group>
+
+
             </form>
         </field>
     </record>

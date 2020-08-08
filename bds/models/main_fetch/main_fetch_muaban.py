@@ -3,10 +3,9 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website
 from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
 from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic
 
 from bs4 import BeautifulSoup
 import re
@@ -16,7 +15,6 @@ from copy import deepcopy
 from odoo.exceptions import UserError
 import os
 import pytz
-from odoo.addons.bds.models.bds_tools  import  request_html
 from unidecode import unidecode
 import json
 import math
@@ -65,23 +63,18 @@ class MuabanFetch(models.AbstractModel):
             return 300
         return super(MuabanFetch, self).get_last_page_number(url_id)
         
-    def request_topic (self, link, url_id):
-        topic_dict = super(MuabanFetch, self).request_topic(link, url_id)
+    def parse_html_topic (self, topic_html_or_json, url_id):
         if self.site_name =='muaban':
-            topic_html_or_json = request_html(link)
-            # path = os.path.dirname(os.path.abspath(__file__))
-            # f = open(os.path.join(path,'muaban.html'), 'w')
-            # f.write(topic_html_or_json)
-            # f.close()
             topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json, self.siteleech_id_id)
-        return topic_dict
+            return topic_dict
+        return super(MuabanFetch, self).parse_html_topic(topic_html_or_json, url_id)
 
-    def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        filtered_page_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
-        if self.site_name =='muaban':
-            filtered_page_topic_dict['area'] = topic_data_from_page.get('area',False)
-            filtered_page_topic_dict['thumb'] = topic_data_from_page.get('thumb',False)
-        return filtered_page_topic_dict
+    # def copy_page_data_to_rq_topic(self, topic_data_from_page):
+    #     filtered_page_topic_dict = super(MuabanFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
+    #     if self.site_name =='muaban':
+    #         filtered_page_topic_dict['area'] = topic_data_from_page.get('area',False)
+    #         filtered_page_topic_dict['thumb'] = topic_data_from_page.get('thumb',False)
+    #     return filtered_page_topic_dict
 
     def create_page_link(self, format_page_url, page_int):
         page_url = super(MuabanFetch, self).create_page_link(format_page_url, page_int)
@@ -95,15 +88,11 @@ class MuabanFetch(models.AbstractModel):
             
         return page_url
 
-    def fetch_topics_info_per_page(self, html_page):
-        topic_data_from_pages_of_a_page = super(MuabanFetch, self).fetch_topics_info_per_page(html_page)
+    def ph_parse_pre_topic(self, html_page):
+        topic_data_from_pages_of_a_page = super(MuabanFetch, self).ph_parse_pre_topic(html_page)
         if self.site_name == 'muaban':
-            # page_url = self.create_page_link(format_page_url, page_int)
-            # html_page = request_html(page_url)
             a_page_html_soup = BeautifulSoup(html_page, 'html.parser')
             title_and_icons = a_page_html_soup.select('div.list-item-container')
-            if not title_and_icons:
-                raise UserError('Không có topic nào từ page của muaban')
             for title_and_icon in title_and_icons:
                 # self.save_to_disk(str(title_and_icon),'muaban_item')
                 topic_data_from_page = {}

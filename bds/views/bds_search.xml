@@ -7,6 +7,7 @@
       <search string="bds search">
         <field name="title" />
         <field name="gia"  string="Tạo cách đây bn phút" filter_domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=self)).strftime('%Y-%m-%d %H:%M:%S'))]"   />
+        <field name="gia"  string="Update cách đây bn phút" filter_domain="[('update_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=self)).strftime('%Y-%m-%d %H:%M:%S'))]"   />
         <field name="gia"  string="giá bé hơn" filter_domain="[('gia','&lt;',self)]"/>
         <field name="gia"  string="giá  lớn hơn" filter_domain="[('gia','&gt;',self)]"/>
         <field name="count_post_all_site"  string="count_post_all_site  bé hơn" filter_domain="[('count_post_all_site','&lt;',self)]"/>

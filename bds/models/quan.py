@@ -48,8 +48,8 @@ class QuanHuyen(models.Model):
     _name = 'res.country.district'
     _inherit = ['khongdaumodel']
     _auto = True
-    state_id = fields.Many2one('res.country.state', string='Province')#, required=True
-    name = fields.Char()
+    state_id = fields.Many2one('res.country.state', string='Province', required=True)#, required=True
+    name = fields.Char(required=True)
     name_unidecode = fields.Char()
     name_without_quan = fields.Char(compute='name_without_quan_', store=True)
     post_ids = fields.One2many('bds.bds','quan_id')

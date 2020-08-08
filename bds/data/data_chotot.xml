@@ -15,14 +15,6 @@
         <field name="description">Chợ tốt Tân phú</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=1020&amp;limit=20&amp;o=60&amp;st=s,k</field>
     </record>
-<!-- 
-    <record model="bds.url" id="url_chotot_tan_phu_chung_cu">
-        <field name="description">Chợ tốt Tân phú chung cư </field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13113&amp;cg=1010&amp;limit=20&amp;o=20&amp;st=s,k</field>
-    </record> -->
-
-   
-
 
     <record model="bds.url" id="url_chotot_quan_10">
         <field name="description">Chợ tốt 10</field>
@@ -113,53 +105,30 @@
         <field name="url"> https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;area_v2=13110&amp;cg=1020&amp;limit=20&amp;o=20&amp;st=s,k</field>
     </record>
 
-    <!-- <record model="bds.url" id="url_chotot_bds_hcm_all_sell">
-        <field name="description">Chợ tốt HCM tất cả nhà phố, chung cư sell</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;o=360&amp;st=s,k&amp;page=19</field>
-    </record> -->
+  
 
     <record model="bds.url" id="url_chotot_bds_nhapho_all_sell">
         <field name="description">Chợ tốt HCM tất cả all nhà phố sell</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1020&amp;limit=20&amp;o=20&amp;st=s,k&amp;page=2</field>
     </record>
 
-
+    <record model="bds.url" id="url_chotot_cho_thue_all_hcm">
+        <field name="description">Chợ tốt cho thuê all</field>
+        <field name="sell_or_rent">rent</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;t=u,h</field>
+    </record>
     
-    <!-- <record model="bds.url" id="url_chotot_bds_hcm_all_rent">
-        <field name="description">BDS HCM tất cả rent</field>
-        <field name="sell_or_rent">rent</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;st=u,h</field>
-    </record> -->
+    <record model="bds.url" id="url_chotot_bds_nhapho_toan_quoc_all_sell">
+        <field name="description">Chợ tốt all toàn quôc nhà phố sell</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?cg=1000&amp;limit=20&amp;st=s,k</field>
+    </record>
     
-    <!-- <record model="bds.url" id="url_chotot_bds_binh_duong_all_sell">
-        <field name="description">BDS Bình Dương tất cả sell</field>
-        <field name="sell_or_rent">sell</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2011&amp;cg=1000&amp;limit=20&amp;st=s,k</field>
-    </record>
 
-    <record model="bds.url" id="url_chotot_bds_binh_duong_all_rent">
-        <field name="description">BDS Bình Dương tất cả rent</field>
+    <record model="bds.url" id="url_chotot_bds_nhapho_toan_quoc_all_rent">
+        <field name="description">Chợ tốt all cho thuê toàn quôc nhà phố rent</field>
         <field name="sell_or_rent">rent</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2011&amp;cg=1000&amp;limit=20&amp;st=u,h</field>
+        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?cg=1000&amp;limit=20&amp;st=u,h</field>
     </record>
-
-<record model="bds.url" id="url_chotot_bds_dni_all_sell">
-        <field name="description">BDS DNI tất cả sell</field>
-        <field name="sell_or_rent">sell</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2013&amp;cg=1000&amp;limit=20&amp;st=s,k</field>
-    </record>
-
-<record model="bds.url" id="url_chotot_bds_dni_all_rent">
-        <field name="description">BDS DNI tất cả rent</field>
-        <field name="sell_or_rent">rent</field>
-        <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=2013&amp;cg=1000&amp;limit=20&amp;st=s,k&amp;f=p&amp;page=1
-</field> 
-
-
-    </record>-->
-
-
-
 
 </odoo>
 

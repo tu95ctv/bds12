@@ -3,10 +3,10 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website
 from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
 from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic
+
 
 from bs4 import BeautifulSoup
 import re
@@ -16,7 +16,6 @@ from copy import deepcopy
 from odoo.exceptions import UserError
 import os
 import pytz
-from odoo.addons.bds.models.bds_tools  import  request_html
 from unidecode import unidecode
 import json
 import math
@@ -57,7 +56,7 @@ class MuabanFetch(models.AbstractModel):
 
     def get_main_obj(self):
         rs = super().get_main_obj()
-        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
             return self.env['tap.hoa']
         return rs
 
@@ -80,12 +79,11 @@ class MuabanFetch(models.AbstractModel):
 
 
 
-    def request_topic (self, link, url_id):
+    def parse_html_topic (self, topic_html_or_json, url_id):
         
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name')=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
             topic_dict = {}
             # return topic_dict
-            topic_html_or_json = request_html(link)
             a_page_html_soup = BeautifulSoup(topic_html_or_json, 'html.parser')
             # quan_huyen = a_page_html_soup.select('ul.breadcrumb > li')
             # tinh = quan_huyen[1].get_text()
@@ -116,14 +114,14 @@ class MuabanFetch(models.AbstractModel):
                 nghanh_nghe = nghanh_nghe.replace('./.','').strip()
             except IndexError:
                 nghanh_nghe = False
-            print ('***nghanh_nghe***', nghanh_nghe)
+            
             topic_dict['nganh_nghe_kinh_doanh'] = nghanh_nghe
             # topic_dict['link'] = link
             # user = get_or_create_user_and_posternamelines(self.env, mobile, mobile, self.siteleech_id_id)
             # topic_dict['poster_id'] = user.id
             # topic_dict['title'] = 'tạp hóa của: %s'%mobile
             return topic_dict
-        return super().request_topic(link, url_id)
+        return super().parse_html_topic(topic_html_or_json, url_id)
 
 
     def create_page_link(self, format_page_url, page_int):
@@ -136,45 +134,37 @@ class MuabanFetch(models.AbstractModel):
         return page_url
 
 
-    def create_dict_for_topic_handle(self, topic_data_from_page, url_id, link):
-        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+    def th_create_dict(self, topic_data_from_page, url_id, link, is_topic_link):
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
             return {}
-        return super().create_dict_for_topic_handle(topic_data_from_page, url_id, link)
+        return super().th_create_dict(topic_data_from_page, url_id, link, is_topic_link)
 
-    def write_dict_for_topic_handle(self, search_bds_obj, topic_data_from_page):
+    def th_write_dict(self, search_bds_obj, topic_data_from_page):
 
-        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
             return {}
-        return super().write_dict_for_topic_handle(search_bds_obj, topic_data_from_page)
+        return super().th_write_dict(search_bds_obj, topic_data_from_page)
 
     def request_write(self, fetch_item_id, link, url_id):
-        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
             if not fetch_item_id.not_request_topic or fetch_item_id.model_id:
-                rq_topic_dict = self.request_topic(link, url_id)
+                rq_topic_dict = self.request_parse_html_topic(link, url_id)
                 if rq_topic_dict:
                     rq_topic_dict['is_full_topic'] =  True
                 return rq_topic_dict
-        return {}
+        return super().request_write(fetch_item_id, link, url_id)
 
-    # def topic_handle(self, link, url_id, topic_data_from_page={}):
+  
 
-    #     if self.site_name == 'cuahangtaphoa':
-    #         self.allow_update =  False
-    #     return super().topic_handle(link, url_id, topic_data_from_page=topic_data_from_page)
+    # def copy_page_data_to_rq_topic(self, topic_data_from_page):
+    #     filtered_page_topic_dict = super().copy_page_data_to_rq_topic(topic_data_from_page)
+    #     if self.site_name =='cuahangtaphoa':
+    #         filtered_page_topic_dict = topic_data_from_page
+    #     return filtered_page_topic_dict
 
-
-    def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        filtered_page_topic_dict = super().copy_page_data_to_rq_topic(topic_data_from_page)
-        if self.site_name =='cuahangtaphoa':
-            filtered_page_topic_dict = topic_data_from_page
-        return filtered_page_topic_dict
-
-    def fetch_topics_info_per_page(self,html_page):
-        topic_data_from_pages_of_a_page = super().fetch_topics_info_per_page(html_page)
+    def ph_parse_pre_topic(self,html_page):
+        topic_data_from_pages_of_a_page = super().ph_parse_pre_topic(html_page)
         if self.site_name == 'cuahangtaphoa':
-            # page_url = self.create_page_link(format_page_url, page_int)
-            # html_page = request_html(page_url)
-            # self.save_to_disk(html_page, 'cua_hang_tap_hoa')
             a_page_html_soup = BeautifulSoup(html_page, 'html.parser')
             title_and_icons = a_page_html_soup.select('div.news-v3')
             if not title_and_icons:

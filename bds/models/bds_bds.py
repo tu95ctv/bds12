@@ -47,7 +47,8 @@ class bds(models.Model):
     vip = fields.Char()
     user_read_mark_ids = fields.One2many('user.read.mark','bds_id')
     user_quantam_mark_ids = fields.One2many('user.quantam.mark','bds_id')
-    sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent')], default='sell')
+    sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent'),
+        ('need_to_buy','need_to_buy')], default='sell')
     loai_nha = fields.Char('Loại nhà')
     loai_nha_selection = fields.Selection('get_loai_nha_selection_', string='Loại nhà')
     link = fields.Char()
@@ -63,9 +64,12 @@ class bds(models.Model):
         ('chinh_chu', 'Cá nhân'),('khong_biet','Không Phải bài ở chợt tốt')], default='khong_biet',string='Bán chuyên')
     gia = fields.Float('Giá')
     gia_trieu = fields.Float()
+    price = fields.Float()
+    price_unit = fields.Char()
     area = fields.Float(digits=(32,1),string='Diện tích')
     address=fields.Char()
     quan_id = fields.Many2one('res.country.district',ondelete='restrict',string='Quận')
+    state_id = fields.Many2one('res.country.state',related='quan_id.state_id', store=True)
     phuong_id = fields.Many2one('bds.phuong','Phường')
     date_text = fields.Char()
     public_datetime = fields.Datetime()
@@ -217,6 +221,7 @@ class bds(models.Model):
         r.poster_id.quanofposter_ids_()
         r.quan_id.muc_gia_quan_()
         r.quan_id.len_post_ids_()
+        return RuntimeWarning
 
     def make_trigger(self):
         for r in self:

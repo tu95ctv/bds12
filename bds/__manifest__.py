@@ -45,7 +45,7 @@
         'views/poster.xml',
         'views/quan.xml',
         'views/error.xml',
-        'views/url.xml',
+        'views/url_views.xml',
         'views/laptop.xml',
         'views/get_phone_poster.xml',
         'views/ir_actions_server.xml',

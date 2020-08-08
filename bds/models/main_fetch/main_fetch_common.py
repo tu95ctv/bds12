@@ -3,11 +3,10 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
+from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website
 from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
 from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic
-
+from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi
 from bs4 import BeautifulSoup
 import re
 import datetime
@@ -16,12 +15,12 @@ from copy import deepcopy
 from odoo.exceptions import UserError
 import os
 import pytz
-from odoo.addons.bds.models.bds_tools  import  request_html
 from unidecode import unidecode
 import json
 import math
-from odoo.addons.bds.models.bds_tools  import  FetchError
+from odoo.addons.bds.models.bds_tools  import  FetchError, SaveAndRaiseException
 import traceback
+
 import logging
 _logger = logging.getLogger(__name__)
 def convert_muaban_string_gia_to_float(str):
@@ -65,12 +64,8 @@ class CommonMainFetch(models.AbstractModel):
         return public_datetime, public_date
 
 
-    def write_dict_for_topic_handle(self, search_bds_obj, topic_data_from_page):
-        # public_datetime = topic_data_from_page['public_datetime'] # naitive datetime
-        # now = datetime.datetime.now()
-        # gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
-        # public_date  = gmt7_public_datetime.date()
-        #tách ra hàm riêng
+    def th_write_dict(self, search_bds_obj, topic_data_from_page):
+
         public_datetime, public_date = self.get_public_date(topic_data_from_page)
         update_dict = {}
         now = datetime.datetime.now()
@@ -114,46 +109,136 @@ class CommonMainFetch(models.AbstractModel):
         return update_dict
 
 
-    def create_dict_for_topic_handle(self, topic_data_from_page, url_id, link):
-        public_datetime, public_date = self.get_public_date(topic_data_from_page)
+    def th_create_dict(self, topic_data_from_page, url_id, link, is_topic_link):
         create_dict = {}
-        create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
+        if not is_topic_link:
+            public_datetime, public_date = self.get_public_date(topic_data_from_page)
+            create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
         create_dict['siteleech_id'] = self.siteleech_id_id
-        create_dict['link'] = link
         create_dict['cate'] = url_id.cate
         create_dict['sell_or_rent'] = url_id.sell_or_rent
+        create_dict['link'] = link
+        
         return create_dict
 
-    def topic_handle(self, link, url_id, topic_data_from_page={}, search_bds_obj = None, fetch_item_id = None):
+    def request_write(self, fetch_item_id, link, url_id ):
+        return {}
+
+    def parse_html_topic (self, topic_html_or_json, url_id):
+        return {}
+    
+    def request_parse_html_topic(self, link, url_id):
+        if not getattr(self,'topic_path',None):
+            headers = self.page_header_request()
+            header_kwargs = {'headers': headers} if headers else {}
+            topic_html_or_json = request_html(link, **header_kwargs)
+        else:
+            topic_html_or_json = file_from_tuong_doi(self.topic_path)
+        try:
+            topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
+        except SaveAndRaiseException as e:
+            save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+            raise
+        except:
+            save_to_disk(topic_html_or_json, 'file_topic_bug')
+            raise
+        return topic_dict
+
+    # def copy_page_data_to_rq_topic_combine_topic_link(self,fetch_item_id, topic_data_from_page):
+    #     if fetch_item_id.topic_link or fetch_item_id.topic_path:
+    #         return {}
+    #     return self.copy_page_data_to_rq_topic(topic_data_from_page)
+    
+    def del_list_id_topic_data_from_page(self, topic_data_from_page):
+        if 'list_id' in topic_data_from_page:
+            del topic_data_from_page['list_id']
+
+
+    def topic_handle(self, link, url_id, topic_data_from_page, fetch_item_id,  search_bds_obj=None):
+        self.link = link
+        self.page_dict = topic_data_from_page
         main_obj = self.get_main_obj()
         search_bds_obj= main_obj.search([('link','=',link)])
-        is_link_number = 0
+        is_fail_link_number = 0
         is_existing_link_number = 0
         is_update_link_number = 0
         is_create_link_number = 0
         try:
             if search_bds_obj:
-                update_dict = self.write_dict_for_topic_handle(search_bds_obj, topic_data_from_page)
-                request_write_dict = self.request_write(fetch_item_id, link, url_id)
-                update_dict.update(request_write_dict)
-                if update_dict:
-                    search_bds_obj.write(update_dict)
+                if (not fetch_item_id.topic_link and not fetch_item_id.topic_path and not fetch_item_id.is_must_update_topic):
+                    update_dict = self.th_write_dict(search_bds_obj, topic_data_from_page)
+                    request_write_dict = self.request_write(fetch_item_id, link, url_id)
+                    update_dict.update(request_write_dict)
+                    if fetch_item_id.page_path:
+                        update_dict = self.request_parse_html_topic(link, url_id)
+                    if update_dict:
+                        search_bds_obj.write(update_dict)
+                        is_update_link_number = 1
+                elif fetch_item_id.topic_link or fetch_item_id.topic_path or fetch_item_id.is_must_update_topic :
+                    rq_topic_dict = {}
+                    self.del_list_id_topic_data_from_page(topic_data_from_page)
+                    # filtered_page_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
+                    # rq_topic_dict.update(filtered_page_topic_dict)
+                    rq_topic_dict = self.request_parse_html_topic(link, url_id)
+                    print ('***rq_topic_dict**', rq_topic_dict)
+                    search_bds_obj.write(rq_topic_dict)
                     is_update_link_number = 1
+
                 is_existing_link_number = 1
             else:
-                create_dict = self.create_dict_for_topic_handle(topic_data_from_page, url_id, link)
+                is_topic_link = bool(fetch_item_id.topic_link or fetch_item_id.topic_path)
+                create_dict = self.th_create_dict(topic_data_from_page, url_id, link, is_topic_link)
                 if not fetch_item_id.not_request_topic:
-                    rq_topic_dict = self.request_topic(link, url_id)
+                    rq_topic_dict = self.request_parse_html_topic(link, url_id)
                     create_dict.update(rq_topic_dict)
-                filtered_page_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
-                create_dict.update(filtered_page_topic_dict)
+
+                if not fetch_item_id.topic_link or fetch_item_id.topic_path:
+                    self.del_list_id_topic_data_from_page(topic_data_from_page)
+                    create_dict.update(topic_data_from_page)
+                
                 main_obj.create(create_dict) 
                 is_create_link_number = 1
-            is_link_number = 1
-        except FetchError as e:
-            self.env['bds.error'].create({'name':str(e),'des':str(e)})
+                self.env['bds.error'].create({
+                'name':'success link',
+                'des':'success link',
+                'link':link,
+                'type':'success',
+                'link_type':'topic',
+                'fetch_item_id':fetch_item_id.id,
+                'error_or_success':'success',
+                    }
+                )
 
-        return is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number
+        except FetchError as e:
+            is_fail_link_number = 1
+            self.env['bds.error'].create({
+                'name':str(e),
+                'des':str(e),
+                'link':link,
+                'type':'fetch_error',
+                'link_type':'topic',
+                'fetch_item_id':fetch_item_id.id,
+                }
+            )
+        # except SaveAndRaiseException as e:
+        #     save_to_disk(self.topic_html_or_json, 'file_topic_bug')
+        #     raise
+           
+        except:
+            raise
+            is_fail_link_number = 1
+            self.env['bds.error'].create({
+                'name':'internal_error',
+                'des':str(traceback.format_exc()),
+                'link':link,
+                'type':'internal_error',
+                'link_type':'topic',
+                'fetch_item_id':fetch_item_id.id,
+                }
+                )
+        return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number
+
+        
 
 
     def make_topic_link_from_list_id(self, list_id):
@@ -165,52 +250,58 @@ class CommonMainFetch(models.AbstractModel):
 
     def page_handle(self, page_int, url_id, fetch_item_id):
         format_page_url = url_id.url  
-        existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
-        remain_retry_bds = 1
-        bds_exception_count = 0
-        while remain_retry_bds:
-            remain_retry_bds -=1
-            try:
+        existing_link_number, update_link_number, create_link_number, fail_link_number = 0, 0, 0, 0
+        try:
+            if not fetch_item_id.page_path:
                 page_url = self.create_page_link(format_page_url, page_int)
                 headers = self.page_header_request()
                 header_kwargs = {'headers': headers} if headers else {}
                 html_page = request_html(page_url,**header_kwargs)
-                topic_data_from_pages_of_a_page = self.fetch_topics_info_per_page(html_page)
-            except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':str(e)})
-                return existing_link_number, update_link_number, create_link_number, link_number
-            except Exception as e:
-                if url_id.siteleech_id.name == 'batdongsan':
-                    self.env['bds.error'].create({'name':'lỗi fetch_topics_info_per_page', 'des':traceback.format_exc()})
-                    bds_exception_count +=1
-                    if bds_exception_count ==3:
-                        remain_retry_bds = 0
-                        return existing_link_number, update_link_number, create_link_number, link_number
-                    else:
-                        remain_retry_bds = 1
-                else:
-                    raise
-        
+            else:
+                html_page = file_from_tuong_doi(fetch_item_id.page_path)
+            try:
+                topic_data_from_pages_of_a_page = self.ph_parse_pre_topic(html_page)
+
+            except SaveAndRaiseException as e:
+                save_to_disk(html_page, 'file_topic_bug_theo_y_muon_%s'%str(e))
+                raise
+                # raise 
+            except:
+                file_name = 'file_page_bug' if not fetch_item_id.page_path else 'file_page_bug_page_path'
+                save_to_disk(html_page, file_name)
+                raise
+        except FetchError as e:
+            self.env['bds.error'].create({
+                'name':str(e),
+                'des':str(e),
+                'link':page_url,
+                'type':'fetch_error',
+                'link_type':'page',
+                'fetch_item_id':fetch_item_id.id,
+                }
+            )
+            return existing_link_number, update_link_number, create_link_number, fail_link_number
+        except Exception as e:
+            raise
+        if not topic_data_from_pages_of_a_page:
+            file_name = 'file_page_bug' if not fetch_item_id.page_path else 'file_page_bug_page_path'
+            save_to_disk(html_page, file_name)
+            raise ValueError('topic_data_from_pages_of_a_page is empty')
         # link_number = len(topic_data_from_pages_of_a_page)
+         
         for topic_data_from_page in topic_data_from_pages_of_a_page:
             list_id = topic_data_from_page['list_id']
             link = self.make_topic_link_from_list_id(list_id)
-            try:
-                is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number = \
-                    self.topic_handle(link, url_id, topic_data_from_page=topic_data_from_page, 
-                            fetch_item_id=fetch_item_id)
-                existing_link_number += is_existing_link_number
-                update_link_number += is_update_link_number
-                create_link_number += is_create_link_number
-                link_number +=is_link_number
-            except FetchError as e:
-                self.env['bds.error'].create({'name':str(e),'des':str(e)})
-            except Exception as e:
-                if url_id.siteleech_id.name == 'batdongsan':
-                    self.env['bds.error'].create({'name':str(e),'des':str(e)})
-                else:
-                    raise
-        return existing_link_number, update_link_number, create_link_number, link_number
+                
+            is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number = \
+                self.topic_handle(link, url_id, topic_data_from_page, 
+                        fetch_item_id)
+            existing_link_number += is_existing_link_number
+            update_link_number += is_update_link_number
+            create_link_number += is_create_link_number
+            fail_link_number +=is_fail_link_number
+        link_number = len(topic_data_from_pages_of_a_page)
+        return existing_link_number, update_link_number, create_link_number, fail_link_number, link_number
 
     def gen_page_number_list(self, fetch_item_id ): 
         url_id = fetch_item_id
@@ -253,56 +344,77 @@ class CommonMainFetch(models.AbstractModel):
 
     def fetch_bo_sung_da_co_link(self, fetch_item_id):
         model = fetch_item_id.model_id.name
-        objs = self.env[model].search([('is_full_topic','=',False)],limit=fetch_item_id.limit)
+        objs = self.env[model].search([('is_full_topic','=',False)], limit=fetch_item_id.limit)
         # len_objs = len(objs)
-        existing_link_number, update_link_number, create_link_number, link_number = 0,0,0,0
+        existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0,0,0,0,0
         for r in objs:
-            # url_id = False
-            # rq_topic_dict = self.request_topic(r.link, url_id)
-            # r.write(rq_topic_dict)
             url_id = False
             try:
-                is_link_number, is_existing_link_number, is_update_link_number, is_create_link_number= \
-                    self.topic_handle(r.link, url_id, topic_data_from_page={}, search_bds_obj = r, fetch_item_id = fetch_item_id)
+                is_fail_link_number, is_existing_link_number, is_update_link_number, is_create_link_number= \
+                    self.topic_handle(r.link, url_id,{}, fetch_item_id, search_bds_obj=r)
                 existing_link_number += is_existing_link_number
                 update_link_number += is_update_link_number
                 create_link_number += is_create_link_number
-                link_number +=is_link_number
+                fail_link_number += is_fail_link_number
+                link_number += 1
             except FetchError as e:
                 self.env['bds.error'].create({'name':str(e),'des':str(e)})
           
         # is_existing_link_number, is_update_link_number, is_create_link_number = \
         #     len_objs, len_objs, 0
-        return existing_link_number, update_link_number, create_link_number, link_number
+        return existing_link_number, update_link_number, create_link_number, link_number, fail_link_number
 
 
-    # MỚI THÊM NGÀY 11/04
     def fetch_a_url_id (self, fetch_item_id):
         begin_time = datetime.datetime.now()
         is_finished = False
         url_id = fetch_item_id.url_id
         self.site_name = url_id.siteleech_id.name
-        if  fetch_item_id.model_id:
+        end_page_number_in_once_fetch = False
+        existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
+        if fetch_item_id.topic_link or fetch_item_id.topic_path:
+            self.topic_path = fetch_item_id.topic_path
+            self.siteleech_id_id = url_id.siteleech_id.id
+            existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
+                    fail_link_number_one_page = \
+                self.topic_handle(fetch_item_id.topic_link, url_id, {}, fetch_item_id, None)
+            link_number_one_page = 1
+            existing_link_number += existing_link_number_one_page
+            update_link_number += update_link_number_one_page
+            create_link_number += create_link_number_one_page
+            fail_link_number += fail_link_number_one_page
+            link_number += link_number_one_page
+        elif  fetch_item_id.model_id:
             self.model_name = fetch_item_id.model_id.name
-            existing_link_number, update_link_number, create_link_number, link_number = \
+            existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = \
                 self.fetch_bo_sung_da_co_link(fetch_item_id)
             link_number = update_link_number
             end_page_number_in_once_fetch = False
             is_finished = False
         else:
             self.siteleech_id_id = url_id.siteleech_id.id
-            end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
-            existing_link_number, update_link_number, create_link_number, link_number = 0, 0, 0, 0
+            if not fetch_item_id.page_path:
+                end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
+            else: 
+                page_lists = range(1)
+            
             for page_int in page_lists:
-                existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page, link_number_one_page = \
+                existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
+                    fail_link_number_one_page, link_number_one_page = \
                     self.page_handle( page_int, url_id, fetch_item_id)
 
                 existing_link_number += existing_link_number_one_page
                 update_link_number += update_link_number_one_page
                 create_link_number += create_link_number_one_page
+                fail_link_number += fail_link_number_one_page
                 link_number += link_number_one_page
-                if end_page_number_in_once_fetch == self.max_page_assign_again:
+                
+                if not fetch_item_id.page_path:
+                    if end_page_number_in_once_fetch == self.max_page_assign_again:
+                        is_finished = True
+                else:
                     is_finished = True
+
         
         
         self.last_fetched_item_id = fetch_item_id
@@ -312,6 +424,7 @@ class CommonMainFetch(models.AbstractModel):
                     'create_link_number': create_link_number,
                     'update_link_number': update_link_number,
                     'link_number': link_number,
+                    'fail_link_number':fail_link_number, 
                     'existing_link_number': existing_link_number,
                     'is_finished':is_finished,
                     })

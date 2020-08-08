@@ -18,7 +18,7 @@ def div_part(total_page, number_of_part, nth_part):
     number_page = second - first + 1
     return (first, second, number_page)
 
-class BDSFetchLine(models.Model):
+class BDSFetchHistoryLine(models.Model):
     _name = 'bds.fetch.item.history'
     _order = 'id desc'
 
@@ -39,6 +39,7 @@ class BDSFetchLine(models.Model):
     
     name = fields.Char(related='url_id.description', store=True)
     url_id = fields.Many2one('bds.url')
+    topic_link = fields.Char()
     description = fields.Char(related='url_id.description')
     web_last_page_number = fields.Integer(related='url_id.web_last_page_number')
     fetch_id = fields.Many2one('bds.fetch')
@@ -58,6 +59,11 @@ class BDSFetchLine(models.Model):
     not_request_topic = fields.Boolean()
     fetch_item_history_ids = fields.One2many('bds.fetch.item.history','fetch_item_id')
     fetched_number = fields.Integer()
+    fail_link_number = fields.Integer()
+    error_ids = fields.One2many('bds.error','fetch_item_id')
+    page_path = fields.Char()
+    topic_path = fields.Char()
+    is_must_update_topic = fields.Boolean()
 #lam gon lai ngay 23/02
 class Fetch(models.Model):
 
@@ -137,13 +143,10 @@ class Fetch(models.Model):
             item.set_number_of_page_once_fetch = self.batch_number_of_once_fetch
 
     def batch_div_part(self):
-        print ('***batch_div_part***')
         if self.nth_part and self.number_of_part:
-            print ('***batch_div_part2***')
             for item in self.fetch_item_ids:
                 if item.web_last_page_number:
                     first, second, number_page = div_part(item.web_last_page_number, self.number_of_part, self.nth_part)
-                    print ('***first, second**', first, second)
                     item.min_page = first
                     item.set_leech_max_page = second
 
@@ -160,10 +163,6 @@ class Fetch(models.Model):
             for url in obj.url_ids:
                 if url not in url_in_fetch_item_ids:
                     self.env['bds.fetch.item'].create({'url_id':url.id, 'fetch_id':obj.id})
-
-            # for fetch_item in obj.fetch_item_ids:
-            #     if fetch_item.url_id not in obj.url_ids:
-            #         fetch_item.unlink()
 
 
     @api.model
@@ -191,8 +190,8 @@ class Fetch(models.Model):
     @api.depends('url_ids','des')
     def _compute_name(self):
         for r in self:
-            if r.url_ids:
-                descriptions = ','.join(r.url_ids.mapped('name'))
+            if r.fetch_item_ids:
+                descriptions = ','.join(r.fetch_item_ids.mapped('description'))
                 des = r.des
                 if des:
                     name = '%s-%s'%(des, descriptions)

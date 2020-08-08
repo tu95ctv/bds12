@@ -1,7 +1,7 @@
 <odoo>
 	<data>
 			 <!-- error -->
-        <record id="error_form1" model="ir.ui.view">
+        <!-- <record id="error_form1" model="ir.ui.view">
             <field name="name">bds</field>
             <field name="model">bds.error</field>
             <field name="arch" type="xml">
@@ -16,15 +16,19 @@
                     </sheet>
                 </form>
             </field>
-        </record>
+        </record> -->
         <record id="error_list1" model="ir.ui.view">
             <field name="name">bds.error.list</field>
             <field name="model">bds.error</field>
             <field name="arch" type="xml">
                 <tree>
-                 <field name="name" />
-                  <field name="des" />
-                  <field name="create_date" />
+                    <field name="name" />
+                    <field name="des" />
+                    <field name="fetch_item_id" />
+                    <field name="type" />
+                    <field name="link" />
+                    <field name="link_type" />
+                    <field name="create_date" />
                 </tree>
             </field>
         </record>
