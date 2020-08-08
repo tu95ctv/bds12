@@ -149,7 +149,7 @@ class BDSFetch(models.AbstractModel):
 
                     topic_data_from_page['gia'] = int_gia
                     topic_data_from_page['price'] = price
-
+                    topic_data_from_page['trieu_gia'] = trieu_gia
                     quan_huyen_str = title_and_icon.select('span.p-district strong.product-city-dist')[0].get_text()
                     quan = g_or_create_quan_include_state(self, quan_huyen_str)
                     topic_data_from_page['quan_id'] = quan.id
@@ -184,6 +184,7 @@ class BDSFetch(models.AbstractModel):
                     else:
                         int_gia,trieu_gia, price, price_unit = False, False, False, False
                     topic_data_from_page['gia'] = int_gia
+                    topic_data_from_page['trieu_gia'] = trieu_gia
                     topic_data_from_page['price'] = price
                     topic_data_from_page['price_unit'] = price_unit
 
@@ -225,6 +226,7 @@ class BDSFetch(models.AbstractModel):
 
                         topic_data_from_page['gia'] = int_gia
                         topic_data_from_page['price'] = price
+                        topic_data_from_page['trieu_gia'] = trieu_gia
                         date_dang = title_and_icon.select('div.p-content div.mar-right-10')
                         date_dang = date_dang[0].get_text().replace('\n','')
                         date_dang = re.sub('\s*','', date_dang)

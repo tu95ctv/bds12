@@ -134,25 +134,50 @@ class MuabanFetch(models.AbstractModel):
         return page_url
 
 
-    def th_create_dict(self, topic_data_from_page, url_id, link, is_topic_link):
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
-            return {}
-        return super().th_create_dict(topic_data_from_page, url_id, link, is_topic_link)
+    def request_parse_html_topic(self, link, url_id):
+        topic_dict = super().request_parse_html_topic(link, url_id)
+        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
+            topic_dict['is_full_topic'] = True
+        return topic_dict
 
-    def th_write_dict(self, search_bds_obj, topic_data_from_page):
 
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
-            return {}
-        return super().th_write_dict(search_bds_obj, topic_data_from_page)
+    # def th_bds_create_dict_from_page_dict_and_url_id(self, topic_data_from_page, url_id, link, is_topic_link_or_topic_path):
+    #     if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
+    #         return {}
+    #     return super().th_bds_create_dict_from_page_dict_and_url_id(topic_data_from_page, url_id, link, is_topic_link_or_topic_path)
 
-    def request_write(self, fetch_item_id, link, url_id):
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
-            if not fetch_item_id.not_request_topic or fetch_item_id.model_id:
-                rq_topic_dict = self.request_parse_html_topic(link, url_id)
-                if rq_topic_dict:
-                    rq_topic_dict['is_full_topic'] =  True
-                return rq_topic_dict
-        return super().request_write(fetch_item_id, link, url_id)
+
+    
+
+    def get_st_is_pre_topic_dict_from_page_dict_and_url_id(self, fetch_item_id):
+        if self.site_name =='cuahangtaphoa' or fetch_item_id.model_id.name =='tap.hoa':
+            return False
+        return super().get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
+
+
+    # def get_setting_tp_is_request_update(self, fetch_item_id):
+    #     if self.site_name =='cuahangtaphoa' or fetch_item_id.model_id.name =='tap.hoa':
+    #         # if not fetch_item_id.not_request_topic or fetch_item_id.model_id:
+    #         if fetch_item_id.model_id:
+    #             return True
+    #     return super().get_setting_tp_is_request_update(fetch_item_id)
+
+
+    def get_st_is_compare_price_or_public_date(self, fetch_item_id):
+
+        if self.site_name =='cuahangtaphoa' or fetch_item_id.model_id.name =='tap.hoa':
+            return False
+        return super().get_st_is_compare_price_or_public_date(fetch_item_id)
+
+
+    # def request_write(self, fetch_item_id, link, url_id):
+    #     if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
+    #         if not fetch_item_id.not_request_topic or fetch_item_id.model_id:
+    #             rq_topic_dict = self.request_parse_html_topic(link, url_id)
+    #             if rq_topic_dict:
+    #                 rq_topic_dict['is_full_topic'] =  True
+    #             return rq_topic_dict
+    #     return super().request_write(fetch_item_id, link, url_id)
 
   
 

@@ -64,7 +64,7 @@ class CommonMainFetch(models.AbstractModel):
         return public_datetime, public_date
 
 
-    def th_write_dict(self, search_bds_obj, topic_data_from_page):
+    def th_topic_update_compare_price(self, search_bds_obj, topic_data_from_page):
 
         public_datetime, public_date = self.get_public_date(topic_data_from_page)
         update_dict = {}
@@ -109,9 +109,9 @@ class CommonMainFetch(models.AbstractModel):
         return update_dict
 
 
-    def th_create_dict(self, topic_data_from_page, url_id, link, is_topic_link):
+    def th_bds_create_dict_from_page_dict_and_url_id(self, topic_data_from_page, url_id, link, is_topic_link_or_topic_path):
         create_dict = {}
-        if not is_topic_link:
+        if not is_topic_link_or_topic_path:
             public_datetime, public_date = self.get_public_date(topic_data_from_page)
             create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
         create_dict['siteleech_id'] = self.siteleech_id_id
@@ -148,7 +148,7 @@ class CommonMainFetch(models.AbstractModel):
     #     if fetch_item_id.topic_link or fetch_item_id.topic_path:
     #         return {}
     #     return self.copy_page_data_to_rq_topic(topic_data_from_page)
-    
+
     def del_list_id_topic_data_from_page(self, topic_data_from_page):
         if 'list_id' in topic_data_from_page:
             del topic_data_from_page['list_id']
@@ -165,34 +165,44 @@ class CommonMainFetch(models.AbstractModel):
         is_create_link_number = 0
         try:
             if search_bds_obj:
-                if (not fetch_item_id.topic_link and not fetch_item_id.topic_path and not fetch_item_id.is_must_update_topic):
-                    update_dict = self.th_write_dict(search_bds_obj, topic_data_from_page)
-                    request_write_dict = self.request_write(fetch_item_id, link, url_id)
-                    update_dict.update(request_write_dict)
+                is_must_update_combine = fetch_item_id.topic_link or fetch_item_id.topic_path or fetch_item_id.is_must_update_topic
+                if not is_must_update_combine:# update ở mode bình thường
+                    update_dict = {}
+
+                    if self.st_is_compare_price_or_public_date:
+                        compare_update_dict = self.th_topic_update_compare_price(search_bds_obj, topic_data_from_page)
+                        update_dict.update(compare_update_dict)
+
+                    # if self.tp_is_request_update:
+                    if self.model_id:
+                        request_write_dict = self.request_parse_html_topic(link, url_id)
+                        request_write_dict['is_full_topic'] =  True
+                        update_dict.update(request_write_dict)
+
                     if fetch_item_id.page_path:
                         update_dict = self.request_parse_html_topic(link, url_id)
-                    if update_dict:
+                    
+                else:
+                    self.del_list_id_topic_data_from_page(topic_data_from_page)
+                    update_dict = self.request_parse_html_topic(link, url_id)
+                    search_bds_obj.write(update_dict)
+
+                if update_dict:
                         search_bds_obj.write(update_dict)
                         is_update_link_number = 1
-                elif fetch_item_id.topic_link or fetch_item_id.topic_path or fetch_item_id.is_must_update_topic :
-                    rq_topic_dict = {}
-                    self.del_list_id_topic_data_from_page(topic_data_from_page)
-                    # filtered_page_topic_dict = self.copy_page_data_to_rq_topic(topic_data_from_page)
-                    # rq_topic_dict.update(filtered_page_topic_dict)
-                    rq_topic_dict = self.request_parse_html_topic(link, url_id)
-                    print ('***rq_topic_dict**', rq_topic_dict)
-                    search_bds_obj.write(rq_topic_dict)
-                    is_update_link_number = 1
 
                 is_existing_link_number = 1
             else:
-                is_topic_link = bool(fetch_item_id.topic_link or fetch_item_id.topic_path)
-                create_dict = self.th_create_dict(topic_data_from_page, url_id, link, is_topic_link)
+                create_dict = {}
+                is_topic_link_or_topic_path = bool(fetch_item_id.topic_link or fetch_item_id.topic_path)
+                if self.st_is_pre_topic_dict_from_page_dict_and_url_id:
+                    pre_create_dict = self.th_bds_create_dict_from_page_dict_and_url_id(topic_data_from_page, url_id, link, is_topic_link_or_topic_path)
+                    create_dict.update(pre_create_dict)
                 if not fetch_item_id.not_request_topic:
                     rq_topic_dict = self.request_parse_html_topic(link, url_id)
                     create_dict.update(rq_topic_dict)
 
-                if not fetch_item_id.topic_link or fetch_item_id.topic_path:
+                if not is_topic_link_or_topic_path:
                     self.del_list_id_topic_data_from_page(topic_data_from_page)
                     create_dict.update(topic_data_from_page)
                 
@@ -364,14 +374,29 @@ class CommonMainFetch(models.AbstractModel):
         #     len_objs, len_objs, 0
         return existing_link_number, update_link_number, create_link_number, link_number, fail_link_number
 
+    # def get_setting_tp_is_request_update(self, fetch_item_id):
+    #     return False
+
+    def get_st_is_compare_price_or_public_date(self, fetch_item_id):
+        return True
+        
+    def get_st_is_pre_topic_dict_from_page_dict_and_url_id(self, fetch_item_id):
+        return True
+
 
     def fetch_a_url_id (self, fetch_item_id):
         begin_time = datetime.datetime.now()
         is_finished = False
         url_id = fetch_item_id.url_id
         self.site_name = url_id.siteleech_id.name
+        self.model_name = fetch_item_id.model_id.name
         end_page_number_in_once_fetch = False
         existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
+        # self.tp_is_request_update = self.get_setting_tp_is_request_update(fetch_item_id)
+        self.st_is_compare_price_or_public_date = self.get_st_is_compare_price_or_public_date(fetch_item_id)
+        self.st_is_pre_topic_dict_from_page_dict_and_url_id = self.get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
+        
+        
         if fetch_item_id.topic_link or fetch_item_id.topic_path:
             self.topic_path = fetch_item_id.topic_path
             self.siteleech_id_id = url_id.siteleech_id.id
@@ -385,7 +410,6 @@ class CommonMainFetch(models.AbstractModel):
             fail_link_number += fail_link_number_one_page
             link_number += link_number_one_page
         elif  fetch_item_id.model_id:
-            self.model_name = fetch_item_id.model_id.name
             existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = \
                 self.fetch_bo_sung_da_co_link(fetch_item_id)
             link_number = update_link_number

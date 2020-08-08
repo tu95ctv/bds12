@@ -39,7 +39,6 @@
         'views/bds_search.xml',
         'views/bds_form.xml',
         'views/bds_list.xml',
-        'views/tap_hoa_list.xml',
         'views/tap_hoa.xml',
 
         'views/poster.xml',
