@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines,g_or_c_quan
+from odoo.addons.bds.models.bds_tools  import  request_html, g_or_c_ss, get_or_create_user_and_posternamelines
 from bs4 import BeautifulSoup
 import re
 import datetime
+from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_or_create_quan_include_state
 ############mua ban ############
 
 def get_mobile_name_for_muaban(soup):
@@ -29,13 +30,16 @@ class MuabanObject():
 
     def write_images(self, soup):
         update_dict = {}
-        image_soup = soup.select('div.slider__frame')
-        images = []
-        for i in image_soup:
-            data_src = i.get('data-src',False)
-            if data_src:
-                images.append(data_src)
-            
+        image_soup = soup.select('div.image__slides img')
+        images = [i['src'] for i in image_soup]
+        # vì đang load... dùng javascript nên ko lấy được ảnh
+        # raise ValueError('akakaka')
+
+        # for i in image_soup:
+        #     data_src = i['src']
+        #     if data_src:
+        #         images.append(data_src)
+        # print ('***images**', images)
         if images:
             object_m2m_list = list(map(self.create_or_get_one_in_m2m_value, images))
             m2m_ids = list(map(lambda x:x.id, object_m2m_list))
@@ -55,12 +59,16 @@ class MuabanObject():
             gia = 0
         return {'gia':gia}
 
+    
     def write_quan_phuong(self, soup):
         quan_soup = soup.select('span.location-clock__location')
         quan_txt =  quan_soup[0].get_text()
-        quan_name =  quan_txt.split('-')[0].strip()
-        quan_id = g_or_c_quan(self.env, quan_name)
-        return {'quan_id': quan_id}
+        quan_tinhs = quan_txt.split('-')
+        tinh_name = quan_tinhs[1].strip()
+        tinh_name = re.sub('tphcm','Hồ Chí Minh',tinh_name,flags=re.I)
+        quan_name =  quan_tinhs[0].strip()
+        quan = get_or_create_quan_include_state(self, tinh_name, quan_name)
+        return {'quan_id': quan.id}
 
     def write_poster(self, soup, siteleech_id_id):
         try:

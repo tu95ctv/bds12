@@ -19,8 +19,10 @@
                 <field name="gia_trieu"/>
                 <field name="price"/>
                 <field name="price_unit"/>
+                <field name="thumb"/>
                 <field name="quan_id"/>
                 <field name="state_id"/>
+                
                 <field name="public_datetime" />
                 <field name="public_date" />
                 <field name="images_ids"/>
@@ -123,7 +125,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="main_bds_action">
-        <field name="name">BDS</field>
+        <field name="name">Sell</field>
         <field name="res_model">bds.bds</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','sell')]</field>
@@ -132,7 +134,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="rent_bds_action">
-        <field name="name">BDS</field>
+        <field name="name">Rent</field>
         <field name="res_model">bds.bds</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','rent')]</field>
@@ -141,7 +143,7 @@
     </record>
 
     <record model="ir.actions.act_window" id="need_bds_action">
-        <field name="name">BDS</field>
+        <field name="name">Cần mua</field>
         <field name="res_model">bds.bds</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('cate','=','bds'), ('sell_or_rent','=','need_to_buy')]</field>

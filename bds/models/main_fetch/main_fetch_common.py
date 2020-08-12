@@ -3,10 +3,7 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website
-from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi
+from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi, g_or_c_ss
 from bs4 import BeautifulSoup
 import re
 import datetime
@@ -20,27 +17,11 @@ import json
 import math
 from odoo.addons.bds.models.bds_tools  import  FetchError, SaveAndRaiseException
 import traceback
-
+from time import sleep
 import logging
+from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_or_create_quan_include_state
+from dateutil.relativedelta import relativedelta
 _logger = logging.getLogger(__name__)
-def convert_muaban_string_gia_to_float(str):
-    rs = re.search('(\d+) tỷ',str,re.I)
-    if rs:
-        ty = float(rs.group(1))*1000000000
-    else:
-        ty = 0
-    rs = re.search('(\d+) triệu',str,re.I)
-    if rs:
-        trieu = float(rs.group(1))*1000000
-    else:
-        trieu = 0
-    
-    kq = (ty + trieu)/1000000000.0
-    if not kq:
-        gia = re.sub(u'\.|đ|\s', '',str)
-        gia = float(gia)
-        kq = gia/1000000000.0
-    return kq
 
 def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         local = pytz.timezone('Etc/GMT-7')
@@ -49,6 +30,60 @@ def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         gio_bat_dau_utc = utc_tz.localize(gio_bat_dau_utc_native, is_dst=None)
         gio_bat_dau_vn = gio_bat_dau_utc.astimezone (local)
         return gio_bat_dau_vn
+
+ty_trieu_nghin_look = {'tỷ':1000000000, 'triệu':1000000, 'nghìn':1000, 'đ':1}     
+def convert_gia_from_string_to_float(gia):# 3.5 triệu/tháng
+    gia_ty, trieu_gia, price, thang_m2_hay_m2 = False, False, False, False
+    gia = gia.strip()
+    if not gia:
+        return gia_ty, trieu_gia, price, thang_m2_hay_m2
+
+    if re.search('thỏa thuận', gia, re.I):
+        return gia_ty, trieu_gia, price, thang_m2_hay_m2
+
+    try:
+        rs = re.search('([\d\,\.]*) (\w+)(?:$|/)(.*$)', gia)
+        gia_char = rs.group(1).strip()
+        if not gia_char:
+            return gia_ty, trieu_gia, price, thang_m2_hay_m2
+        gia_char = gia_char.replace(',','.')
+        ty_trieu_nghin = rs.group(2)
+        thang_m2_hay_m2 = rs.group(3)
+        if ty_trieu_nghin == 'đ':
+            gia_char = gia_char.replace('.','')
+        gia_float = float(gia_char)
+        he_so = ty_trieu_nghin_look[ty_trieu_nghin]
+        price = gia_float* he_so
+        gia_ty = price/1000000000
+        trieu_gia = price/1000000
+
+    except:
+        print ('exception gia', gia)
+        raise
+        
+    return gia_ty, trieu_gia, price, thang_m2_hay_m2
+
+MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA = {
+        u'ngày':'days',
+        u'tuần':'weeks',
+        u'hôm qua':'days',
+        u'giờ':'hours',
+        u'phút':'minutes',
+        u'giây':'seconds',
+        u'năm':'years',
+        u'tháng':'months'
+        }
+        
+def convert_chotot_date_to_datetime(string):
+    rs = re.search (r'(\d*?)\s?(ngày|tuần|hôm qua|giờ|phút|giây|năm|tháng)',string,re.I)
+    rs1 =rs.group(1)
+    rs2 =rs.group(2)
+    if rs1=='':
+        rs1 =1
+    rs1 = int (rs1)
+    rs2 = MAP_CHOTOT_DATE_TYPE_WITH_TIMEDELTA[rs2]
+    dt = datetime.datetime.now() - relativedelta(**{rs2:rs1})
+    return dt
 
 class CommonMainFetch(models.AbstractModel):
     _name = 'abstract.main.fetch'
@@ -127,7 +162,7 @@ class CommonMainFetch(models.AbstractModel):
     def parse_html_topic (self, topic_html_or_json, url_id):
         return {}
     
-    def request_parse_html_topic(self, link, url_id):
+    def request_parse_html_topic_tho(self, link, url_id):
         if not getattr(self,'topic_path',None):
             headers = self.page_header_request()
             header_kwargs = {'headers': headers} if headers else {}
@@ -144,10 +179,115 @@ class CommonMainFetch(models.AbstractModel):
             raise
         return topic_dict
 
-    # def copy_page_data_to_rq_topic_combine_topic_link(self,fetch_item_id, topic_data_from_page):
-    #     if fetch_item_id.topic_link or fetch_item_id.topic_path:
-    #         return {}
-    #     return self.copy_page_data_to_rq_topic(topic_data_from_page)
+    def get_or_create_quan_include_state(self, tinh_str, quan_str):
+        tinh_str = re.sub('tp|Thành phố|tỉnh','', tinh_str, flags=re.I)
+        tinh_str = tinh_str.strip()
+        country_obj = self.env['res.country'].search([('name','ilike','viet')])[0]
+        state = g_or_c_ss(self.env['res.country.state'], {'name':tinh_str, 'country_id':country_obj.id},
+                            {'code':tinh_str}, False)
+        if quan_str:
+            quan = g_or_c_ss(self.env['res.country.district'], {'name':quan_str, 'state_id':state.id},
+                                {}, False)
+        else:
+            quan = False
+        return state, quan
+   
+    def write_quan_phuong(self, topic_dict):
+        update_dict = {}
+        tinh = topic_dict['region_name']
+        if 'area_name' in topic_dict:
+            quan_name = topic_dict['area_name']
+        else:
+            quan_name = False
+        state, quan = self.get_or_create_quan_include_state(tinh, quan_name)
+        if quan:
+            quan_id = quan.id
+        else:
+            quan_id = False
+        if quan_id:
+            update_dict['quan_id'] = quan_id
+        try:
+            ward =  topic_dict['ward_name']
+            phuong_id = g_or_c_ss(self.env['bds.phuong'], {'name_phuong':ward, 'quan_id':quan_id}, {})
+            update_dict['phuong_id'] = phuong_id.id
+        except:
+            pass
+        return update_dict
+
+    def write_images(self, topic_dict):
+        def create_or_get_one_in_m2m_value( url):
+            url = url.strip()
+            if url:
+                return g_or_c_ss(self.env['bds.images'],{'url':url})
+        update_dict = {}
+        images_urls = topic_dict.get('images',[])
+        if images_urls:
+            object_m2m_list = list(map(create_or_get_one_in_m2m_value, images_urls))
+            m2m_ids = list(map(lambda x:x.id, object_m2m_list))
+            if m2m_ids:
+                val = [(6, False, m2m_ids)]
+                update_dict['images_ids'] = val
+        return update_dict   
+
+    def write_poster(self, topic_dict, siteleech_id_id):
+        print ('***write_poster***')
+        search_dict = {}
+        phone = topic_dict['phone']
+        search_dict['phone'] = phone 
+        account_name = topic_dict['account_name']
+        search_dict['login'] = str(phone)+'@gmail.com'
+        poster =  self.env['bds.poster'].search([('phone','=', phone)])
+        if poster:
+            posternamelines_search_dict = {'username_in_site':account_name, 'site_id':siteleech_id_id, 'poster_id':poster.id}
+            g_or_c_ss(self.env['bds.posternamelines'], posternamelines_search_dict)
+                                                
+        else:
+            search_dict.update({'created_by_site_id': siteleech_id_id})
+            poster =  self.env['bds.poster'].create(search_dict)
+            self.env['bds.posternamelines'].create( {'username_in_site':account_name, 'site_id':siteleech_id_id, 'poster_id':poster.id})
+        return {'poster_id':poster.id}
+
+
+    def write_gia(self, topic_dict):
+        gia_dict = {}
+        price_string = topic_dict.get('price_string',False)
+        if price_string:
+            gia_ty, trieu_gia, price, price_unit = convert_gia_from_string_to_float(price_string)
+        else:
+            gia_ty, trieu_gia, price, price_unit= False,False,False,False
+        
+        gia_dict['price_unit'] = price_unit # tháng/m2
+        price = topic_dict.get('price', price)
+        
+        if price:
+            gia_ty, gia_trieu = price/1000000000, price/1000000
+        else:
+            gia_ty, gia_trieu = False, False
+        gia_dict['gia'] = gia_ty
+        gia_dict['gia_trieu'] = gia_trieu
+        gia_dict['price'] = price
+        return gia_dict
+
+    def write_public_datetime(self, topic_dict):
+        update = {}
+        if 'date' in topic_dict and 'public_datetime' not in topic_dict:
+            date = topic_dict['date']
+            update ['public_datetime'] = convert_chotot_date_to_datetime(date)
+        return update
+
+    def odoo_model_topic_dict(self, topic_dict):
+        topic_dict.update(self.write_quan_phuong(topic_dict))
+        topic_dict.update(self.write_images(topic_dict))
+        topic_dict.update(self.write_poster(topic_dict, self.siteleech_id_id))
+        topic_dict.update(self.write_gia(topic_dict))
+        topic_dict.update(self.write_public_datetime(topic_dict))
+
+
+    def request_parse_html_topic(self, link, url_id):
+        topic_dict = self.request_parse_html_topic_tho(link, url_id)
+        self.odoo_model_topic_dict(topic_dict)
+        return topic_dict
+
 
     def del_list_id_topic_data_from_page(self, topic_data_from_page):
         if 'list_id' in topic_data_from_page:
@@ -155,6 +295,8 @@ class CommonMainFetch(models.AbstractModel):
 
 
     def topic_handle(self, link, url_id, topic_data_from_page, fetch_item_id,  search_bds_obj=None):
+        topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
+        print ('topic: %s'%self.topic_count)
         self.link = link
         self.page_dict = topic_data_from_page
         main_obj = self.get_main_obj()
@@ -173,8 +315,7 @@ class CommonMainFetch(models.AbstractModel):
                         compare_update_dict = self.th_topic_update_compare_price(search_bds_obj, topic_data_from_page)
                         update_dict.update(compare_update_dict)
 
-                    # if self.tp_is_request_update:
-                    if self.model_id:
+                    if fetch_item_id.model_id:
                         request_write_dict = self.request_parse_html_topic(link, url_id)
                         request_write_dict['is_full_topic'] =  True
                         update_dict.update(request_write_dict)
@@ -182,10 +323,9 @@ class CommonMainFetch(models.AbstractModel):
                     if fetch_item_id.page_path:
                         update_dict = self.request_parse_html_topic(link, url_id)
                     
-                else:
+                else:#topic_link, topic_path
                     self.del_list_id_topic_data_from_page(topic_data_from_page)
                     update_dict = self.request_parse_html_topic(link, url_id)
-                    search_bds_obj.write(update_dict)
 
                 if update_dict:
                         search_bds_obj.write(update_dict)
@@ -195,18 +335,24 @@ class CommonMainFetch(models.AbstractModel):
             else:
                 create_dict = {}
                 is_topic_link_or_topic_path = bool(fetch_item_id.topic_link or fetch_item_id.topic_path)
+                
                 if self.st_is_pre_topic_dict_from_page_dict_and_url_id:
                     pre_create_dict = self.th_bds_create_dict_from_page_dict_and_url_id(topic_data_from_page, url_id, link, is_topic_link_or_topic_path)
                     create_dict.update(pre_create_dict)
+               
                 if not fetch_item_id.not_request_topic:
                     rq_topic_dict = self.request_parse_html_topic(link, url_id)
                     create_dict.update(rq_topic_dict)
+                else:
+                    self.odoo_model_topic_dict(topic_data_from_page)
 
                 if not is_topic_link_or_topic_path:
                     self.del_list_id_topic_data_from_page(topic_data_from_page)
                     create_dict.update(topic_data_from_page)
                 
                 main_obj.create(create_dict) 
+                self.env.cr.commit()
+                
                 is_create_link_number = 1
                 self.env['bds.error'].create({
                 'name':'success link',
@@ -230,9 +376,7 @@ class CommonMainFetch(models.AbstractModel):
                 'fetch_item_id':fetch_item_id.id,
                 }
             )
-        # except SaveAndRaiseException as e:
-        #     save_to_disk(self.topic_html_or_json, 'file_topic_bug')
-        #     raise
+
            
         except:
             raise
@@ -297,12 +441,17 @@ class CommonMainFetch(models.AbstractModel):
             file_name = 'file_page_bug' if not fetch_item_id.page_path else 'file_page_bug_page_path'
             save_to_disk(html_page, file_name)
             raise ValueError('topic_data_from_pages_of_a_page is empty')
-        # link_number = len(topic_data_from_pages_of_a_page)
          
-        for topic_data_from_page in topic_data_from_pages_of_a_page:
+        for topic_count, topic_data_from_page in enumerate(topic_data_from_pages_of_a_page):
+            self.topic_count = topic_count
             list_id = topic_data_from_page['list_id']
+
             link = self.make_topic_link_from_list_id(list_id)
-                
+            # if self.topic_count == 5:
+            #     self.env.cr.rollback()
+                # return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number
+
+
             is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number = \
                 self.topic_handle(link, url_id, topic_data_from_page, 
                         fetch_item_id)
@@ -369,13 +518,8 @@ class CommonMainFetch(models.AbstractModel):
                 link_number += 1
             except FetchError as e:
                 self.env['bds.error'].create({'name':str(e),'des':str(e)})
-          
-        # is_existing_link_number, is_update_link_number, is_create_link_number = \
-        #     len_objs, len_objs, 0
         return existing_link_number, update_link_number, create_link_number, link_number, fail_link_number
 
-    # def get_setting_tp_is_request_update(self, fetch_item_id):
-    #     return False
 
     def get_st_is_compare_price_or_public_date(self, fetch_item_id):
         return True
@@ -388,11 +532,10 @@ class CommonMainFetch(models.AbstractModel):
         begin_time = datetime.datetime.now()
         is_finished = False
         url_id = fetch_item_id.url_id
-        self.site_name = url_id.siteleech_id.name
+        self.site_name = url_id.siteleech_id.name + (' ' +   url_id.fetch_mode if url_id.fetch_mode else '')
         self.model_name = fetch_item_id.model_id.name
         end_page_number_in_once_fetch = False
         existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
-        # self.tp_is_request_update = self.get_setting_tp_is_request_update(fetch_item_id)
         self.st_is_compare_price_or_public_date = self.get_st_is_compare_price_or_public_date(fetch_item_id)
         self.st_is_pre_topic_dict_from_page_dict_and_url_id = self.get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
         
@@ -469,7 +612,7 @@ class CommonMainFetch(models.AbstractModel):
         return None
 
     def look_next_fetched_url_id(self):
-        fetch_item_ids = self.fetch_item_ids
+        fetch_item_ids = self.fetch_item_ids.filtered(lambda i: not i.disible)
 
         if self.is_next_if_only_finish:
             object_url_ids = fetch_item_ids.filtered(lambda r: not r.is_finished)
@@ -508,6 +651,12 @@ class CommonMainFetch(models.AbstractModel):
 
     # làm gọn lại ngày 23/02
     def fetch (self):
+        # while 1:
+            # sleep_count = 5
+            # while sleep_count:
+            #     print ('sleep....%s'%sleep_count)
+            #     sleep(1)
+            #     sleep_count-=1
         url_id = self.look_next_fetched_url_id()
         try:
             self.fetch_a_url_id(url_id)

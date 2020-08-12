@@ -98,13 +98,6 @@ def get_or_create_user_and_posternamelines(env, mobile, name, siteleech_id_id):
         env['bds.posternamelines'].create( {'username_in_site':name,'site_id':siteleech_id_id,'poster_id':user.id})
     return user 
 
-def g_or_c_quan(env, quan_name):
-    name_without_quan_huyen = quan_name.replace(u'Quận ','').replace(u'Huyện','')
-    quan_unidecode = unidecode(quan_name).lower().replace(' ','-')
-    quan_search_dict = {'name_without_quan':name_without_quan_huyen}
-    quan_update_dict = {'name':quan_name,'name_unidecode':quan_unidecode}
-    quan = g_or_c_ss(env['res.country.district'],quan_search_dict, quan_update_dict )
-    return quan.id
 
 
 def save_to_disk( ct, name_file ):

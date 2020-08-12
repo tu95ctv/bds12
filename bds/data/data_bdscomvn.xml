@@ -92,4 +92,13 @@
             <field name="url">https://batdongsan.com.vn/nha-dat-ban</field>
         </record>
         
+        <!-- Lấy dự án-->
+
+        <record model="bds.url" id="url_bds_duan_hcm">
+            <field name="description">bds dự án chung cư hcm</field>
+            <field name="url">https://batdongsan.com.vn/can-ho-chung-cu-tp-hcm</field>
+            <field name="fetch_mode">dự án</field>
+        </record>
+
+
 </odoo>

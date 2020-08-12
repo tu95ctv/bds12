@@ -37,7 +37,7 @@ class URL(models.Model):
     sell_or_rent =  fields.Selection([('sell','sell'), ('rent', 'rent'),('need_to_buy','need_to_buy')], default='sell')
     priority = fields.Integer()
     minute_change =  fields.Integer(compute='_minute_change')
-
+    fetch_mode = fields.Char()
 
     @api.depends('description')
     def description_unidecode_(self):

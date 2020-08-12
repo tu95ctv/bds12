@@ -3,10 +3,9 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html, SaveAndRaiseException
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
-from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_bds_dict_in_topic, g_or_create_quan_include_state
+from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
+from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
+from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_bds_dict_in_topic, g_or_create_quan_include_state
 
 from bs4 import BeautifulSoup
 import re
@@ -37,32 +36,7 @@ header = {
                 }
 
 
-def convert_muaban_string_gia_to_float(str):
-    rs = re.search('(\d+) tỷ',str,re.I)
-    if rs:
-        ty = float(rs.group(1))*1000000000
-    else:
-        ty = 0
-    rs = re.search('(\d+) triệu',str,re.I)
-    if rs:
-        trieu = float(rs.group(1))*1000000
-    else:
-        trieu = 0
-    
-    kq = (ty + trieu)/1000000000.0
-    if not kq:
-        gia = re.sub(u'\.|đ|\s', '',str)
-        gia = float(gia)
-        kq = gia/1000000000.0
-    return kq
 
-def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
-        local = pytz.timezone('Etc/GMT-7')
-        utc_tz =pytz.utc
-        gio_bat_dau_utc_native = utc_datetime_inputs#fields.Datetime.from_string(self.gio_bat_dau)
-        gio_bat_dau_utc = utc_tz.localize(gio_bat_dau_utc_native, is_dst=None)
-        gio_bat_dau_vn = gio_bat_dau_utc.astimezone (local)
-        return gio_bat_dau_vn
 
 
 class BDSFetch(models.AbstractModel):
@@ -87,16 +61,6 @@ class BDSFetch(models.AbstractModel):
         return super().parse_html_topic(topic_html_or_json, url_id)
         
 
-    def copy_page_data_to_rq_topic(self, topic_data_from_page):
-        filtered_page_topic_dict = super(BDSFetch, self).copy_page_data_to_rq_topic(topic_data_from_page)
-        print ('***topic_data_from_page***', topic_data_from_page)
-        print (aaa)
-        if self.site_name =='batdongsan' :  
-            filtered_page_topic_dict['thumb'] = topic_data_from_page.get('thumb',False)
-            filtered_page_topic_dict['vip'] = topic_data_from_page['vip']
-            filtered_page_topic_dict['quan_id'] = topic_data_from_page['quan_id']
-        return filtered_page_topic_dict
-
     def create_page_link(self, format_page_url, page_int):
         page_url = super(BDSFetch, self).create_page_link(format_page_url, page_int)
         if self.site_name == 'batdongsan':
@@ -105,7 +69,7 @@ class BDSFetch(models.AbstractModel):
 
     def page_header_request(self):
         # return None
-        header = super().page_header_request()
+        
         if self.site_name == 'batdongsan':
             header = {
                 'Host': 'batdongsan.com.vn',
@@ -116,10 +80,13 @@ class BDSFetch(models.AbstractModel):
                 # 'Accept-Encoding': 'gzip, deflate, br',
                 'Referer': 'https://batdongsan.com.vn/ban-nha-dat-tp-hcm/p4',
                 'Connection': 'keep-alive',
-                'Cookie': 'SERVERNAME=L_22006251500; _gcl_au=1.1.271490124.1593699646; __cfduid=d962388d50425a164b6fa007bb18400a11593699656; _ga=GA1.3.2004129680.1593699653; usidtb=el2cCH0hYkeyFsUCXtus4pJnBJX0iIA5; __auc=fc627e9a1730fe6dc02b1aad644; ins-storage-version=75; c_u_id=104601; uitb=%7B%22name%22%3A%22Nguyen%20Duc%20Tu%22%2C%22email%22%3A%22nguyenductu%40gmail.com%22%2C%22mobile%22%3A%220916022787%22%2C%22time%22%3A1593701739318%7D; NPS_b514e4e7_last_seen=1593701743389; _fbp=fb.2.1593701744644.54625863; _ym_uid=15937017471040494592; _ym_d=1593701747; __zi=2000.SSZzejyD6jy_Zl2jp1eKttQU_gxC3nMGTChWuC8NLyncmFxoW0L1t2AVkF62JGtQ8fgnzeP5IDidclhqXafDtIkV_FG.1; fpsend=147621; __zlcmid=yzjFnky3OLinOV; SERVERID=H; ASP.NET_SessionId=pmzli2x4f0m2fw0jfdbp2aov; _gid=GA1.3.1740494310.1594452137; psortfilter=1%24all%24VOE%2FWO8MpO1adIX%2BwMGNUA%3D%3D; sidtb=Xs6HBrUnnCvh6iGaEMGmhBx2nCLrUMGh; __asc=b0a63b421733d08f828fd8fa4e2',
+                'Cookie': '__cfduid=d6a5f615edb1d758de8f6076e15eaa6731596941037; expires=Tue, 08-Sep-20 02:43:57 GMT; path=/; domain=.useinsider.com; HttpOnly; SameSite=Lax',
+                #set-cookie: __cfduid=d6a5f615edb1d758de8f6076e15eaa6731596941037; expires=Tue, 08-Sep-20 02:43:57 GMT; path=/; domain=.useinsider.com; HttpOnly; SameSite=Lax
+
                 # 'Upgrade-Insecure-Requests': 1
                 }
-        return header
+            return header
+        return super().page_header_request()
 
     def ph_parse_pre_topic(self, html_page):
         topic_data_from_pages_of_a_page = super(BDSFetch, self).ph_parse_pre_topic(html_page)
@@ -136,23 +103,22 @@ class BDSFetch(models.AbstractModel):
                     href = title_soups[0]['href']
                     topic_data_from_page['list_id'] = href
                     icon_soup = title_and_icon.select('img.product-avatar-img')
-                    topic_data_from_page['thumb'] = icon_soup[0]['src']
+                    thumb = icon_soup[0]['src']
+                    if 'nophoto' in thumb:
+                        thumb = 'https://batdongsan.com.vn/Images/nophoto.jpg'
+                    topic_data_from_page['thumb'] = thumb
                     gia_soup = title_and_icon.select('strong.product-price')
                     gia = gia_soup[0].get_text()
                     gia = gia.strip()
-                    if gia:
-                        int_gia,trieu_gia, price, price_unit = convert_gia_from_string_to_float(gia)
-                    else:
-                        int_gia,trieu_gia, price, price_unit = False, False, False, False
-                        
-                    
-
-                    topic_data_from_page['gia'] = int_gia
-                    topic_data_from_page['price'] = price
-                    topic_data_from_page['trieu_gia'] = trieu_gia
                     quan_huyen_str = title_and_icon.select('span.p-district strong.product-city-dist')[0].get_text()
-                    quan = g_or_create_quan_include_state(self, quan_huyen_str)
-                    topic_data_from_page['quan_id'] = quan.id
+
+                    topic_data_from_page['price_string'] = gia
+                    quan_huyen_strs = quan_huyen_str.split(',')
+                    tinh_str = quan_huyen_strs[1]
+                    quan_str = quan_huyen_strs[0]
+                    topic_data_from_page['region_name'] = tinh_str
+                    topic_data_from_page['area_name'] = quan_str
+
 
 
                     date_dang = title_and_icon.select('span.uptime')
@@ -179,19 +145,15 @@ class BDSFetch(models.AbstractModel):
                     gia_soup = title_and_icon.select('span.price')
                     gia = gia_soup[0].get_text()
                     gia = gia.strip()
-                    if gia:
-                        int_gia,trieu_gia, price, price_unit = convert_gia_from_string_to_float(gia)
-                    else:
-                        int_gia,trieu_gia, price, price_unit = False, False, False, False
-                    topic_data_from_page['gia'] = int_gia
-                    topic_data_from_page['trieu_gia'] = trieu_gia
-                    topic_data_from_page['price'] = price
-                    topic_data_from_page['price_unit'] = price_unit
-
-                    
                     quan_huyen_str = title_and_icon.select('div.product-info > span.location')[0].get_text()
-                    quan = g_or_create_quan_include_state(self, quan_huyen_str)
-                    topic_data_from_page['quan_id'] = quan.id
+                    
+                    topic_data_from_page['price_string'] = gia
+                    quan_huyen_strs = quan_huyen_str.split(',')
+                    tinh_str = quan_huyen_strs[1]
+                    quan_str = quan_huyen_strs[0]
+                    topic_data_from_page['region_name'] = tinh_str
+                    topic_data_from_page['area_name'] = quan_str
+                  
 
                     date_dang = title_and_icon.select('span.tooltip-time')
                     date_dang = date_dang[0].get_text().replace('\n','')
@@ -203,8 +165,7 @@ class BDSFetch(models.AbstractModel):
                     title_and_icons = soup.select('div.vip5')[1:]
                     if title_and_icons:
                         page_css_type = 3
-                    if not title_and_icons:
-                        raise ValueError('dau xanh')
+                    
                     for title_and_icon in title_and_icons:
                         vip = title_and_icon['class'][0]
                         topic_data_from_page = {}
@@ -217,16 +178,14 @@ class BDSFetch(models.AbstractModel):
                         gia_soup = title_and_icon.select('span.product-price')
                         gia = gia_soup[0].get_text()
                         gia = gia.strip()
-                        if gia:
-                            int_gia,trieu_gia, price, price_unit = convert_gia_from_string_to_float(gia)
-                        else:
-                            int_gia,trieu_gia, price, price_unit = False, False, False, False
-                            
-                        
 
-                        topic_data_from_page['gia'] = int_gia
-                        topic_data_from_page['price'] = price
-                        topic_data_from_page['trieu_gia'] = trieu_gia
+                        topic_data_from_page['price_string'] = gia
+                        # quan_huyen_strs = quan_huyen_str.split(',')
+                        # tinh_str = quan_huyen_strs[1]
+                        # quan_str = quan_huyen_strs[0]
+                        # topic_data_from_page['region_name'] = tinh_str
+                        # topic_data_from_page['area_name'] = quan_str
+
                         date_dang = title_and_icon.select('div.p-content div.mar-right-10')
                         date_dang = date_dang[0].get_text().replace('\n','')
                         date_dang = re.sub('\s*','', date_dang)

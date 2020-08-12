@@ -27,7 +27,7 @@
         'data/data_chotot_phuong.xml',
         'data/data_chotot.xml',
         'data/data_muaban.xml',
-        'data/data_bdsvn.xml',
+        'data/data_bdscomvn.xml',
         'data/data_taphoa.xml',
         'data/cronjob_data.xml',
         'data/email.xml',

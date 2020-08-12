@@ -64,6 +64,7 @@ class BDSFetchLine(models.Model):
     page_path = fields.Char()
     topic_path = fields.Char()
     is_must_update_topic = fields.Boolean()
+    disible = fields.Boolean()
 #lam gon lai ngay 23/02
 class Fetch(models.Model):
 
@@ -90,6 +91,7 @@ class Fetch(models.Model):
     def cronjob_1(self):
         fetch_obj = self.search([('is_cronjob','=',True)], limit=1)
         if fetch_obj:
+            print ('***cronjob_1**', fetch_obj.name)
             fetch_obj.fetch()
         else:
             self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
@@ -97,9 +99,10 @@ class Fetch(models.Model):
     def cronjob_2(self):
         fetch_obj = self.search([('is_cronjob','=',True)], offset=1, limit=1)
         if fetch_obj:
+            print ('***cronjob_2**', fetch_obj.name)
             fetch_obj.fetch()
         else:
-            self.env['bds.error'].create({'name':'không có cronjob 1', 'des':'không có cronjob 1'})
+            self.env['bds.error'].create({'name':'không có cronjob 2', 'des':'không có cronjob 2'})
 
     def cronjob_3(self):
         fetch_obj = self.search([('is_cronjob','=',True)], offset=2, limit=1)

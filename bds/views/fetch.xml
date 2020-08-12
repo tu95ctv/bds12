@@ -62,6 +62,7 @@
                                 <field name="fetched_number" />
                                 <field name="not_request_topic" />
                                 <field name="is_must_update_topic" />
+                                <field name="disible" />
                             </tree>
                         </field>
                     </page>

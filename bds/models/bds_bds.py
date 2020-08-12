@@ -11,7 +11,7 @@ from odoo.addons.bds.models.bds_tools import g_or_c_ss
 from odoo.addons.bds.models.compute_bds  import  _compute_so_phong_ngu, _compute_mat_tien_or_trich_dia_chi,\
     _compute_dd_tin_cua_dau_tu, _compute_loai_hem_combine, _compute_kw_mg
 from odoo.addons.bds.models.compute_choosed_area  import _compute_choosed_area_muc_gia
-
+import psycopg2
 
 def skip_if_cate_not_bds(depend_func):
     def wrapper(*args,**kargs):
@@ -216,12 +216,16 @@ class bds(models.Model):
 
     @api.model
     def create(self, vals):
+        
         r = super(bds,self).create(vals)
-        r.count_post_of_poster_()
-        r.poster_id.quanofposter_ids_()
-        r.quan_id.muc_gia_quan_()
-        r.quan_id.len_post_ids_()
-        return RuntimeWarning
+        try:
+            r.count_post_of_poster_()
+            r.poster_id.quanofposter_ids_()
+            r.quan_id.muc_gia_quan_()
+            r.quan_id.len_post_ids_()
+        except psycopg2.extensions.TransactionRollbackError:
+            pass
+        return r
 
     def make_trigger(self):
         for r in self:

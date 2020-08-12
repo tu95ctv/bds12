@@ -39,7 +39,7 @@ def get_phuong_xa_from_topic(self,soup,quan_id):
 
 def get_images_for_bds_com_vn(soup):
     rs = soup.select('meta[property="og:image"]')
-    images =  list(map(lambda i:i['content'],rs))
+    images =  list(map(lambda i:i['content'], rs))
     return images
 
 
@@ -201,8 +201,8 @@ def convert_gia_from_string_to_float(gia):# 3.5 triệu/tháng
         gia_float = float(gia_char)
         he_so = ty_trieu_nghin_look[ty_trieu_nghin]
         price = gia_float* he_so
-        gia_ty = price/10**9
-        trieu_gia = price/10**6
+        gia_ty = price/1000000000
+        trieu_gia = price/1000000
 
     except:
         print ('exception gia', gia)
@@ -230,37 +230,59 @@ def get_price(soup):
 
 
 def get_bds_dict_in_topic(self, page_dict, html, siteleech_id_id):
-    def create_or_get_one_in_m2m_value(val):
-            val = val.strip()
-            if val:
-                return g_or_c_ss(self.env['bds.images'],{'url':val})
+    # def create_or_get_one_in_m2m_value(val):
+    #         val = val.strip()
+    #         if val:
+    #             return g_or_c_ss(self.env['bds.images'],{'url':val})
 
     update_dict = {}
     update_dict['data'] = html
     soup = BeautifulSoup(html, 'html.parser')
     
-    gia, trieu_gia, price, price_unit, type_bdscom_topic = get_price(soup)
-    update_dict['price'] = price
-    update_dict['gia'] = gia
-    update_dict['trieu_gia'] = trieu_gia
-    update_dict['price_unit'] = price_unit
+    try:
+        kqs = soup.find_all("span", class_="gia-title")
+        gia = kqs[0].find_all("strong")
+        gia = gia[0].get_text()
+        type_bdscom_topic = 1
+    except:
+        gia_soup = soup.select("div.short-detail-wrap > ul.short-detail-2 > li:nth-of-type(1) > span.sp2")[0]
+        gia = gia_soup.get_text()
+        type_bdscom_topic = 2
+    update_dict['price_string'] = gia
+   
+    # gia, trieu_gia, price, price_unit, type_bdscom_topic = get_price(soup)
+    # update_dict['price'] = price
+    # update_dict['gia'] = gia
+    # update_dict['trieu_gia'] = trieu_gia
+    # update_dict['price_unit'] = price_unit
+
+
+
     update_dict['html'] = get_product_detail(soup, type_bdscom_topic)
 
 
     images = get_images_for_bds_com_vn(soup)
     if images:
-        object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
-        m2m_ids = list(map(lambda x:x.id, object_m2m_list))
-        if m2m_ids:
-            val = [(6, False, m2m_ids)]
-            update_dict['images_ids'] = val
+        update_dict['images'] = images
+
+        # object_m2m_list = list(map(create_or_get_one_in_m2m_value, images))
+        # m2m_ids = list(map(lambda x:x.id, object_m2m_list))
+        # if m2m_ids:
+        #     val = [(6, False, m2m_ids)]
+        #     update_dict['images_ids'] = val
     
     update_dict['area'] = get_dientich(soup)
  
-    if not page_dict.get('quan_id'):
-        quan_id= g_or_c_bds_quan(self,soup)
-        update_dict['quan_id'] = quan_id
-        update_dict['phuong_id'] = get_phuong_xa_from_topic(self,soup,quan_id)
+    
+    
+    # if not page_dict.get('quan_id'):
+    #     quan_id= g_or_c_bds_quan(self, soup)
+    #     update_dict['quan_id'] = quan_id
+    #     update_dict['phuong_id'] = get_phuong_xa_from_topic(self,soup,quan_id)
+    
+    
+    
+    
     try:
         title = soup.select('div.pm-title > h1')[0].contents[0] 
     except:
@@ -269,10 +291,12 @@ def get_bds_dict_in_topic(self, page_dict, html, siteleech_id_id):
         except:
             raise 
     update_dict['title']=title
-    mobile,name = get_mobile_name_for_batdongsan(soup)
-    user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
-    update_dict['phone_poster']=mobile
-    update_dict['poster_id'] = user.id 
+    update_dict['phone'], update_dict['account_name'] = get_mobile_name_for_batdongsan(soup)
+    
+    # user = get_or_create_user_and_posternamelines(self.env, mobile, name, siteleech_id_id)
+    # update_dict['phone_poster']=mobile
+    # update_dict['poster_id'] = user.id 
+
     try:
         loai_nha = soup.select('span.diadiem-title a')[0].get_text()
         loai_nha_search = re.search('(^.*?) tại', loai_nha)
@@ -284,11 +308,8 @@ def get_bds_dict_in_topic(self, page_dict, html, siteleech_id_id):
             loai_nha = loai_nha_search.group(1)
         except:
             loai_nha = soup.select('span.diadiem > strong')[0].get_text()
-        
-
-    
-
-
+    loai_nha = re.sub('^bán |^cho thuê ','',loai_nha, flags=re.I)  
+    loai_nha = loai_nha.capitalize()    
     update_dict['loai_nha'] = loai_nha  
 
     for key, value in update_dict.items():

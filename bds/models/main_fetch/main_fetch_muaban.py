@@ -3,10 +3,7 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_bds_com_vn  import get_last_page_from_bdsvn_website
 from odoo.addons.bds.models.fetch_site.fetch_muaban_obj  import MuabanObject
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import ChototGetTopic, create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
-
 from bs4 import BeautifulSoup
 import re
 import datetime
@@ -39,14 +36,6 @@ def convert_muaban_string_gia_to_float(str):
         gia = float(gia)
         kq = gia/1000000000.0
     return kq
-
-def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
-        local = pytz.timezone('Etc/GMT-7')
-        utc_tz =pytz.utc
-        gio_bat_dau_utc_native = utc_datetime_inputs#fields.Datetime.from_string(self.gio_bat_dau)
-        gio_bat_dau_utc = utc_tz.localize(gio_bat_dau_utc_native, is_dst=None)
-        gio_bat_dau_vn = gio_bat_dau_utc.astimezone (local)
-        return gio_bat_dau_vn
 
 
 class MuabanFetch(models.AbstractModel):
