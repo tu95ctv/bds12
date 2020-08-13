@@ -54,7 +54,7 @@ class MuabanFetch(models.AbstractModel):
         
     def parse_html_topic (self, topic_html_or_json, url_id):
         if self.site_name =='muaban':
-            topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json, self.siteleech_id_id)
+            topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json)
             return topic_dict
         return super(MuabanFetch, self).parse_html_topic(topic_html_or_json, url_id)
 

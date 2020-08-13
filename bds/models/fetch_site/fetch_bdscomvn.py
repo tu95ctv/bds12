@@ -229,7 +229,7 @@ def get_price(soup):
     return gia_ty,trieu_gia, price, thang_m2_hay_m2, type_bdscom_topic
 
 
-def get_bds_dict_in_topic(self, page_dict, html, siteleech_id_id):
+def get_bds_dict_in_topic(self, page_dict, html):
     # def create_or_get_one_in_m2m_value(val):
     #         val = val.strip()
     #         if val:

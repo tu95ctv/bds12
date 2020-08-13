@@ -56,7 +56,7 @@ class BDSFetch(models.AbstractModel):
 
     def parse_html_topic (self, topic_html_or_json, url_id):
         if self.site_name =='batdongsan':
-            topic_dict = get_bds_dict_in_topic(self, self.page_dict, topic_html_or_json, self.siteleech_id_id)
+            topic_dict = get_bds_dict_in_topic(self, self.page_dict, topic_html_or_json)
             return topic_dict
         return super().parse_html_topic(topic_html_or_json, url_id)
         

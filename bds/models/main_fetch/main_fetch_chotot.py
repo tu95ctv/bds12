@@ -65,7 +65,7 @@ class ChototMainFetch(models.AbstractModel, ChototFetchIndepend):
 
     def parse_html_topic (self, topic_html_or_json, url_id):
         if self.site_name =='chotot':
-            topic_dict = get_topic(self, topic_html_or_json, self.page_dict, self.siteleech_id_id)
+            topic_dict = get_topic(self, topic_html_or_json, self.page_dict)
             return topic_dict
         return super().parse_html_topic(topic_html_or_json, url_id)
 

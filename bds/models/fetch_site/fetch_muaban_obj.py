@@ -142,7 +142,7 @@ class MuabanObject():
         loai_nha = loai_nha_soup[0].get_text()
         return {'loai_nha':loai_nha}
 
-    def get_topic(self, html, siteleech_id_id):
+    def get_topic(self, html):
         update_dict  = {}
         
         update_dict['data'] = html

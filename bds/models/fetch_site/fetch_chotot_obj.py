@@ -153,7 +153,7 @@ def write_address(ad_params):
     else:
         return {}
 
-def get_topic(self, topic_html_or_json, page_dict, siteleech_id_id, ad = None):
+def get_topic(self, topic_html_or_json, page_dict, ad = None):
     update_dict = {}
     if not ad:
         topic_html_or_json = json.loads(topic_html_or_json) 
