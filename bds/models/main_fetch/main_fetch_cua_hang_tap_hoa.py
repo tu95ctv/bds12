@@ -82,7 +82,6 @@ class TapHoaMainFetch(models.AbstractModel):
 
 
 
-
     def request_parse_html_topic(self, link, url_id):
         topic_dict = super().request_parse_html_topic(link, url_id)
         if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
@@ -90,17 +89,12 @@ class TapHoaMainFetch(models.AbstractModel):
         return topic_dict
 
 
-    def get_st_is_pre_topic_dict_from_page_dict_and_url_id(self, fetch_item_id):
-        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
-            return False
-        return super().get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
 
-
-    def get_st_is_compare_price_or_public_date(self, fetch_item_id):
+    def get_st_is_bds_site(self):
 
         if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
             return False
-        return super().get_st_is_compare_price_or_public_date(fetch_item_id)
+        return super().get_st_is_bds_site()
 
     
     # def get_st_is_bds_type(self, fetch_item_id):
@@ -119,16 +113,13 @@ class TapHoaMainFetch(models.AbstractModel):
             for title_and_icon in title_and_icons:
                 topic_data_from_page = {}
                 try:
-                    
                     chu_so_huu_soup = title_and_icon.select('a')[0]
                     chu_so_huu = chu_so_huu_soup.get_text()
                     topic_data_from_page['name_of_poster'] = chu_so_huu
-
                     mst_tag = title_and_icon.select('a')[1]
                     href = mst_tag['href']
                     title = mst_tag['title']
                     mst = mst_tag.get_text()
-
                     phone = re.search(' (\d{7,})$', title)
                     if phone:
                         phone = phone.group(1)

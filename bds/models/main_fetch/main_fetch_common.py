@@ -99,7 +99,7 @@ class CommonMainFetch(models.AbstractModel):
         return public_datetime, public_date
 
 
-    def th_topic_update_compare_price(self, search_bds_obj, topic_data_from_page):
+    def th_bds_type_update_compare_price(self, search_bds_obj, topic_data_from_page):
 
         public_datetime, public_date = self.get_public_date(topic_data_from_page)
         update_dict = {}
@@ -107,6 +107,8 @@ class CommonMainFetch(models.AbstractModel):
         diff_day_public_from_now =  (now - public_datetime).days
         if diff_day_public_from_now==0:
             public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
+            # print ('**topic_data_from_page**', topic_data_from_page)
+            # print ('***public_datetime**', public_datetime, '**public_datetime_cu**', public_datetime_cu)
             diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
             if diff_public_datetime_in_hours > 2 :
                 public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
@@ -144,9 +146,9 @@ class CommonMainFetch(models.AbstractModel):
         return update_dict
 
 
-    def th_bds_create_dict_from_page_dict_and_url_id(self, topic_data_from_page, url_id, link, is_topic_link_or_topic_path):
+    def th_bds_type_create_dict_from_page_dict_and_url_id(self, topic_data_from_page, url_id, link):
         create_dict = {}
-        if not is_topic_link_or_topic_path:
+        if not self.is_page_handle:
             public_datetime, public_date = self.get_public_date(topic_data_from_page)
             create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
         create_dict['siteleech_id'] = self.siteleech_id_id
@@ -284,7 +286,7 @@ class CommonMainFetch(models.AbstractModel):
 
     def request_parse_html_topic(self, link, url_id):
         topic_dict = self.request_parse_html_topic_tho(link, url_id)
-        if self.st_is_compare_price_or_public_date:
+        if self.st_is_bds_site:
             self.odoo_model_topic_dict(topic_dict)
         return topic_dict
 
@@ -295,9 +297,6 @@ class CommonMainFetch(models.AbstractModel):
 
 
     def topic_handle(self, link, url_id, topic_data_from_page, fetch_item_id,  search_bds_obj=None):
-        if self.st_is_compare_price_or_public_date:
-            topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
-            topic_data_from_page.update(self.write_gia(topic_data_from_page))
         print ('topic: %s'%self.topic_count)
         self.link = link
         self.page_dict = topic_data_from_page
@@ -309,53 +308,51 @@ class CommonMainFetch(models.AbstractModel):
         is_create_link_number = 0
         try:
             if search_bds_obj:
-                is_must_update_combine = fetch_item_id.topic_link or fetch_item_id.topic_path or fetch_item_id.is_must_update_topic
-                if not is_must_update_combine:# update ở mode bình thường
+                if not self.is_must_update_combine:# update ở mode bình thường
                     update_dict = {}
-
-                    if self.st_is_compare_price_or_public_date:
-                        compare_update_dict = self.th_topic_update_compare_price(search_bds_obj, topic_data_from_page)
+                    if self.st_is_bds_site:
+                        topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
+                        topic_data_from_page.update(self.write_gia(topic_data_from_page))
+                        compare_update_dict = self.th_bds_type_update_compare_price(search_bds_obj, topic_data_from_page)
                         update_dict.update(compare_update_dict)
-
-                    if fetch_item_id.model_id:
-                        request_write_dict = self.request_parse_html_topic(link, url_id)
-                        request_write_dict['is_full_topic'] =  True
-                        update_dict.update(request_write_dict)
-
-                    if fetch_item_id.page_path:
-                        update_dict = self.request_parse_html_topic(link, url_id)
-                    
-                else:#topic_link, topic_path
-                    self.del_list_id_topic_data_from_page(topic_data_from_page)
+                else:
                     update_dict = self.request_parse_html_topic(link, url_id)
+                    # if self.is_page_handle:
+                    #     if self.st_is_bds_site:
+                    #         self.odoo_model_topic_dict(topic_data_from_page)
+                    update_dict.update(topic_data_from_page)
+                    if self.st_is_model_id:
+                        update_dict['is_full_topic'] =  True
 
                 if update_dict:
-                        search_bds_obj.write(update_dict)
-                        is_update_link_number = 1
+                    print ('**update topic**')
+                    search_bds_obj.write(update_dict)
+                    is_update_link_number = 1
 
                 is_existing_link_number = 1
             else:
                 create_dict = {}
-                is_topic_link_or_topic_path = bool(fetch_item_id.topic_link or fetch_item_id.topic_path)
+                # if self.st_is_bds_site:
+                #         self.odoo_model_topic_dict(topic_data_from_page)
                 
-                if self.st_is_pre_topic_dict_from_page_dict_and_url_id:
-                    pre_create_dict = self.th_bds_create_dict_from_page_dict_and_url_id(topic_data_from_page, url_id, link, is_topic_link_or_topic_path)
-                    create_dict.update(pre_create_dict)
-               
-                if not fetch_item_id.not_request_topic:
+                if self.st_is_request_topic:
                     rq_topic_dict = self.request_parse_html_topic(link, url_id)
                     create_dict.update(rq_topic_dict)
-                else:
-                    if self.st_is_compare_price_or_public_date:
-                        self.odoo_model_topic_dict(topic_data_from_page)
 
-                if not is_topic_link_or_topic_path:
+                if self.is_page_handle:
+                    if not self.st_is_request_topic:
+                        if self.st_is_bds_site:
+                            self.odoo_model_topic_dict(topic_data_from_page)
                     self.del_list_id_topic_data_from_page(topic_data_from_page)
                     create_dict.update(topic_data_from_page)
                 
+                if self.st_is_bds_site:
+                    pre_create_dict = self.th_bds_type_create_dict_from_page_dict_and_url_id(topic_data_from_page, url_id, link)
+                    create_dict.update(pre_create_dict)
+
                 main_obj.create(create_dict) 
                 self.env.cr.commit()
-                
+                print ('**create topic**')
                 is_create_link_number = 1
                 self.env['bds.error'].create({
                 'name':'success link',
@@ -523,10 +520,7 @@ class CommonMainFetch(models.AbstractModel):
         return existing_link_number, update_link_number, create_link_number, link_number, fail_link_number
 
 
-    def get_st_is_compare_price_or_public_date(self, fetch_item_id):
-        return True
-        
-    def get_st_is_pre_topic_dict_from_page_dict_and_url_id(self, fetch_item_id):
+    def get_st_is_bds_site(self):
         return True
 
 
@@ -534,15 +528,18 @@ class CommonMainFetch(models.AbstractModel):
         begin_time = datetime.datetime.now()
         is_finished = False
         url_id = fetch_item_id.url_id
-        self.siteleech_id_id = url_id.siteleech_id.id
-        self.site_name = url_id.siteleech_id.name + (' ' +   url_id.fetch_mode if url_id.fetch_mode else '')
-        self.model_name = fetch_item_id.model_id.name
         end_page_number_in_once_fetch = False
         existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
-        self.st_is_compare_price_or_public_date = self.get_st_is_compare_price_or_public_date(fetch_item_id)
-        self.st_is_pre_topic_dict_from_page_dict_and_url_id = self.get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
-        
-        
+        self.siteleech_id_id = url_id.siteleech_id.id
+        self.site_name = url_id.siteleech_id.name + (' ' + url_id.fetch_mode if url_id.fetch_mode else '')
+        self.model_name = fetch_item_id.model_id.name
+        self.st_is_bds_site = self.get_st_is_bds_site()
+        self.is_page_handle = not (fetch_item_id.topic_link or fetch_item_id.topic_path or \
+                    fetch_item_id.model_id)
+        self.is_must_update_combine = fetch_item_id.topic_link or fetch_item_id.topic_path \
+                     or fetch_item_id.is_must_update_topic or fetch_item_id.model_id
+        self.st_is_request_topic = not fetch_item_id.not_request_topic
+        self.st_is_model_id = bool(fetch_item_id.model_id)
         if fetch_item_id.topic_link or fetch_item_id.topic_path:
             self.topic_path = fetch_item_id.topic_path
             existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
