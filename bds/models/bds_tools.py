@@ -36,6 +36,7 @@ def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
             html = in_try()
             return html
         except Exception as e:
+            print ('loi html')
             count_fail +=1
             sleep(5)
             if count_fail ==5:

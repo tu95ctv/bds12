@@ -168,8 +168,6 @@ def get_topic(self, topic_html_or_json, page_dict, siteleech_id_id, ad = None):
     update_dict.update(write_images_tho(ad))
     update_dict['phone'] = ad['phone']
     update_dict['account_name'] = ad['account_name']
-    
-    
     update_dict['price_string'] = ad['price_string']
     # print ('***price_string***', price_string)
     # gia_ty, trieu_gia, price, price_unit = convert_gia_from_string_to_float(price_string)

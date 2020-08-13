@@ -23,7 +23,7 @@ class TapHoaMainFetch(models.AbstractModel):
 
     def get_main_obj(self):
         rs = super().get_main_obj()
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             return self.env['tap.hoa']
         return rs
 
@@ -45,7 +45,7 @@ class TapHoaMainFetch(models.AbstractModel):
 
     def parse_html_topic (self, topic_html_or_json, url_id):
         
-        if self.site_name =='cuahangtaphoa' or getattr(self,'model_name',None)=='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             topic_dict = {}
             a_page_html_soup = BeautifulSoup(topic_html_or_json, 'html.parser')
             topic_soups = a_page_html_soup.select('div.item-page')[0]
@@ -62,14 +62,25 @@ class TapHoaMainFetch(models.AbstractModel):
         return super().parse_html_topic(topic_html_or_json, url_id)
 
 
+    # def create_page_link(self, format_page_url, page_int):
+    #     page_url = super().create_page_link(format_page_url, page_int)
+        
+    #     if self.site_name == 'cuahangtaphoa':
+    #         repl = 'page-%s-danh-sach'%page_int
+    #         page_url =  re.sub('danh-sach', repl, format_page_url)
+    #         # page_url = re.sub('/$','.aspx',page_url)
+    #     return page_url
+
+    #page-6-cua-hang-tap-hoa.html
     def create_page_link(self, format_page_url, page_int):
         page_url = super().create_page_link(format_page_url, page_int)
-        
         if self.site_name == 'cuahangtaphoa':
-            repl = 'page-%s-danh-sach'%page_int
-            page_url =  re.sub('danh-sach', repl, format_page_url)
-            page_url = re.sub('/$','.aspx',page_url)
+            repl = 'page-%s'%page_int
+            page_url =  re.sub('page-\d+', repl, format_page_url)
+            # page_url = re.sub('/$','.aspx',page_url)
         return page_url
+
+
 
 
     def request_parse_html_topic(self, link, url_id):
@@ -80,17 +91,23 @@ class TapHoaMainFetch(models.AbstractModel):
 
 
     def get_st_is_pre_topic_dict_from_page_dict_and_url_id(self, fetch_item_id):
-        if self.site_name =='cuahangtaphoa' or fetch_item_id.model_id.name =='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
             return False
         return super().get_st_is_pre_topic_dict_from_page_dict_and_url_id(fetch_item_id)
 
 
     def get_st_is_compare_price_or_public_date(self, fetch_item_id):
 
-        if self.site_name =='cuahangtaphoa' or fetch_item_id.model_id.name =='tap.hoa':
+        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
             return False
         return super().get_st_is_compare_price_or_public_date(fetch_item_id)
 
+    
+    # def get_st_is_bds_type(self, fetch_item_id):
+
+    #     if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
+    #         return False
+    #     return super().get_st_is_bds_type(fetch_item_id)
 
     def ph_parse_pre_topic(self,html_page):
         topic_data_from_pages_of_a_page = super().ph_parse_pre_topic(html_page)

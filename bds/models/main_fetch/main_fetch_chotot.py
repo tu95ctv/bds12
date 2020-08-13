@@ -20,10 +20,11 @@ import math
 from odoo.addons.bds.models.bds_tools  import  FetchError
 import traceback
 
+
 class ChototFetchIndepend(object):
+    
     def ph_parse_pre_topic(self, html_page):
         topic_data_from_pages_of_a_page = []
-        
         if self.site_name == 'chotot':
             json_a_page = json.loads(html_page)
             topic_data_from_pages_of_a_page_origin = json_a_page['ads']
@@ -52,8 +53,6 @@ class ChototFetchIndepend(object):
                     topic_data_from_page['loai_nha'] =  False
                 topic_data_from_pages_of_a_page.append(topic_data_from_page)
         return topic_data_from_pages_of_a_page
-
-    
 
 
 class ChototMainFetch(models.AbstractModel, ChototFetchIndepend):

@@ -230,7 +230,6 @@ class CommonMainFetch(models.AbstractModel):
         return update_dict   
 
     def write_poster(self, topic_dict, siteleech_id_id):
-        print ('***write_poster***')
         search_dict = {}
         phone = topic_dict['phone']
         search_dict['phone'] = phone 
@@ -285,7 +284,8 @@ class CommonMainFetch(models.AbstractModel):
 
     def request_parse_html_topic(self, link, url_id):
         topic_dict = self.request_parse_html_topic_tho(link, url_id)
-        self.odoo_model_topic_dict(topic_dict)
+        if self.st_is_compare_price_or_public_date:
+            self.odoo_model_topic_dict(topic_dict)
         return topic_dict
 
 
@@ -295,7 +295,9 @@ class CommonMainFetch(models.AbstractModel):
 
 
     def topic_handle(self, link, url_id, topic_data_from_page, fetch_item_id,  search_bds_obj=None):
-        topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
+        if self.st_is_compare_price_or_public_date:
+            topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
+            topic_data_from_page.update(self.write_gia(topic_data_from_page))
         print ('topic: %s'%self.topic_count)
         self.link = link
         self.page_dict = topic_data_from_page
@@ -344,7 +346,8 @@ class CommonMainFetch(models.AbstractModel):
                     rq_topic_dict = self.request_parse_html_topic(link, url_id)
                     create_dict.update(rq_topic_dict)
                 else:
-                    self.odoo_model_topic_dict(topic_data_from_page)
+                    if self.st_is_compare_price_or_public_date:
+                        self.odoo_model_topic_dict(topic_data_from_page)
 
                 if not is_topic_link_or_topic_path:
                     self.del_list_id_topic_data_from_page(topic_data_from_page)
@@ -434,7 +437,7 @@ class CommonMainFetch(models.AbstractModel):
                 'fetch_item_id':fetch_item_id.id,
                 }
             )
-            return existing_link_number, update_link_number, create_link_number, fail_link_number
+            return existing_link_number, update_link_number, create_link_number, fail_link_number, link_number
         except Exception as e:
             raise
         if not topic_data_from_pages_of_a_page:
@@ -504,7 +507,6 @@ class CommonMainFetch(models.AbstractModel):
     def fetch_bo_sung_da_co_link(self, fetch_item_id):
         model = fetch_item_id.model_id.name
         objs = self.env[model].search([('is_full_topic','=',False)], limit=fetch_item_id.limit)
-        # len_objs = len(objs)
         existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0,0,0,0,0
         for r in objs:
             url_id = False
@@ -532,6 +534,7 @@ class CommonMainFetch(models.AbstractModel):
         begin_time = datetime.datetime.now()
         is_finished = False
         url_id = fetch_item_id.url_id
+        self.siteleech_id_id = url_id.siteleech_id.id
         self.site_name = url_id.siteleech_id.name + (' ' +   url_id.fetch_mode if url_id.fetch_mode else '')
         self.model_name = fetch_item_id.model_id.name
         end_page_number_in_once_fetch = False
@@ -542,7 +545,6 @@ class CommonMainFetch(models.AbstractModel):
         
         if fetch_item_id.topic_link or fetch_item_id.topic_path:
             self.topic_path = fetch_item_id.topic_path
-            self.siteleech_id_id = url_id.siteleech_id.id
             existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
                     fail_link_number_one_page = \
                 self.topic_handle(fetch_item_id.topic_link, url_id, {}, fetch_item_id, None)
@@ -559,17 +561,17 @@ class CommonMainFetch(models.AbstractModel):
             end_page_number_in_once_fetch = False
             is_finished = False
         else:
-            self.siteleech_id_id = url_id.siteleech_id.id
+            
             if not fetch_item_id.page_path:
                 end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
             else: 
                 page_lists = range(1)
             
             for page_int in page_lists:
+                page_handle_rs = self.page_handle( page_int, url_id, fetch_item_id)
                 existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
-                    fail_link_number_one_page, link_number_one_page = \
-                    self.page_handle( page_int, url_id, fetch_item_id)
-
+                    fail_link_number_one_page, link_number_one_page = page_handle_rs
+                    
                 existing_link_number += existing_link_number_one_page
                 update_link_number += update_link_number_one_page
                 create_link_number += create_link_number_one_page
@@ -582,8 +584,6 @@ class CommonMainFetch(models.AbstractModel):
                 else:
                     is_finished = True
 
-        
-        
         self.last_fetched_item_id = fetch_item_id
         interval = (datetime.datetime.now() - begin_time).total_seconds()
         fetch_item_id.interval = interval
@@ -629,7 +629,6 @@ class CommonMainFetch(models.AbstractModel):
             if not object_url_ids and self.is_next_if_only_finish:
                 object_url_ids.write({'is_finished':False})
 
-
         # tuần tự
         filtered_object_url_ids_id = object_url_ids.ids
         
@@ -651,17 +650,17 @@ class CommonMainFetch(models.AbstractModel):
 
     # làm gọn lại ngày 23/02
     def fetch (self):
-        # while 1:
-            # sleep_count = 5
-            # while sleep_count:
-            #     print ('sleep....%s'%sleep_count)
-            #     sleep(1)
-            #     sleep_count-=1
-        url_id = self.look_next_fetched_url_id()
-        try:
-            self.fetch_a_url_id(url_id)
-        except FetchError as e:
-            self.env['bds.error'].create({'name':str(e),'des':'type of error:%s'%type(e)})
+            # while 1:
+                # sleep_count = 5
+                # while sleep_count:
+                #     print ('sleep....%s'%sleep_count)
+                #     sleep(1)
+                #     sleep_count-=1
+            url_id = self.look_next_fetched_url_id()
+            try:
+                self.fetch_a_url_id(url_id)
+            except FetchError as e:
+                self.env['bds.error'].create({'name':str(e),'des':'type of error:%s'%type(e)})
 
 
     def fetch_all_url(self):
