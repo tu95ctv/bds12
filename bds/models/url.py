@@ -5,7 +5,6 @@ from odoo.addons.bds.models.bds_tools import g_or_c_ss
 import re
 from unidecode import unidecode
 
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import create_cho_tot_page_link
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
@@ -51,13 +50,14 @@ class URL(models.Model):
             r.minute_change = (r.write_date - datetime.datetime.now()).seconds/60
 
     def get_last_page_number(self):
-        if self.siteleech_id.name =='chotot':
-            page_1st_url = create_cho_tot_page_link(self.url, 1)
-            html = request_html(page_1st_url)
-            html = json.loads(html)
-            total = int(html["total"])
-            web_last_page_number = int(math.ceil(total/20.0))
-            self.web_last_page_number = web_last_page_number
+        pass
+        # if self.siteleech_id.name =='chotot':
+        #     page_1st_url = create_cho_tot_page_link(self.url, 1)
+        #     html = request_html(page_1st_url)
+        #     html = json.loads(html)
+        #     total = int(html["total"])
+        #     web_last_page_number = int(math.ceil(total/20.0))
+        #     self.web_last_page_number = web_last_page_number
 
     def get_last_page_all_url(self):
         all_urls = self.search([])

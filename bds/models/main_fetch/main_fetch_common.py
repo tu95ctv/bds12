@@ -1,32 +1,22 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.addons.bds.models.bds_tools  import  request_html
-import json
-import math
+from odoo.addons.bds.models.bds_tools  import  request_html, FetchError, SaveAndRaiseException
 from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi, g_or_c_ss
-from bs4 import BeautifulSoup
 import re
 import datetime
 from datetime import timedelta
-from copy import deepcopy
-from odoo.exceptions import UserError
 import os
 import pytz
-from unidecode import unidecode
-import json
-import math
-from odoo.addons.bds.models.bds_tools  import  FetchError, SaveAndRaiseException
 import traceback
 from time import sleep
-import logging
-from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_or_create_quan_include_state
 from dateutil.relativedelta import relativedelta
+import logging
 _logger = logging.getLogger(__name__)
 
 def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         local = pytz.timezone('Etc/GMT-7')
         utc_tz =pytz.utc
-        gio_bat_dau_utc_native = utc_datetime_inputs#fields.Datetime.from_string(self.gio_bat_dau)
+        gio_bat_dau_utc_native = utc_datetime_inputs
         gio_bat_dau_utc = utc_tz.localize(gio_bat_dau_utc_native, is_dst=None)
         gio_bat_dau_vn = gio_bat_dau_utc.astimezone (local)
         return gio_bat_dau_vn
@@ -85,6 +75,42 @@ def convert_chotot_date_to_datetime(string):
     dt = datetime.datetime.now() - relativedelta(**{rs2:rs1})
     return dt
 
+def write_gia(topic_dict):
+        gia_dict = {}
+        price_string = topic_dict.get('price_string',False)
+        if price_string:
+            gia_ty, trieu_gia, price, price_unit = convert_gia_from_string_to_float(price_string)
+        else:
+            gia_ty, trieu_gia, price, price_unit= False,False,False,False
+        
+        gia_dict['price_unit'] = price_unit # tháng/m2
+        price = topic_dict.get('price', price)
+        
+        if price:
+            gia_ty, gia_trieu = price/1000000000, price/1000000
+        else:
+            gia_ty, gia_trieu = False, False
+        gia_dict['gia'] = gia_ty
+        gia_dict['gia_trieu'] = gia_trieu
+        gia_dict['price'] = price
+        return gia_dict
+
+def write_public_datetime(topic_dict):
+    update = {}
+    print ('**topic_dict**', topic_dict)
+    if 'date' in topic_dict and 'public_datetime' not in topic_dict:
+        date = topic_dict['date']
+        public_datetime = convert_chotot_date_to_datetime(date)
+        update ['public_datetime'] = public_datetime
+
+    public_datetime = topic_dict.get('public_datetime')  or public_datetime # naitive datetime
+    gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
+    public_date  = gmt7_public_datetime.date()
+    # return public_datetime, public_date
+    update['public_date'] = public_date
+    update['public_datetime'] = public_datetime
+    return update
+
 class CommonMainFetch(models.AbstractModel):
     _name = 'abstract.main.fetch'
     allow_update = True
@@ -101,18 +127,17 @@ class CommonMainFetch(models.AbstractModel):
 
     def th_bds_type_update_compare_price(self, search_bds_obj, topic_data_from_page):
 
-        public_datetime, public_date = self.get_public_date_from_public_datetime(topic_data_from_page)
+        public_datetime = topic_data_from_page['public_datetime']
+        public_date = topic_data_from_page['public_date']
         update_dict = {}
         now = datetime.datetime.now()
         diff_day_public_from_now =  (now - public_datetime).days
         if diff_day_public_from_now==0:
-            # public_datetime_cu  = fields.Datetime.from_string(search_bds_obj.public_datetime)
             public_datetime_cu  = search_bds_obj.public_datetime
             print ('**topic_data_from_page**', topic_data_from_page)
             print ('***public_datetime**', public_datetime, '**public_datetime_cu**', public_datetime_cu)
             diff_public_datetime_in_hours = int((public_datetime - public_datetime_cu + timedelta(hours=1)).seconds/3600)
             if diff_public_datetime_in_hours > 2 :
-                # public_date_cu  = fields.Date.from_string(search_bds_obj.public_date)
                 public_date_cu =  search_bds_obj.public_date
                 diff_public_date = (public_date - public_date_cu).days
                 so_lan_diff_public_update = search_bds_obj.so_lan_diff_public_update + 1
@@ -148,15 +173,16 @@ class CommonMainFetch(models.AbstractModel):
         return update_dict
 
 
-    def th_bds_type_create_dict_from_page_dict_and_url_id(self, topic_data_from_page, url_id, link):
+    def th_more_create_dict(self, topic_data_from_page, url_id, link):
         create_dict = {}
-        if self.is_page_handle:
-            public_datetime, public_date = self.get_public_date_from_public_datetime(topic_data_from_page)
-            create_dict.update({'public_date':public_date, 'public_datetime':public_datetime, 'url_id': url_id.id })
+        # if self.is_page_handle:
+        #     public_datetime, public_date = self.get_public_date_from_public_datetime(topic_data_from_page)
+        #     create_dict.update({'public_date':public_date, 'public_datetime':public_datetime})
         create_dict['siteleech_id'] = self.siteleech_id_id
         create_dict['cate'] = url_id.cate
         create_dict['sell_or_rent'] = url_id.sell_or_rent
         create_dict['link'] = link
+        create_dict['url_id'] = url_id.id
         
         return create_dict
 
@@ -253,45 +279,31 @@ class CommonMainFetch(models.AbstractModel):
         return {'poster_id':poster.id}
 
 
-    def write_gia(self, topic_dict):
-        gia_dict = {}
-        price_string = topic_dict.get('price_string',False)
-        if price_string:
-            gia_ty, trieu_gia, price, price_unit = convert_gia_from_string_to_float(price_string)
-        else:
-            gia_ty, trieu_gia, price, price_unit= False,False,False,False
-        
-        gia_dict['price_unit'] = price_unit # tháng/m2
-        price = topic_dict.get('price', price)
-        
-        if price:
-            gia_ty, gia_trieu = price/1000000000, price/1000000
-        else:
-            gia_ty, gia_trieu = False, False
-        gia_dict['gia'] = gia_ty
-        gia_dict['gia_trieu'] = gia_trieu
-        gia_dict['price'] = price
-        return gia_dict
-
-    def write_public_datetime(self, topic_dict):
-        update = {}
-        if 'date' in topic_dict and 'public_datetime' not in topic_dict:
-            print ('***date***', topic_dict['date'])
-            date = topic_dict['date']
-            update ['public_datetime'] = convert_chotot_date_to_datetime(date)
-        return update
+    
 
     def odoo_model_topic_dict(self, topic_dict):
         topic_dict.update(self.write_quan_phuong(topic_dict))
         topic_dict.update(self.write_images(topic_dict))
         topic_dict.update(self.write_poster(topic_dict, self.siteleech_id_id))
-        topic_dict.update(self.write_gia(topic_dict))
-        topic_dict.update(self.write_public_datetime(topic_dict))
+        topic_dict.update(write_gia(topic_dict))
+        topic_dict.update(write_public_datetime(topic_dict))
 
 
     def request_parse_html_topic(self, link, url_id):
-        topic_dict = self.request_parse_html_topic_tho(link, url_id)
-        
+        if not getattr(self,'topic_path',None):
+            headers = self.page_header_request()
+            header_kwargs = {'headers': headers} if headers else {}
+            topic_html_or_json = request_html(link, **header_kwargs)
+        else:
+            topic_html_or_json = file_from_tuong_doi(self.topic_path)
+        try:
+            topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
+        except SaveAndRaiseException as e:
+            save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+            raise
+        except:
+            save_to_disk(topic_html_or_json, 'file_topic_bug')
+            raise
         return topic_dict
 
 
@@ -316,8 +328,8 @@ class CommonMainFetch(models.AbstractModel):
                 if not self.is_must_update_combine:# update ở mode bình thường
                     update_dict = {}
                     if self.st_is_bds_site:
-                        topic_data_from_page.update(self.write_public_datetime(topic_data_from_page))
-                        topic_data_from_page.update(self.write_gia(topic_data_from_page))
+                        topic_data_from_page.update(write_public_datetime(topic_data_from_page))
+                        topic_data_from_page.update(write_gia(topic_data_from_page))
                         compare_update_dict = self.th_bds_type_update_compare_price(search_bds_obj, topic_data_from_page)
                         update_dict.update(compare_update_dict)
                 else:
@@ -340,16 +352,17 @@ class CommonMainFetch(models.AbstractModel):
             
                 if self.st_is_request_topic:
                     create_dict = self.request_parse_html_topic(link, url_id)
+                    print ('***create_dict in request_parse_html_topic**', create_dict)
                 if self.is_page_handle:
                     #     if self.st_is_bds_site:
                     #         self.odoo_model_topic_dict(topic_data_from_page)
                     # self.del_list_id_topic_data_from_page(topic_data_from_page)
                     create_dict.update(topic_data_from_page)
-                
+                print ('****create_dict***', create_dict)
                 if self.st_is_bds_site:
                     self.odoo_model_topic_dict(create_dict)
-                    pre_create_dict = self.th_bds_type_create_dict_from_page_dict_and_url_id(create_dict, url_id, link)
-                    create_dict.update(pre_create_dict)
+                    more_create_dict = self.th_more_create_dict(create_dict, url_id, link)
+                    create_dict.update(more_create_dict)
                     
                 if not self.is_test:
                     main_obj.create(create_dict) 
@@ -649,7 +662,7 @@ class CommonMainFetch(models.AbstractModel):
         try:
             url_id = object_url_ids[new_index]
         except:
-            raise UserError('Không loop được url')
+            raise ValueError('Không loop được url')
         return url_id
 
     # làm gọn lại ngày 23/02

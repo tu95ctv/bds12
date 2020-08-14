@@ -3,26 +3,24 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import create_cho_tot_page_link, \
-    convert_chotot_price, convert_chotot_date_to_datetime, deal_gia_chotot, write_quan_phuong_raped, get_topic
-from odoo.addons.bds.models.bds_tools  import   SaveAndRaiseException
-from bs4 import BeautifulSoup
+from odoo.addons.bds.models.fetch_site.fetch_chotot_obj import  get_topic
 import re
-import datetime
-from datetime import timedelta
-from copy import deepcopy
-from odoo.exceptions import UserError
-import os
-import pytz
-from unidecode import unidecode
-import json
-import math
-from odoo.addons.bds.models.bds_tools  import  FetchError
-import traceback
 
+def create_cho_tot_page_link(url_input, page_int):
+    repl = 'o=%s'%(20*(page_int-1))
+    url_input,count = re.subn('o=\d+', repl, url_input)
+    if not count:
+        url_input += '&'+ repl
+    if '&page=' not in url_input: 
+        url_input = url_input +  '&page=' +str(page_int)
+    else:
+        repl = 'page=' +str(page_int)
+        url_input = re.sub('page=\d+', repl, url_input)
+    return url_input
 
-class ChototFetchIndepend(object):
-    
+class ChototMainFetch(models.AbstractModel):
+    _inherit = 'abstract.main.fetch'
+
     def ph_parse_pre_topic(self, html_page):
         topic_data_from_pages_of_a_page = []
         if self.site_name == 'chotot':
@@ -37,7 +35,13 @@ class ChototFetchIndepend(object):
                 topic_data_from_page['list_id'] = ad['list_id']
                 topic_data_from_page['html'] = ad['body']
                 topic_data_from_page['title']= ad['subject']
-                topic_data_from_page.update(write_quan_phuong_raped(ad))
+                topic_data_from_page['region_name'] = ad['region_name']
+                topic_data_from_page['area_name'] = ad['area_name']
+                try:
+                    topic_data_from_page['ward_name'] = ad['ward_name']
+                except:
+                    pass
+                
                 if 'image' in ad:
                     topic_data_from_page['thumb'] = ad['image']
                 if 'company_ad' in ad:
@@ -55,8 +59,6 @@ class ChototFetchIndepend(object):
         return topic_data_from_pages_of_a_page
 
 
-class ChototMainFetch(models.AbstractModel, ChototFetchIndepend):
-    _inherit = 'abstract.main.fetch'
 
     def create_page_link(self, format_page_url, page_int):
         if self.site_name == 'chotot':
@@ -65,7 +67,7 @@ class ChototMainFetch(models.AbstractModel, ChototFetchIndepend):
 
     def parse_html_topic (self, topic_html_or_json, url_id):
         if self.site_name =='chotot':
-            topic_dict = get_topic(self, topic_html_or_json, self.page_dict)
+            topic_dict = self.get_topic(topic_html_or_json, self.page_dict)
             return topic_dict
         return super().parse_html_topic(topic_html_or_json, url_id)
 
@@ -85,6 +87,40 @@ class ChototMainFetch(models.AbstractModel, ChototFetchIndepend):
             total = int(html["total"])
             web_last_page_number = int(math.ceil(total/20.0))
             return web_last_page_number
+    
+    def get_topic(self, topic_html_or_json, page_dict):
+        update_dict = {}
+        
+        topic_html_or_json = json.loads(topic_html_or_json) 
+        ad = topic_html_or_json['ad']
+        ad_params = topic_html_or_json['ad_params']
+
+        update_dict['region_name'] = ad['region_name']
+        update_dict['area_name'] = ad['area_name']
+        try:
+            update_dict['ward_name'] = ad['ward_name']
+        except:
+            pass
+        update_dict['images']= ad.get('images',[])
+        update_dict['phone'] = ad['phone']
+        update_dict['account_name'] = ad['account_name']
+        update_dict['price_string'] = ad['price_string']
+        update_dict['price'] = ad['price']
+
+        address = ad_params.get('address',{}).get('value',False)
+        if address:
+            update_dict['address'] = address
+        else:
+            pass
+        try:
+            if not 'html' in page_dict:
+                update_dict['html'] = ad['body']
+        except KeyError:
+            pass
+        update_dict['area']= ad.get('size',0)
+        if 'title' not in page_dict:
+            update_dict['title']= ad['subject']
+        return update_dict
 
 
 

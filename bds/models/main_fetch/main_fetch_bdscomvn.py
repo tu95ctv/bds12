@@ -4,7 +4,6 @@ from odoo.addons.bds.models.bds_tools  import  request_html, SaveAndRaiseExcepti
 import json
 import math
 from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_last_page_from_bdsvn_website, convert_gia_from_string_to_float
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj  import create_cho_tot_page_link, convert_chotot_price, convert_chotot_date_to_datetime
 from odoo.addons.bds.models.fetch_site.fetch_bdscomvn  import get_bds_dict_in_topic, g_or_create_quan_include_state
 
 from bs4 import BeautifulSoup
