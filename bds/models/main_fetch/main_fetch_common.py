@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.addons.bds.models.bds_tools  import  request_html, FetchError, SaveAndRaiseException
+from odoo.addons.bds.models.bds_tools  import  request_html, FetchError, SaveAndRaiseException, SaveAndPass
 from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi, g_or_c_ss
 import re
 import datetime
@@ -102,6 +102,11 @@ def write_public_datetime(topic_dict):
         date = topic_dict['date']
         public_datetime = convert_chotot_date_to_datetime(date)
         update ['public_datetime'] = public_datetime
+    if 'public_datetime_str' in topic_dict and 'public_datetime' not in topic_dict:
+        public_datetime_str = topic_dict['public_datetime_str']
+        public_datetime = datetime.datetime.strptime(public_datetime_str,"%d/%m/%Y")
+        update ['public_datetime'] = public_datetime
+        
 
     public_datetime = topic_dict.get('public_datetime')  or public_datetime # naitive datetime
     gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
@@ -192,22 +197,25 @@ class CommonMainFetch(models.AbstractModel):
     def parse_html_topic (self, topic_html_or_json, url_id):
         return {}
     
-    def request_parse_html_topic_tho(self, link, url_id):
-        if not getattr(self,'topic_path',None):
-            headers = self.page_header_request()
-            header_kwargs = {'headers': headers} if headers else {}
-            topic_html_or_json = request_html(link, **header_kwargs)
-        else:
-            topic_html_or_json = file_from_tuong_doi(self.topic_path)
-        try:
-            topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
-        except SaveAndRaiseException as e:
-            save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
-            raise
-        except:
-            save_to_disk(topic_html_or_json, 'file_topic_bug')
-            raise
-        return topic_dict
+    # def request_parse_html_topic_tho(self, link, url_id):
+    #     if not getattr(self,'topic_path',None):
+    #         headers = self.page_header_request()
+    #         header_kwargs = {'headers': headers} if headers else {}
+    #         topic_html_or_json = request_html(link, **header_kwargs)
+    #     else:
+    #         topic_html_or_json = file_from_tuong_doi(self.topic_path)
+    #     try:
+    #         topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
+    #     except SaveAndRaiseException as e:
+    #         save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+    #         raise
+    #     except SaveAndPass as e:
+    #         save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+    #         # raise
+    #     except:
+    #         save_to_disk(topic_html_or_json, 'file_topic_bug')
+    #         raise
+    #     return topic_dict
 
     def get_or_create_quan_include_state(self, tinh_str, quan_str):
         tinh_str = re.sub('tp|Thành phố|tỉnh','', tinh_str, flags=re.I)
@@ -300,6 +308,9 @@ class CommonMainFetch(models.AbstractModel):
             topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
         except SaveAndRaiseException as e:
             save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+            raise
+        except SaveAndPass as e:
+            save_to_disk(topic_html_or_json, 'file_topic_bug_save_and_pass_%s'%str(e))
             raise
         except:
             save_to_disk(topic_html_or_json, 'file_topic_bug')
@@ -467,14 +478,17 @@ class CommonMainFetch(models.AbstractModel):
             #     self.env.cr.rollback()
                 # return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number
 
+            try:
+                is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number,  create_dict = \
+                    self.topic_handle(link, url_id, topic_data_from_page, 
+                            fetch_item_id)
+                existing_link_number += is_existing_link_number
+                update_link_number += is_update_link_number
+                create_link_number += is_create_link_number
+                fail_link_number +=is_fail_link_number
+            except SaveAndPass:
+                pass
 
-            is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number,  create_dict = \
-                self.topic_handle(link, url_id, topic_data_from_page, 
-                        fetch_item_id)
-            existing_link_number += is_existing_link_number
-            update_link_number += is_update_link_number
-            create_link_number += is_create_link_number
-            fail_link_number +=is_fail_link_number
         link_number = len(topic_data_from_pages_of_a_page)
         return existing_link_number, update_link_number, create_link_number, fail_link_number, link_number
 

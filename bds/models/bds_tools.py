@@ -16,6 +16,9 @@ class FetchError(Exception):
 class SaveAndRaiseException(Exception):
     pass
 
+class SaveAndPass(Exception):
+    pass
+
 headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
 def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
     _logger.warning('***request_html***' + url)

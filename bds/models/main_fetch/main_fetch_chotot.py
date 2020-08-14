@@ -3,7 +3,6 @@ from odoo import api, fields, models, _
 from odoo.addons.bds.models.bds_tools  import  request_html
 import json
 import math
-from odoo.addons.bds.models.fetch_site.fetch_chotot_obj import  get_topic
 import re
 
 def create_cho_tot_page_link(url_input, page_int):
