@@ -237,8 +237,11 @@ def get_images_for_bds_com_vn(soup):
 
 
 def get_public_datetime(soup):
-    select = soup.select('div.prd-more-info > div:nth-of-type(3)')#[0].contents[0]
-    public_datetime_str = select[0].contents[2]
+    try:
+        select = soup.select('div.prd-more-info > div:nth-of-type(3)')#[0].contents[0]
+        public_datetime_str = select[0].contents[2]
+    except IndexError:
+        pass
     public_datetime_str = public_datetime_str.replace('\r','').replace('\n','')
     public_datetime_str = re.sub('\s*', '', public_datetime_str)
     public_datetime = datetime.datetime.strptime(public_datetime_str,"%d-%m-%Y")
