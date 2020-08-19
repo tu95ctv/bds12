@@ -285,19 +285,19 @@ class MainCommonFetch():
         if not getattr(self,'topic_path',None):
             headers = self.page_header_request()
             header_kwargs = {'headers': headers} if headers else {}
-            topic_html_or_json = request_html(link, **header_kwargs)
+            topic_html = request_html(link, **header_kwargs)
         else:
-            topic_html_or_json = file_from_tuong_doi(self.topic_path)
+            topic_html = file_from_tuong_doi(self.topic_path)
         try:
-            topic_dict = self.parse_html_topic(topic_html_or_json)
+            topic_dict = self.parse_html_topic(topic_html)
         except SaveAndRaiseException as e:
-            save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+            save_to_disk(topic_html, 'file_topic_bug_theo_y_muon_%s'%str(e))
             raise
         except SaveAndPass as e:
-            save_to_disk(topic_html_or_json, 'file_topic_bug_save_and_pass_%s'%str(e))
+            save_to_disk(topic_html, 'file_topic_bug_save_and_pass_%s'%str(e))
             raise
         except:
-            save_to_disk(topic_html_or_json, 'file_topic_bug')
+            save_to_disk(topic_html, 'file_topic_bug')
             raise
         return topic_dict
 

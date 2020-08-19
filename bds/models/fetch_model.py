@@ -65,11 +65,14 @@ class BDSFetchLine(models.Model):
     topic_path = fields.Char()
     is_must_update_topic = fields.Boolean()
     disible = fields.Boolean()
+
+
+
 #lam gon lai ngay 23/02
-class Fetch(models.Model, MainFetchCommon):
+class Fetch(models.Model ):
 
     _name = 'bds.fetch'
-    # _inherit = 'abstract.main.fetch'
+    _inherit = 'abstract.main.fetch'
     _auto = True
 
     name = fields.Char(compute='_compute_name', store=True)

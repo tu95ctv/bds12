@@ -52,11 +52,11 @@ class BDSFetch(models.AbstractModel):
         
         return link
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         if self.site_name == 'batdongsan dự án':
-            topic_dict = get_bds_dict_in_topic(self, self.page_dict, topic_html_or_json)
+            topic_dict = get_bds_dict_in_topic(self, self.page_dict, topic_html)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json)
+        return super().parse_html_topic(topic_html)
         
 
     # def copy_page_data_to_rq_topic(self, topic_data_from_page):

@@ -98,11 +98,11 @@ class MainFetchChotot():
             url =  create_cho_tot_page_link(format_page_url, page_int)
             return url
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         if self.site_name =='chotot':
-            topic_dict = self.get_topic(topic_html_or_json, self.page_dict)
+            topic_dict = self.get_topic(topic_html, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json)
+        return super().parse_html_topic(topic_html)
 
     def make_topic_link_from_list_id(self, list_id):
         link = super().make_topic_link_from_list_id(list_id)
@@ -119,12 +119,12 @@ class MainFetchChotot():
             web_last_page_number = int(math.ceil(total/20.0))
             return web_last_page_number
     
-    def get_topic(self, topic_html_or_json, page_dict):
+    def get_topic(self, topic_html, page_dict):
         update_dict = {}
         
-        topic_html_or_json = json.loads(topic_html_or_json) 
-        ad = topic_html_or_json['ad']
-        ad_params = topic_html_or_json['ad_params']
+        topic_html = json.loads(topic_html) 
+        ad = topic_html['ad']
+        ad_params = topic_html['ad_params']
 
         update_dict['region_name'] = ad['region_name']
         update_dict['area_name'] = ad['area_name']

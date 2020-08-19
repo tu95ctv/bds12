@@ -43,11 +43,11 @@ class TapHoaMainFetch(models.AbstractModel):
             ngay_cap = None
         return ngay_cap
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         
         if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             topic_dict = {}
-            a_page_html_soup = BeautifulSoup(topic_html_or_json, 'html.parser')
+            a_page_html_soup = BeautifulSoup(topic_html, 'html.parser')
             topic_soups = a_page_html_soup.select('div.item-page')[0]
             try:
                 nghanh_nghe_soup = topic_soups.select("li:contains('Ngành nghề chính: ')")[0]
@@ -59,7 +59,7 @@ class TapHoaMainFetch(models.AbstractModel):
             topic_dict['nganh_nghe_kinh_doanh'] = nghanh_nghe
 
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json, url_id)
+        return super().parse_html_topic(topic_html)
 
 
     # def create_page_link(self, format_page_url, page_int):
@@ -165,7 +165,6 @@ class TapHoaMainFetch(models.AbstractModel):
                 topic_data_from_page['phuong']=phuong
                 topic_data_from_page['duong']=duong
                 topic_data_from_page['link'] = href
-                topic_data_from_page['list_id'] = href
                 topic_data_from_page['mst'] = mst
                 topic_data_from_page['address'] = dia_chi
                 topic_data_from_page['title'] = title

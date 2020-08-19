@@ -6,10 +6,6 @@ import datetime
 
 
 class MuabanObject():
-
-    def __init__(self, env):
-        self.env = env
-
     def write_images(self, soup):
         update_dict = {}
         image_soup = soup.select('div.image__slides img')
@@ -17,21 +13,13 @@ class MuabanObject():
         update_dict['images'] = images
         return update_dict
 
-
-
     def write_gia_tho(self, soup):
         gia_soup = soup.select('div.price-container__value')
         try:
             gia =  gia_soup[0].get_text()
-            # gia = re.sub(u'\.|đ|\s', '',gia)
-            # gia = float(gia)
-            # gia = gia/1000000000.0
         except IndexError:
             gia = False
         return {'price_string':gia}
-
-    
-  
 
     def write_quan_phuong_tho(self, soup):
         quan_soup = soup.select('span.location-clock__location')
@@ -41,7 +29,6 @@ class MuabanObject():
         tinh_name = re.sub('tphcm','Hồ Chí Minh', tinh_name,flags=re.I)
         quan_name =  quan_tinhs[0].strip()
         return {'region_name':tinh_name, 'area_name':quan_name}
-
 
     def write_poster_tho(self, soup):
         try:
@@ -58,8 +45,6 @@ class MuabanObject():
         name = name or mobile
         return {'phone':mobile, 'account_name':name}
 
-
-
     def get_loai_nha(self, soup):
         loai_nha_soup = soup.select('div.breadcrumb li:last-child')
         loai_nha = loai_nha_soup[0].get_text()
@@ -67,25 +52,17 @@ class MuabanObject():
 
     def get_topic(self, html):
         update_dict  = {}
-        
         update_dict['data'] = html
         soup = BeautifulSoup(html, 'html.parser')
-
         content_soup = soup.select('div.body-container')
-        
         update_dict['html']  = content_soup[0].get_text()
-
         update_dict.update(self.write_gia_tho(soup))
         update_dict.update(self.write_quan_phuong_tho(soup))
         update_dict.update(self.get_loai_nha(soup))
         update_dict.update(self.write_poster_tho(soup))
-
         title = soup.select('h1.title')[0].get_text()
         title = title.strip()
         update_dict['title'] = title
-    
-        
-        
         return update_dict
 
 ############## end mua ban  ###########

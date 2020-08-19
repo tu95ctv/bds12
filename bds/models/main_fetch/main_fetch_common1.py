@@ -77,18 +77,18 @@ def g_or_c_ss(self_env_class_name,search_dict,
             searched_object.write(create_write_dict)
     return return_obj       
 
-def save_to_disk( ct, name_file):
-    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    print ('***path***', path)
-    f = open(os.path.join(path,'test_html', '%s.html'%name_file), 'w')
-    f.write(ct)
-    f.close()
+# def save_to_disk( ct, name_file):
+#     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     print ('***path***', path)
+#     f = open(os.path.join(path,'test_html', '%s.html'%name_file), 'w')
+#     f.write(ct)
+#     f.close()
 
-def file_from_tuong_doi(tuong_doi_path):
-    dir_path = os.path.dirname(os.path.abspath(__file__))
-#     dir_path = r"C:\D4\tgl_code\bds12\bds\models"
-    f = open(os.path.join(dir_path,'%s.html'%tuong_doi_path), 'r', encoding="utf8")
-    return f.read()
+# def file_from_tuong_doi(tuong_doi_path):
+#     dir_path = os.path.dirname(os.path.abspath(__file__))
+# #     dir_path = r"C:\D4\tgl_code\bds12\bds\models"
+#     f = open(os.path.join(dir_path,'%s.html'%tuong_doi_path), 'r', encoding="utf8")
+#     return f.read()
 ##############! bds tools ########################
 headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
 def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
@@ -244,19 +244,27 @@ class MainFetchCommon():
         dir_path = os.path.dirname(os.path.abspath(__file__))
         # if self.is_test:
         dir_path = os.path.dirname(dir_path)
+        dir_path = os.path.dirname(dir_path)
     #     dir_path = r"C:\D4\tgl_code\bds12\bds\models"
         f = open(os.path.join(dir_path,'test_html', '%s.html'%tuong_doi_path), 'r', encoding="utf8")
         return f.read()
     
-    def save_to_disk( self, ct, name_file ):
-        
+    def save_to_disk(self, ct, name_file ):
         dir_path = os.path.dirname(os.path.abspath(__file__))
-        
-        # if self.is_test:
         dir_path = os.path.dirname(dir_path)
-        f = open(os.path.join(dir_path, 'test_html', '%s.html'%name_file), 'w', encoding="utf8")
+        dir_path = os.path.dirname(dir_path)
+        f = open(os.path.join(dir_path, 'html_log', '%s.html'%name_file), 'w', encoding="utf8")
         f.write(ct)
         f.close()
+
+    def save_to_disk_mau( self, ct, page_or_topic, surfix='' ):
+        if self.attrs_dict.get('is_save_mau'):
+            dir_path = os.path.dirname(os.path.abspath(__file__))
+            dir_path = os.path.dirname(dir_path)
+            dir_path = os.path.dirname(dir_path)
+            f = open(os.path.join(dir_path, 'html_log', '%s_%s%s.html'%(page_or_topic, self.site_name, '_%s'%surfix if surfix else '')), 'w', encoding="utf8")
+            f.write(ct)
+            f.close()
 
     def get_main_obj(self):
         return self.env['bds.bds']
@@ -322,7 +330,7 @@ class MainFetchCommon():
         create_dict['siteleech_id'] = self.siteleech_id_id
         create_dict['cate'] = url_id.cate
         create_dict['sell_or_rent'] = url_id.sell_or_rent
-        create_dict['link'] = link
+        # create_dict['link'] = link
         create_dict['url_id'] = url_id.id
         
         return create_dict
@@ -411,27 +419,26 @@ class MainFetchCommon():
         if not getattr(self,'topic_path',None):
             headers = self.page_header_request()
             header_kwargs = {'headers': headers} if headers else {}
-            topic_html_or_json = request_html(link, **header_kwargs)
+            topic_html = request_html(link, **header_kwargs)
         else:
-            topic_html_or_json = self.file_from_tuong_doi(self.topic_path)
-
-        
-
-
+            topic_html = self.file_from_tuong_doi(self.topic_path)
+        if not getattr(self,'topic_count',None):
+            self.save_to_disk_mau(topic_html, 'topic', surfix='')
         try:
-            is_save_and_raise_in_topic = self.attrs_dict.get('is_save_and_raise_in_topic')
-            if is_save_and_raise_in_topic:
-                raise SaveAndRaiseException(self.site_name)
-            topic_dict = self.parse_html_topic(topic_html_or_json)
+            # is_save_and_raise_in_topic = self.attrs_dict.get('is_save_and_raise_in_topic')
+            # if is_save_and_raise_in_topic:
+            #     raise SaveAndRaiseException(self.site_name)
+            topic_dict = self.parse_html_topic(topic_html)
         except SaveAndRaiseException as e:
-            self.save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
+            self.save_to_disk(topic_html, 'file_topic_bug_theo_y_muon_%s'%str(e))
             raise
         except SaveAndPass as e:
-            self.save_to_disk(topic_html_or_json, 'file_topic_bug_save_and_pass_%s'%str(e))
+            self.save_to_disk(topic_html, 'file_topic_bug_save_and_pass_%s'%str(e))
             raise
         except:
-            self.save_to_disk(topic_html_or_json, 'file_topic_bug')
+            self.save_to_disk(topic_html, 'file_topic_bug')
             raise
+        topic_dict['link'] = link
         return topic_dict
 
 
@@ -552,7 +559,6 @@ class MainFetchCommon():
         existing_link_number, update_link_number, create_link_number, fail_link_number, link_number = 0, 0, 0, 0, 0
         page_list = []
         try:
-            print ('***self.page_path***', self.page_path)
             if not self.page_path:
                 format_page_url = url or  url_id.url 
                 page_url = self.create_page_link(format_page_url, page_int)
@@ -561,12 +567,11 @@ class MainFetchCommon():
                 html_page = request_html(page_url,**header_kwargs)
             else:
                 html_page = self.file_from_tuong_doi(self.page_path)
-           
+            self.save_to_disk_mau(html_page, 'page', surfix='')
             try:
                 topic_data_from_pages_of_a_page = self.ph_parse_pre_topic(html_page)
             except SaveAndRaiseException as e:
                 self.save_to_disk(html_page, 'file_topic_bug_theo_y_muon_%s'%str(e))
-                print ('***raise ở đây')
                 raise
                 # raise 
             except:
@@ -593,9 +598,8 @@ class MainFetchCommon():
          
         for topic_count, topic_data_from_page in enumerate(topic_data_from_pages_of_a_page):
             self.topic_count = topic_count
-            list_id = topic_data_from_page['list_id']
-
-            link = self.make_topic_link_from_list_id(list_id)
+            link = topic_data_from_page['link']
+            # link = self.make_topic_link_from_list_id(list_id)
             # if self.topic_count == 5:
             #     self.env.cr.rollback()
                 # return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number
@@ -631,6 +635,7 @@ class MainFetchCommon():
         fetch_error = False
         try:
             web_last_page_number =  self.get_last_page_number(fetch_item_id.url_id)
+            print ('**8web_last_page_number**', web_last_page_number)
         except FetchError as e:
             web_last_page_number = fetch_item_id.url_id.web_last_page_number or 200
             fetch_error = True
@@ -639,6 +644,7 @@ class MainFetchCommon():
             max_page =  set_leech_max_page
         else:
             max_page = web_last_page_number
+        print ('***max_page***', max_page)
         if fetch_error == False:
             fetch_item_id.url_id.web_last_page_number = web_last_page_number
         begin = current_page + 1
@@ -691,7 +697,7 @@ class MainFetchCommon():
         
         self.st_is_request_topic = not fetch_item_id.not_request_topic if fetch_item_id else self.attrs_dict.get('st_is_request_topic', True)
         self.model_id = fetch_item_id.model_id if fetch_item_id else False
-        self.topic_link = fetch_item_id.topic_link if fetch_item_id else False
+        self.topic_link = fetch_item_id.topic_link if fetch_item_id else self.attrs_dict.get('topic_link')
         self.topic_path = fetch_item_id.topic_path if fetch_item_id else self.attrs_dict.get('topic_path')
         self.page_path = fetch_item_id.page_path if fetch_item_id else self.attrs_dict.get('page_path')
         self.is_must_update_topic = fetch_item_id.page_path if fetch_item_id else False
@@ -709,7 +715,7 @@ class MainFetchCommon():
             topic_data_from_page = {}
             existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
                     fail_link_number_one_page, fetch_dict = \
-                self.topic_handle(self.topic_link, url_id, topic_data_from_page, fetch_item_id)
+                self.topic_handle(self.topic_link, url_id, topic_data_from_page)
             link_number_one_page = 1
             existing_link_number += existing_link_number_one_page
             update_link_number += update_link_number_one_page
@@ -724,7 +730,6 @@ class MainFetchCommon():
             link_number = update_link_number
             is_finished = False
         else:
-            print ('***self.page_path**', self.page_path)
             if not self.page_path and fetch_item_id:
                 end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
             else: 
@@ -732,9 +737,7 @@ class MainFetchCommon():
                     begin_page, end_page = self.attrs_dict.get('begin_page') or 1, self.attrs_dict.get('end_page') or 1
                 else:
                     begin_page, end_page = 1,1
-
                 page_lists = range(begin_page,end_page+1)
-            print ('***page_lists***', page_lists)
             
             for page_int in page_lists:
                 rs = self.page_handle( page_int,self.url, url_id, fetch_item_id)
@@ -809,15 +812,12 @@ class MainFetchCommon():
             'interval':interval,
         })
 
-
     def look_next_fetched_url_id(self):
         fetch_item_ids = self.fetch_item_ids.filtered(lambda i: not i.disible)
-
         if self.is_next_if_only_finish:
             object_url_ids = fetch_item_ids.filtered(lambda r: not r.is_finished)
         else:
             object_url_ids = fetch_item_ids
-       
         current_fetched_url_id = self.last_fetched_item_id
         if not current_fetched_url_id.model_id:
             if current_fetched_url_id not in fetch_item_ids:
@@ -827,7 +827,6 @@ class MainFetchCommon():
                     return current_fetched_url_id
             if not object_url_ids and self.is_next_if_only_finish:
                 object_url_ids.write({'is_finished':False})
-
         # tuần tự
         filtered_object_url_ids_id = object_url_ids.ids
         
@@ -881,7 +880,7 @@ class MainFetchCommon():
                 topic_data_from_page['price'] = ad['price']
                 topic_data_from_page['gia'] = ad['price']/1000000000
                 topic_data_from_page['date'] = ad['date']
-                topic_data_from_page['list_id'] = ad['list_id']
+                topic_data_from_page['link'] = self.make_topic_link_from_list_id(ad['list_id'])
                 topic_data_from_page['html'] = ad['body']
                 topic_data_from_page['title']= ad['subject']
                 topic_data_from_page['region_name'] = ad['region_name']
@@ -912,11 +911,11 @@ class MainFetchCommon():
             url =  create_cho_tot_page_link(format_page_url, page_int)
             return url
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         if self.site_name =='chotot':
-            topic_dict = self.get_topic_chotot(topic_html_or_json, self.page_dict)
+            topic_dict = self.get_topic_chotot(topic_html, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json)
+        return super().parse_html_topic(topic_html)
 
     def make_topic_link_from_list_id(self, list_id):
         if  self.site_name =='chotot':
@@ -933,12 +932,12 @@ class MainFetchCommon():
             web_last_page_number = int(math.ceil(total/20.0))
             return web_last_page_number
     
-    def get_topic_chotot(self, topic_html_or_json, page_dict):
+    def get_topic_chotot(self, topic_html, page_dict):
         update_dict = {}
         
-        topic_html_or_json = json.loads(topic_html_or_json) 
-        ad = topic_html_or_json['ad']
-        ad_params = topic_html_or_json['ad_params']
+        topic_html = json.loads(topic_html) 
+        ad = topic_html['ad']
+        ad_params = topic_html['ad_params']
 
         update_dict['region_name'] = ad['region_name']
         update_dict['area_name'] = ad['area_name']
@@ -951,7 +950,7 @@ class MainFetchCommon():
         update_dict['account_name'] = ad['account_name']
         update_dict['price_string'] = ad['price_string']
         update_dict['price'] = ad['price']
-
+        update_dict['date'] = ad['date']
         address = ad_params.get('address',{}).get('value',False)
         if address:
             update_dict['address'] = address
@@ -1019,12 +1018,12 @@ class MainFetchCommonBDS(MainFetchCommon):
         
         return link
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         if self.site_name =='batdongsan':
-            # get_bds_dict_in_topic(self, topic_html_or_json, self.page_dict)
-            topic_dict = get_bds_dict_in_topic(topic_html_or_json, self.page_dict)
+            # get_bds_dict_in_topic(self, topic_html, self.page_dict)
+            topic_dict = get_bds_dict_in_topic(topic_html, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json)
+        return super().parse_html_topic(topic_html)
         
 
     def create_page_link(self, format_page_url, page_int):
@@ -1067,7 +1066,7 @@ class MainFetchCommonBDS(MainFetchCommon):
                     topic_data_from_page['vip'] = vip
                     title_soups = title_and_icon.select("div.p-title  a")
                     href = title_soups[0]['href']
-                    topic_data_from_page['list_id'] = href
+                    topic_data_from_page['link'] = self.make_topic_link_from_list_id(href)
                     icon_soup = title_and_icon.select('img.product-avatar-img')
                     thumb = icon_soup[0]['src']
                     if 'nophoto' in thumb:
@@ -1105,7 +1104,7 @@ class MainFetchCommonBDS(MainFetchCommon):
                     topic_data_from_page['vip'] = vip
                     title_soup = title_and_icon.select(".product-title  a")[0]
                     href = title_soup['href']
-                    topic_data_from_page['list_id'] = href
+                    topic_data_from_page['link'] = self.make_topic_link_from_list_id(href)
 
                     icon_soup = title_and_icon.select('img.product-avatar-img')[0]
                     topic_data_from_page['thumb'] = icon_soup['src']
@@ -1139,7 +1138,7 @@ class MainFetchCommonBDS(MainFetchCommon):
                         topic_data_from_page['vip'] = vip
                         title_soups = title_and_icon.select("div.p-title  a")
                         href = title_soups[0]['href']
-                        topic_data_from_page['list_id'] = href
+                        topic_data_from_page['link'] = self.make_topic_link_from_list_id(href)
                         icon_soup = title_and_icon.select('img.product-avatar-img')
                         topic_data_from_page['thumb'] = icon_soup[0]['src']
                         gia_soup = title_and_icon.select('span.product-price')
@@ -1165,11 +1164,11 @@ class MainFetchCommonBDS(MainFetchCommon):
 #             raise SaveAndRaiseException('page_bdscomvn_type_%s'%page_css_type)
             # print (aaa)
             # if topic_data_from_pages_of_a_page:
-            if self.is_test:
+            if self.is_test or page_css_type ==1:
                 self.save_to_disk(html_page, 'bds_page_loai_%s'%page_css_type)
         return topic_data_from_pages_of_a_page
 MainFetchCommon = MainFetchCommonBDS
-####################### PARSE##########################
+####################### PARSE MUABAN##########################
 
 def get_phuong_xa_from_topic(self,soup):
     sl = soup.select('div#divWard li.current')   
@@ -1287,6 +1286,7 @@ def get_bds_dict_in_topic( html, page_dict):
         gia = kqs[0].find_all("strong")
         gia = gia[0].get_text()
         type_bdscom_topic = 1
+        self.save_to_disk(html_page, 'topic_bdscomvn_page_loai_%s'%type_bdscom_topic)
     except:
         gia_soup = soup.select("div.short-detail-wrap > ul.short-detail-2 > li:nth-of-type(1) > span.sp2")[0]
         gia = gia_soup.get_text()
@@ -1294,7 +1294,7 @@ def get_bds_dict_in_topic( html, page_dict):
     update_dict['price_string'] = gia
 
     if type_bdscom_topic == 2:
-        gia_soup = soup.select("div.product-config  > ul.short-detail-2 > li:nth-of-type(1) > span:nth-of-type(2)")[0]
+        gia_soup = soup.select("div.product-config ul.short-detail-2 li:nth-of-type(1) span:nth-of-type(2)")[0]
         gia = gia_soup.get_text()
         update_dict['publish_date_str'] = gia
 
@@ -1342,18 +1342,171 @@ def get_bds_dict_in_topic( html, page_dict):
             page_dict[key]  = value
     return page_dict
 
+################## mua ban ############################
+class MuabanFetch(MainFetchCommon):
+    # _inherit = 'abstract.main.fetch'
 
+    def get_last_page_number(self, url_id):
+        if self.site_name =='muaban':
+            return 300
+        return super(MuabanFetch, self).get_last_page_number(url_id)
+        
+    def parse_html_topic (self, topic_html):
+        if self.site_name =='muaban':
+            topic_dict = MuabanObject().get_topic(topic_html)
+            return topic_dict
+        return super(MuabanFetch, self).parse_html_topic(topic_html)
+
+    def create_page_link(self, format_page_url, page_int):
+        page_url = super(MuabanFetch, self).create_page_link(format_page_url, page_int)
+        repl = '?cp=%s'%page_int
+        if self.site_name == 'muaban':
+            if 'cp=' in format_page_url:
+                page_url =  re.sub('\?cp=(\d*)', repl, format_page_url)
+            else:
+                page_url = format_page_url +  '?' + repl
+        return page_url
+
+    def ph_parse_pre_topic(self, html_page):
+        topic_data_from_pages_of_a_page = super(MuabanFetch, self).ph_parse_pre_topic(html_page)
+        if self.site_name == 'muaban':
+            a_page_html_soup = BeautifulSoup(html_page, 'html.parser')
+            title_and_icons = a_page_html_soup.select('div.list-item-container')
+            for title_and_icon in title_and_icons:
+                topic_data_from_page = {}
+                image_soups = title_and_icon.select("a.list-item__link")
+                image_soups = image_soups[0]
+                href = image_soups['href']
+                img = image_soups.select('img')[0]
+                src_img = img.get('data-src',False)
+                topic_data_from_page['link'] = self.make_topic_link_from_list_id(href)
+                topic_data_from_page['thumb'] = src_img
+                area = 0
+                try:
+                    area = title_and_icon.select('span.list-item__area b')[0].get_text()
+                    area = area.split(' ')[0].strip().replace(',','.')
+                    try:
+                        area = float(area)
+                    except:
+                        area = 0
+                except IndexError:
+                    pass
+                topic_data_from_page['area']=area
+                
+                gia_soup = title_and_icon.select('span.list-item__price')
+                if gia_soup:
+                    gia = gia_soup[0].get_text()
+                else:
+                    gia = False
+                
+                topic_data_from_page['price_string'] = gia
+                ngay_soup = title_and_icon.select('span.list-item__date')
+                ngay = ngay_soup[0].get_text().strip().replace('\n','')
+                public_datetime = datetime.datetime.strptime(ngay,"%d/%m/%Y")
+                topic_data_from_page['public_datetime'] = public_datetime  
+                topic_data_from_pages_of_a_page.append(topic_data_from_page)
+        return topic_data_from_pages_of_a_page
+
+MainFetchCommon = MuabanFetch
+
+        ####### FETCH MUABAN ###########
+
+class MuabanObject():
+    def write_images(self, soup):
+        update_dict = {}
+        image_soup = soup.select('div.image__slides img')
+        images = [i['src'] for i in image_soup]
+        update_dict['images'] = images
+        return update_dict
+
+    def write_gia_tho(self, soup):
+        gia_soup = soup.select('div.price-container__value')
+        try:
+            gia =  gia_soup[0].get_text()
+        except IndexError:
+            gia = False
+        return {'price_string':gia}
+
+    def write_quan_phuong_tho(self, soup):
+        quan_soup = soup.select('span.location-clock__location')
+        quan_txt =  quan_soup[0].get_text()
+        quan_tinhs = quan_txt.split('-')
+        tinh_name = quan_tinhs[1].strip()
+        tinh_name = re.sub('tphcm','Hồ Chí Minh', tinh_name,flags=re.I)
+        quan_name =  quan_tinhs[0].strip()
+        return {'region_name':tinh_name, 'area_name':quan_name}
+
+    def write_poster_tho(self, soup):
+        try:
+            name_soup = soup.select('div.user-info__fullname')[0]
+            name =  name_soup.get_text()
+        except:
+            name = None
+        try:
+            span_mobile_soup = soup.select('div.mobile-container__value span')[0]
+            mobile = span_mobile_soup['mobile']
+        except:
+            mobile = None
+        mobile = mobile or 'No Mobile'
+        name = name or mobile
+        return {'phone':mobile, 'account_name':name}
+
+    def get_loai_nha(self, soup):
+        loai_nha_soup = soup.select('div.breadcrumb li')
+        loai_nha = loai_nha_soup[-1].get_text()
+        return {'loai_nha':loai_nha}
+
+    def get_topic(self, html):
+        update_dict  = {}
+        soup = BeautifulSoup(html, 'html.parser')
+        content_soup = soup.select('div.body-container')
+        update_dict['html']  = content_soup[0].get_text()
+        update_dict.update(self.write_gia_tho(soup))
+        update_dict.update(self.write_quan_phuong_tho(soup))
+        update_dict.update(self.get_loai_nha(soup))
+        update_dict.update(self.write_poster_tho(soup))
+        title = soup.select('h1.title')[0].get_text()
+        title = title.strip()
+        update_dict['title'] = title
+        return update_dict
+################## !mua ban ###########################
 if __name__ == '__main__':
     
-    attrs_dict = {'is_test':True, 'site_name': 'chotot', 'url':'https://gateway.chotot.com/v1/public/ad-listing?cg=1000&limit=20&st=s,k' }
-    attrs_dict = {'is_test':True, 'site_name': 'batdongsan', 'url':'https://batdongsan.com.vn/nha-dat-ban',
-    'begin_page':500,  'end_page':500,  'topic_path':'mau/file_topic_bug_theo_y_muon_batdongsan'}
-    # attrs_dict = {'is_test':True, 'site_name': 'batdongsan', 'page_path':'mau/bds_page_loai_2',
-    # 'st_is_request_topic':False, }
+    attrs_dict = {}
+    site_name = 'chotot'
+    site_name = 'muaban'
 
-    # attrs_dict = {'is_test':True, 'site_name': 'batdongsan', 'url':'https://batdongsan.com.vn/nha-dat-ban',
-    # 'begin_page':500,  'end_page':500,  'is_save_and_raise_in_topic':True}
+    is_test = True
+    is_save_mau = True
+    topic_path = False
+    topic_link = False
+    page_path = False
+    page_link = False
 
+    attrs_dict.update({'is_test':is_test, 'site_name': site_name, 'is_save_mau':is_save_mau})
+    if site_name == 'chotot':
+        topic_path = 'mau/topic_chotot'
+        more_dict = { 'url':'https://gateway.chotot.com/v1/public/ad-listing?cg=1000&limit=20&st=s,k' }
+        # more_dict['topic_path'] = topic_path
+    elif site_name =='batdongsan':
+        more_dict = { 'url':'https://batdongsan.com.vn/nha-dat-ban',
+        'begin_page':500,  'end_page':500,  'topic_path':'mau/file_topic_bug_theo_y_muon_batdongsan'}
+        # more_dict = {'is_test':True, 'site_name': 'batdongsan', 'page_path':'mau/bds_page_loai_2',
+        # 'st_is_request_topic':False, }
+        more_dict = {'url':'https://batdongsan.com.vn/nha-dat-ban',
+        'begin_page':500,  'end_page':500, }# 'is_save_and_raise_in_topic':True
+    
+        # more_dict = {'is_test':True, 'site_name': 'batdongsan', 'url':'https://batdongsan.com.vn/nha-dat-ban',
+        # 'begin_page':500,  'end_page':500,  'topic_link':'https://batdongsan.com.vn/ban-can-ho-chung-cu-duong-ho-tung-mau-phuong-phu-dien-prj-goldmark-city/-bay-gio-hoac-khong-bao-gio-mua-160m2-cho-gia-dinh-da-the-he-tang-ngay-hon-600-000-000-pr26721510'
+        # }
+    elif site_name =='muaban':
+        more_dict = { 'url':'https://muaban.net/ban-nha-ho-chi-minh-l59-c32?cp=14' }
+
+    attrs_dict.update(more_dict)
+    attrs_dict['topic_path']=topic_path
+    attrs_dict['topic_link']=topic_link
+    attrs_dict['page_path']=page_path
+    attrs_dict['page_link']=page_link
 
     main_fetch = MainFetchCommon(attrs_dict = attrs_dict)
     fetch_list = main_fetch.fetch_a_url_id(False)
@@ -1388,7 +1541,7 @@ if __name__ == '__main__':
     print ('**not gia**')
     filter_rs = list(filter(lambda r: not r['gia'], rs))
     for r in filter_rs:
-        print ('batdongsan.com.vn' + r['list_id'])
+        print (r['link'])
     
     
 

@@ -70,12 +70,12 @@ class BDSFetch(models.AbstractModel):
         
         return link
 
-    def parse_html_topic (self, topic_html_or_json):
+    def parse_html_topic (self, topic_html):
         if self.site_name =='batdongsan':
-            # get_bds_dict_in_topic(self, topic_html_or_json, self.page_dict)
-            topic_dict = get_bds_dict_in_topic(self, topic_html_or_json, self.page_dict)
+            # get_bds_dict_in_topic(self, topic_html, self.page_dict)
+            topic_dict = get_bds_dict_in_topic(self, topic_html, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json)
+        return super().parse_html_topic(topic_html)
         
 
     def create_page_link(self, format_page_url, page_int):
