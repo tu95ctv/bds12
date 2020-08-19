@@ -18,15 +18,13 @@ from odoo.addons.bds.models.bds_tools  import  FetchError
 import traceback
 
 class TapHoaMainFetch(models.AbstractModel):
-    _inherit = 'abstract.main.fetch'
-
+    # _inherit = 'abstract.main.fetch'
 
     def get_main_obj(self):
         rs = super().get_main_obj()
         if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             return self.env['tap.hoa']
         return rs
-
 
     def get_last_page_number(self, url_id):
         if self.site_name =='cuahangtaphoa':
@@ -55,32 +53,18 @@ class TapHoaMainFetch(models.AbstractModel):
                 nghanh_nghe = nghanh_nghe.replace('./.','').strip()
             except IndexError:
                 nghanh_nghe = False
-            
+
             topic_dict['nganh_nghe_kinh_doanh'] = nghanh_nghe
 
             return topic_dict
         return super().parse_html_topic(topic_html)
 
-
-    # def create_page_link(self, format_page_url, page_int):
-    #     page_url = super().create_page_link(format_page_url, page_int)
-        
-    #     if self.site_name == 'cuahangtaphoa':
-    #         repl = 'page-%s-danh-sach'%page_int
-    #         page_url =  re.sub('danh-sach', repl, format_page_url)
-    #         # page_url = re.sub('/$','.aspx',page_url)
-    #     return page_url
-
-    #page-6-cua-hang-tap-hoa.html
     def create_page_link(self, format_page_url, page_int):
         page_url = super().create_page_link(format_page_url, page_int)
         if self.site_name == 'cuahangtaphoa':
             repl = 'page-%s'%page_int
             page_url =  re.sub('page-\d+', repl, format_page_url)
-            # page_url = re.sub('/$','.aspx',page_url)
         return page_url
-
-
 
     def request_parse_html_topic(self, link):
         topic_dict = super().request_parse_html_topic(link)
@@ -88,21 +72,11 @@ class TapHoaMainFetch(models.AbstractModel):
             topic_dict['is_full_topic'] = True
         return topic_dict
 
-
-
     def get_st_is_bds_site(self):
-
         if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
             return False
         return super().get_st_is_bds_site()
-
     
-    # def get_st_is_bds_type(self, fetch_item_id):
-
-    #     if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
-    #         return False
-    #     return super().get_st_is_bds_type(fetch_item_id)
-
     def ph_parse_pre_topic(self,html_page):
         topic_data_from_pages_of_a_page = super().ph_parse_pre_topic(html_page)
         if self.site_name == 'cuahangtaphoa':
@@ -126,11 +100,9 @@ class TapHoaMainFetch(models.AbstractModel):
                         topic_data_from_page['poster_id'] = phone
                     else:
                         phone = False
-                    
                 except IndexError:
                     href = 'n/a'
                     title = False
-
                 dia_chi_soup = title_and_icon.select("p:contains('Địa chỉ:')")[0]
                 dia_chi = dia_chi_soup.get_text()
                 dia_chis = dia_chi.split(',')  
@@ -146,7 +118,6 @@ class TapHoaMainFetch(models.AbstractModel):
                     duong = duong.replace('Địa chỉ: ')
                 except:
                     duong = False
-
                 ngay_thanh_lap_soup = title_and_icon.select("p:contains('Ngày thành lập: ')")[0]
                 ngay_thanh_lap = ngay_thanh_lap_soup.get_text()
                 ngay_thanh_lap_search = re.search('Ngày thành lập: ([\d/]+) \(', ngay_thanh_lap)

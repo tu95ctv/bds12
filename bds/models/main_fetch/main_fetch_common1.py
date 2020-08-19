@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-# from odoo.addons.bds.models.main_fetch.main_fetch_chotot  import  request_html, FetchError, SaveAndRaiseException, SaveAndPass
-# from odoo.addons.bds.models.bds_tools import FetchError, SaveAndRaiseException, SaveAndPass
-# from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi, g_or_c_ss
 import re
 import datetime
 from datetime import timedelta
@@ -19,7 +16,7 @@ import math
 import re
 from urllib import request
 # from odoo.osv import expression
-
+from compute_bds import _compute_mat_tien_or_trich_dia_chi1
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -77,18 +74,6 @@ def g_or_c_ss(self_env_class_name,search_dict,
             searched_object.write(create_write_dict)
     return return_obj       
 
-# def save_to_disk( ct, name_file):
-#     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#     print ('***path***', path)
-#     f = open(os.path.join(path,'test_html', '%s.html'%name_file), 'w')
-#     f.write(ct)
-#     f.close()
-
-# def file_from_tuong_doi(tuong_doi_path):
-#     dir_path = os.path.dirname(os.path.abspath(__file__))
-# #     dir_path = r"C:\D4\tgl_code\bds12\bds\models"
-#     f = open(os.path.join(dir_path,'%s.html'%tuong_doi_path), 'r', encoding="utf8")
-#     return f.read()
 ##############! bds tools ########################
 headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
 def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
@@ -246,7 +231,7 @@ class MainFetchCommon():
         dir_path = os.path.dirname(dir_path)
         dir_path = os.path.dirname(dir_path)
     #     dir_path = r"C:\D4\tgl_code\bds12\bds\models"
-        f = open(os.path.join(dir_path,'test_html', '%s.html'%tuong_doi_path), 'r', encoding="utf8")
+        f = open(os.path.join(dir_path,'html_log', '%s.html'%tuong_doi_path), 'r', encoding="utf8")
         return f.read()
     
     def save_to_disk(self, ct, name_file ):
@@ -406,6 +391,15 @@ class MainFetchCommon():
                 self.env['bds.posternamelines'].create( {'username_in_site':account_name, 'site_id':siteleech_id_id, 'poster_id':poster.id})
         return {'poster_id':poster.id}
 
+    def write_trich_dia_chi(self, topic_dict):
+        html = topic_dict['html']
+        mat_tien_address, trich_dia_chi, mat_tien_or_trich_dia_chi, is_mat_tien_or_trich_dia_chi = \
+            _compute_mat_tien_or_trich_dia_chi1(self, html, html)
+        topic_dict['mat_tien_address'] = mat_tien_address
+        topic_dict['trich_dia_chi'] = trich_dia_chi
+        topic_dict['mat_tien_or_trich_dia_chi'] = mat_tien_or_trich_dia_chi
+        topic_dict['is_mat_tien_or_trich_dia_chi'] = is_mat_tien_or_trich_dia_chi
+        
     def odoo_model_topic_dict(self, topic_dict):
         if not self.is_test:
             topic_dict.update(self.write_quan_phuong(topic_dict))
@@ -414,6 +408,7 @@ class MainFetchCommon():
         
         topic_dict.update(write_gia(topic_dict))
         topic_dict.update(write_public_datetime(topic_dict))
+        self.write_trich_dia_chi(topic_dict)
 
     def request_parse_html_topic(self, link):
         if not getattr(self,'topic_path',None):
@@ -658,7 +653,7 @@ class MainFetchCommon():
             end = max_page
         self.max_page_assign_again = max_page
         end_page_number_in_once_fetch = end
-        page_lists = range(begin, end+1)
+        page_lists = range(begin, end + 1)
         number_of_pages = end - begin + 1
         return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
 
@@ -1409,7 +1404,6 @@ class MuabanFetch(MainFetchCommon):
 
 MainFetchCommon = MuabanFetch
 
-        ####### FETCH MUABAN ###########
 
 class MuabanObject():
     def write_images(self, soup):
@@ -1470,12 +1464,159 @@ class MuabanObject():
         update_dict['title'] = title
         return update_dict
 ################## !mua ban ###########################
-if __name__ == '__main__':
+class TapHoaMainFetch(MainFetchCommon):
+    def get_main_obj(self):
+        rs = super().get_main_obj()
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+            return self.env['tap.hoa']
+        return rs
+
+    def get_last_page_number(self, url_id):
+        if self.site_name =='cuahangtaphoa':
+            if url_id.web_last_page_number:
+                return url_id.web_last_page_number
+            return 300
+        return super().get_last_page_number(url_id)
+
+    def get_dia_chi(self, topic_soups, dia_chi_str= 'Địa chỉ:'):
+        try:
+            ngay_cap_soup = topic_soups.select("li:contains('%s')"%dia_chi_str)[0]
+            ngay_cap = ngay_cap_soup.get_text().split(':')[1].strip()
+        except IndexError:
+            ngay_cap = None
+        return ngay_cap
+
+    def parse_html_topic (self, topic_html):
+        
+        if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
+            topic_dict = {}
+            a_page_html_soup = BeautifulSoup(topic_html, 'html.parser')
+            topic_soups = a_page_html_soup.select('div.item-page')[0]
+            try:
+                nghanh_nghe_soup = topic_soups.select("li:contains('Ngành nghề chính: ')")[0]
+                nghanh_nghe = nghanh_nghe_soup.get_text().split(':')[1]
+                nghanh_nghe = nghanh_nghe.replace('./.','').strip()
+            except IndexError:
+                nghanh_nghe = False
+
+            topic_dict['nganh_nghe_kinh_doanh'] = nghanh_nghe
+
+            return topic_dict
+        return super().parse_html_topic(topic_html)
+
+    def create_page_link(self, format_page_url, page_int):
+        page_url = super().create_page_link(format_page_url, page_int)
+        if self.site_name == 'cuahangtaphoa':
+            repl = 'page-%s'%page_int
+            page_url =  re.sub('page-\d+', repl, format_page_url)
+        return page_url
+
+    def request_parse_html_topic(self, link):
+        topic_dict = super().request_parse_html_topic(link)
+        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
+            topic_dict['is_full_topic'] = True
+        return topic_dict
+
+    def get_st_is_bds_site(self):
+        if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
+            return False
+        return super().get_st_is_bds_site()
     
+    def ph_parse_pre_topic(self,html_page):
+        topic_data_from_pages_of_a_page = super().ph_parse_pre_topic(html_page)
+        if self.site_name == 'cuahangtaphoa':
+            a_page_html_soup = BeautifulSoup(html_page, 'html.parser')
+            title_and_icons = a_page_html_soup.select('div.news-v3')
+            if not title_and_icons:
+                raise UserError('Không có topic nào từ page của muaban')
+            for title_and_icon in title_and_icons:
+                topic_data_from_page = {}
+                try:
+                    chu_so_huu_soup = title_and_icon.select('a')[0]
+                    chu_so_huu = chu_so_huu_soup.get_text()
+                    topic_data_from_page['name_of_poster'] = chu_so_huu
+                    mst_tag = title_and_icon.select('a')[1]
+                    href = mst_tag['href']
+                    title = mst_tag['title']
+                    mst = mst_tag.get_text()
+                    phone = re.search(' (\d{7,})$', title)
+                    if phone:
+                        phone = phone.group(1)
+                        topic_data_from_page['poster_id'] = phone
+                    else:
+                        phone = False
+                except IndexError:
+                    href = 'n/a'
+                    title = False
+                dia_chi_soup = title_and_icon.select("p:contains('Địa chỉ:')")[0]
+                dia_chi = dia_chi_soup.get_text()
+                dia_chis = dia_chi.split(',')  
+                tinh = dia_chis[-1]
+                quan = dia_chis[-2]
+                try:
+                    phuong = dia_chis[-3]
+                except:
+                    phuong = False
+
+                try:
+                    duong = dia_chis[-4]
+                    duong = duong.replace('Địa chỉ: ')
+                except:
+                    duong = False
+                ngay_thanh_lap_soup = title_and_icon.select("p:contains('Ngày thành lập: ')")[0]
+                ngay_thanh_lap = ngay_thanh_lap_soup.get_text()
+                ngay_thanh_lap_search = re.search('Ngày thành lập: ([\d/]+) \(', ngay_thanh_lap)
+                if ngay_thanh_lap_search:
+                    ngay_thanh_lap = ngay_thanh_lap_search.group(1)
+                    format_str = '%d/%m/%Y' # The format
+                    public_date = datetime.datetime.strptime(ngay_thanh_lap, format_str).date()
+                    
+                else:
+                    ngay_thanh_lap = False
+                    public_date = False
+                topic_data_from_page['public_date'] = public_date
+                topic_data_from_page['ngay_thanh_lap'] = ngay_thanh_lap
+                topic_data_from_page['tinh']=tinh
+                topic_data_from_page['quan']=quan
+                topic_data_from_page['phuong']=phuong
+                topic_data_from_page['duong']=duong
+                topic_data_from_page['link'] = href
+                topic_data_from_page['mst'] = mst
+                topic_data_from_page['address'] = dia_chi
+                topic_data_from_page['title'] = title
+                topic_data_from_page['html'] = ''
+                topic_data_from_pages_of_a_page.append(topic_data_from_page)
+        return topic_data_from_pages_of_a_page
+MainFetchCommon = TapHoaMainFetch
+
+def valid_fetch_list(rs):
+    for i in ['public_date', 'public_datetime',  'area_name', 'region_name', 'price', 'gia','mat_tien_or_trich_dia_chi']:
+        print ('**%s**'%i)
+        filter_rs = list(filter(lambda r: r[i], rs))
+        print (len(filter_rs))
+        if i =='mat_tien_or_trich_dia_chi':
+            for r in filter_rs:
+                print ('mat_tien_or_trich_dia_chi', r['link'])
+                print ('mat_tien_or_trich_dia_chi', r['mat_tien_or_trich_dia_chi'])
+
+
+
+    print ('**not gia**')
+    filter_rs = list(filter(lambda r: not r['gia'], rs))
+    print (len(filter_rs))
+    # for r in filter_rs:
+    #     print (r['link'])
+    
+if __name__ == '__main__':
+    # rs = _compute_mat_tien_or_trich_dia_chi1(False, '12/23 abc', '12/23 abc')
+    # print (rs)
+    # print (aa)
     attrs_dict = {}
     site_name = 'chotot'
     site_name = 'muaban'
-
+    site_name = 'cuahangtaphoa'
+    site_name = 'batdongsan'
+    site_name = 'chotot'
     is_test = True
     is_save_mau = True
     topic_path = False
@@ -1485,9 +1626,9 @@ if __name__ == '__main__':
 
     attrs_dict.update({'is_test':is_test, 'site_name': site_name, 'is_save_mau':is_save_mau})
     if site_name == 'chotot':
-        topic_path = 'mau/topic_chotot'
-        more_dict = { 'url':'https://gateway.chotot.com/v1/public/ad-listing?cg=1000&limit=20&st=s,k' }
-        # more_dict['topic_path'] = topic_path
+        # topic_path = 'mau/topic_chotot'
+        more_dict = { 'url':'https://gateway.chotot.com/v1/public/ad-listing?cg=1000&limit=20&st=s,k',
+        'begin_page':10,  'end_page':15 }
     elif site_name =='batdongsan':
         more_dict = { 'url':'https://batdongsan.com.vn/nha-dat-ban',
         'begin_page':500,  'end_page':500,  'topic_path':'mau/file_topic_bug_theo_y_muon_batdongsan'}
@@ -1501,6 +1642,8 @@ if __name__ == '__main__':
         # }
     elif site_name =='muaban':
         more_dict = { 'url':'https://muaban.net/ban-nha-ho-chi-minh-l59-c32?cp=14' }
+    elif site_name =='cuahangtaphoa':
+        more_dict = { 'url':'http://www.cuahangtaphoa.com/page-6-cua-hang-tap-hoa.html' }
 
     attrs_dict.update(more_dict)
     attrs_dict['topic_path']=topic_path
@@ -1510,38 +1653,11 @@ if __name__ == '__main__':
 
     main_fetch = MainFetchCommon(attrs_dict = attrs_dict)
     fetch_list = main_fetch.fetch_a_url_id(False)
-    rs = fetch_list
     print ('***fetch_list***', fetch_list)
     print ('len(fetch_list)',len(fetch_list))
+    if site_name in ['chotot','batdongsan','cuahangtaphoa']:
+        valid_fetch_list(fetch_list)
 
-    print ('**public_date**')
-    filter_rs = filter(lambda r: r['public_date'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**public_datetime**')
-    filter_rs = filter(lambda r: r['public_datetime'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**area_name**')
-    filter_rs = filter(lambda r: r['area_name'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**region_name**')
-    filter_rs = filter(lambda r: r['region_name'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**price**')
-    filter_rs = filter(lambda r: r['price'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**gia**')
-    filter_rs = filter(lambda r: r['gia'], rs)
-    print (len(list(filter_rs)))
-
-    print ('**not gia**')
-    filter_rs = list(filter(lambda r: not r['gia'], rs))
-    for r in filter_rs:
-        print (r['link'])
     
     
 
