@@ -52,7 +52,7 @@ class MuabanFetch(models.AbstractModel):
             return 300
         return super(MuabanFetch, self).get_last_page_number(url_id)
         
-    def parse_html_topic (self, topic_html_or_json, url_id):
+    def parse_html_topic (self, topic_html_or_json):
         if self.site_name =='muaban':
             topic_dict = MuabanObject(self.env).get_topic(topic_html_or_json)
             return topic_dict

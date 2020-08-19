@@ -43,7 +43,7 @@ class TapHoaMainFetch(models.AbstractModel):
             ngay_cap = None
         return ngay_cap
 
-    def parse_html_topic (self, topic_html_or_json, url_id):
+    def parse_html_topic (self, topic_html_or_json):
         
         if self.site_name =='cuahangtaphoa' or self.model_name=='tap.hoa':
             topic_dict = {}
@@ -82,8 +82,8 @@ class TapHoaMainFetch(models.AbstractModel):
 
 
 
-    def request_parse_html_topic(self, link, url_id):
-        topic_dict = super().request_parse_html_topic(link, url_id)
+    def request_parse_html_topic(self, link):
+        topic_dict = super().request_parse_html_topic(link)
         if self.site_name =='cuahangtaphoa' or self.model_name =='tap.hoa':
             topic_dict['is_full_topic'] = True
         return topic_dict

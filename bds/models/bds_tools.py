@@ -6,7 +6,6 @@ from odoo.osv import expression
 import datetime
 from unidecode import unidecode
 import os
-
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -87,23 +86,6 @@ def g_or_c_ss(self_env_class_name,search_dict,
             searched_object.write(create_write_dict)
     return return_obj       
 
-def get_or_create_user_and_posternamelines(env, mobile, name, siteleech_id_id):
-    search_dict = {}
-    search_dict['phone'] = mobile 
-    search_dict['login'] = str(mobile)+'@gmail.com'
-    user =  env['bds.poster'].search([('phone','=', mobile)])
-    if user:
-        posternamelines_search_dict = {'username_in_site':name, 'site_id':siteleech_id_id, 'poster_id':user.id}
-        g_or_c_ss(env['bds.posternamelines'], posternamelines_search_dict)
-                                              
-    else:
-        search_dict.update({'created_by_site_id': siteleech_id_id})
-        user =  env['bds.poster'].create(search_dict)
-        env['bds.posternamelines'].create( {'username_in_site':name,'site_id':siteleech_id_id,'poster_id':user.id})
-    return user 
-
-
-
 def save_to_disk( ct, name_file ):
     path = os.path.dirname(os.path.abspath(__file__))
     f = open(os.path.join(path,'%s.html'%name_file), 'w')
@@ -114,3 +96,5 @@ def file_from_tuong_doi(tuong_doi_path):
     path = os.path.dirname(os.path.abspath(__file__))
     f = open(os.path.join(path,'%s.html'%tuong_doi_path), 'r')
     return f.read()
+
+

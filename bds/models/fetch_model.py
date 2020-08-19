@@ -5,7 +5,7 @@ import re
 from odoo import models,fields
 from odoo.addons.bds.models.bds_tools  import  FetchError
 import math
-
+from odoo.addons.bds.models.main_fetch.main_fetch_common1 import MainFetchCommon
 
 #lam gon lai ngay 29/07
 def div_part(total_page, number_of_part, nth_part):
@@ -66,10 +66,10 @@ class BDSFetchLine(models.Model):
     is_must_update_topic = fields.Boolean()
     disible = fields.Boolean()
 #lam gon lai ngay 23/02
-class Fetch(models.Model):
+class Fetch(models.Model, MainFetchCommon):
 
     _name = 'bds.fetch'
-    _inherit = 'abstract.main.fetch'
+    # _inherit = 'abstract.main.fetch'
     _auto = True
 
     name = fields.Char(compute='_compute_name', store=True)

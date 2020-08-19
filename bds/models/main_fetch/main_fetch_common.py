@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.addons.bds.models.bds_tools  import  request_html, FetchError, SaveAndRaiseException, SaveAndPass
+# from odoo.addons.bds.models.main_fetch.main_fetch_chotot  import  request_html, FetchError, SaveAndRaiseException, SaveAndPass
+from odoo.addons.bds.models.bds_tools import request_html, FetchError, SaveAndRaiseException, SaveAndPass
 from odoo.addons.bds.models.bds_tools  import   save_to_disk, file_from_tuong_doi, g_or_c_ss
 import re
 import datetime
@@ -12,6 +13,16 @@ from time import sleep
 from dateutil.relativedelta import relativedelta
 import logging
 _logger = logging.getLogger(__name__)
+
+# class FetchError(Exception):
+#     pass
+
+# class SaveAndRaiseException(Exception):
+#     pass
+
+# class SaveAndPass(Exception):
+#     pass
+
 
 def convert_native_utc_datetime_to_gmt_7(utc_datetime_inputs):
         local = pytz.timezone('Etc/GMT-7')
@@ -102,9 +113,9 @@ def write_public_datetime(topic_dict):
         date = topic_dict['date']
         public_datetime = convert_chotot_date_to_datetime(date)
         update ['public_datetime'] = public_datetime
-    if 'public_datetime_str' in topic_dict and 'public_datetime' not in topic_dict:
-        public_datetime_str = topic_dict['public_datetime_str']
-        public_datetime = datetime.datetime.strptime(public_datetime_str,"%d/%m/%Y")
+    if 'publish_date_str' in topic_dict and 'public_datetime' not in topic_dict:
+        publish_date_str = topic_dict['publish_date_str']
+        public_datetime = datetime.datetime.strptime(publish_date_str,"%d/%m/%Y")
         update ['public_datetime'] = public_datetime
         
 
@@ -116,8 +127,8 @@ def write_public_datetime(topic_dict):
     update['public_datetime'] = public_datetime
     return update
 
-class CommonMainFetch(models.AbstractModel):
-    _name = 'abstract.main.fetch'
+class MainCommonFetch():
+    # _name = 'abstract.main.fetch'
     allow_update = True
    
     def get_main_obj(self):
@@ -191,31 +202,7 @@ class CommonMainFetch(models.AbstractModel):
         
         return create_dict
 
-    def request_write(self, fetch_item_id, link, url_id ):
-        return {}
 
-    def parse_html_topic (self, topic_html_or_json, url_id):
-        return {}
-    
-    # def request_parse_html_topic_tho(self, link, url_id):
-    #     if not getattr(self,'topic_path',None):
-    #         headers = self.page_header_request()
-    #         header_kwargs = {'headers': headers} if headers else {}
-    #         topic_html_or_json = request_html(link, **header_kwargs)
-    #     else:
-    #         topic_html_or_json = file_from_tuong_doi(self.topic_path)
-    #     try:
-    #         topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
-    #     except SaveAndRaiseException as e:
-    #         save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
-    #         raise
-    #     except SaveAndPass as e:
-    #         save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
-    #         # raise
-    #     except:
-    #         save_to_disk(topic_html_or_json, 'file_topic_bug')
-    #         raise
-    #     return topic_dict
 
     def get_or_create_quan_include_state(self, tinh_str, quan_str):
         tinh_str = re.sub('tp|Thành phố|tỉnh','', tinh_str, flags=re.I)
@@ -286,18 +273,15 @@ class CommonMainFetch(models.AbstractModel):
                 self.env['bds.posternamelines'].create( {'username_in_site':account_name, 'site_id':siteleech_id_id, 'poster_id':poster.id})
         return {'poster_id':poster.id}
 
-
-    
-
     def odoo_model_topic_dict(self, topic_dict):
-        topic_dict.update(self.write_quan_phuong(topic_dict))
-        topic_dict.update(self.write_images(topic_dict))
-        topic_dict.update(self.write_poster(topic_dict, self.siteleech_id_id))
+        if not self.is_topic:
+            topic_dict.update(self.write_quan_phuong(topic_dict))
+            topic_dict.update(self.write_images(topic_dict))
+            topic_dict.update(self.write_poster(topic_dict, self.siteleech_id_id))
         topic_dict.update(write_gia(topic_dict))
         topic_dict.update(write_public_datetime(topic_dict))
 
-
-    def request_parse_html_topic(self, link, url_id):
+    def request_parse_html_topic(self, link):
         if not getattr(self,'topic_path',None):
             headers = self.page_header_request()
             header_kwargs = {'headers': headers} if headers else {}
@@ -305,7 +289,7 @@ class CommonMainFetch(models.AbstractModel):
         else:
             topic_html_or_json = file_from_tuong_doi(self.topic_path)
         try:
-            topic_dict = self.parse_html_topic(topic_html_or_json, url_id)
+            topic_dict = self.parse_html_topic(topic_html_or_json)
         except SaveAndRaiseException as e:
             save_to_disk(topic_html_or_json, 'file_topic_bug_theo_y_muon_%s'%str(e))
             raise
@@ -323,13 +307,16 @@ class CommonMainFetch(models.AbstractModel):
             del topic_data_from_page['list_id']
 
 
-    def topic_handle(self, link, url_id, topic_data_from_page, fetch_item_id,  search_bds_obj=None):
+    def topic_handle(self, link, url_id, topic_data_from_page, search_bds_obj=None):
         print ('topic: %s'%self.topic_count)
-        create_dict = {}
+        a_topic_fetch_dict = {}
         self.link = link
         self.page_dict = topic_data_from_page
         main_obj = self.get_main_obj()
-        search_bds_obj= main_obj.search([('link','=',link)])
+        if not search_bds_obj:
+            search_bds_obj= main_obj.search([('link','=',link)])
+        else:
+            link = search_bds_obj.link
         is_fail_link_number = 0
         is_existing_link_number = 0
         is_update_link_number = 0
@@ -343,15 +330,17 @@ class CommonMainFetch(models.AbstractModel):
                         topic_data_from_page.update(write_gia(topic_data_from_page))
                         compare_update_dict = self.th_bds_type_update_compare_price(search_bds_obj, topic_data_from_page)
                         update_dict.update(compare_update_dict)
+                        a_topic_fetch_dict = topic_data_from_page
                 else:
-                    update_dict = self.request_parse_html_topic(link, url_id)
+                    update_dict = self.request_parse_html_topic(link)
                     update_dict.update(topic_data_from_page)
+                    
                     if self.st_is_bds_site:
                         self.odoo_model_topic_dict(update_dict)
 
                     if self.st_is_model_id:
                         update_dict['is_full_topic'] =  True
-
+                    a_topic_fetch_dict = update_dict
                 if update_dict:
                     print ('**update topic**')
                     search_bds_obj.write(update_dict)
@@ -362,7 +351,7 @@ class CommonMainFetch(models.AbstractModel):
                 create_dict = {}
             
                 if self.st_is_request_topic:
-                    create_dict = self.request_parse_html_topic(link, url_id)
+                    create_dict = self.request_parse_html_topic(link)
                     print ('***create_dict in request_parse_html_topic**', create_dict)
                 if self.is_page_handle:
                     #     if self.st_is_bds_site:
@@ -386,7 +375,7 @@ class CommonMainFetch(models.AbstractModel):
                 'link':link,
                 'type':'success',
                 'link_type':'topic',
-                'fetch_item_id':fetch_item_id.id,
+                'fetch_item_id':self.fetch_item_id.id,
                 'error_or_success':'success',
                     }
                 )
@@ -400,7 +389,7 @@ class CommonMainFetch(models.AbstractModel):
                     'link':link,
                     'type':'fetch_error',
                     'link_type':'topic',
-                    'fetch_item_id':fetch_item_id.id,
+                    'fetch_item_id':self.fetch_item_id.id,
                     }
                 )
 
@@ -414,7 +403,7 @@ class CommonMainFetch(models.AbstractModel):
                 'link':link,
                 'type':'internal_error',
                 'link_type':'topic',
-                'fetch_item_id':fetch_item_id.id,
+                'fetch_item_id':self.fetch_item_id.id,
                 }
                 )
         return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number, create_dict
@@ -433,13 +422,13 @@ class CommonMainFetch(models.AbstractModel):
         format_page_url = url_id.url  
         existing_link_number, update_link_number, create_link_number, fail_link_number, link_number = 0, 0, 0, 0, 0
         try:
-            if not fetch_item_id.page_path:
+            if not self.page_path:
                 page_url = self.create_page_link(format_page_url, page_int)
                 headers = self.page_header_request()
                 header_kwargs = {'headers': headers} if headers else {}
                 html_page = request_html(page_url,**header_kwargs)
             else:
-                html_page = file_from_tuong_doi(fetch_item_id.page_path)
+                html_page = file_from_tuong_doi(self.page_path)
             try:
                 topic_data_from_pages_of_a_page = self.ph_parse_pre_topic(html_page)
 
@@ -448,7 +437,7 @@ class CommonMainFetch(models.AbstractModel):
                 raise
                 # raise 
             except:
-                file_name = 'file_page_bug' if not fetch_item_id.page_path else 'file_page_bug_page_path'
+                file_name = 'file_page_bug' if not self.page_path else 'file_page_bug_page_path'
                 save_to_disk(html_page, file_name)
                 raise
         except FetchError as e:
@@ -465,7 +454,7 @@ class CommonMainFetch(models.AbstractModel):
         except Exception as e:
             raise
         if not topic_data_from_pages_of_a_page:
-            file_name = 'file_page_bug' if not fetch_item_id.page_path else 'file_page_bug_page_path'
+            file_name = 'file_page_bug' if not self.page_path else 'file_page_bug_page_path'
             save_to_disk(html_page, file_name)
             raise ValueError('topic_data_from_pages_of_a_page is empty')
          
@@ -480,8 +469,8 @@ class CommonMainFetch(models.AbstractModel):
 
             try:
                 is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number,  create_dict = \
-                    self.topic_handle(link, url_id, topic_data_from_page, 
-                            fetch_item_id)
+                    self.topic_handle(link, url_id, topic_data_from_page
+                            )
                 existing_link_number += is_existing_link_number
                 update_link_number += is_update_link_number
                 create_link_number += is_create_link_number
@@ -538,8 +527,11 @@ class CommonMainFetch(models.AbstractModel):
         for r in objs:
             url_id = False
             try:
+                topic_data_from_page = {}
+                    
+                link = None
                 is_fail_link_number, is_existing_link_number, is_update_link_number, is_create_link_number, create_dict= \
-                    self.topic_handle(r.link, url_id,{}, fetch_item_id, search_bds_obj=r)
+                    self.topic_handle(link, url_id, topic_data_from_page, search_bds_obj=r)
                 existing_link_number += is_existing_link_number
                 update_link_number += is_update_link_number
                 create_link_number += is_create_link_number
@@ -554,12 +546,7 @@ class CommonMainFetch(models.AbstractModel):
         return True
 
 
-    def fetch_a_url_id (self, fetch_item_id):
-        begin_time = datetime.datetime.now()
-        is_finished = False
-        url_id = fetch_item_id.url_id
-        end_page_number_in_once_fetch = False
-        existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
+    def setting_for_fetch_obj(self, url_id, fetch_item_id):
         self.siteleech_id_id = url_id.siteleech_id.id 
         self.site_name = url_id.siteleech_id.name + (' ' + url_id.fetch_mode if url_id.fetch_mode else '')
         self.model_name = fetch_item_id.model_id.name
@@ -572,32 +559,37 @@ class CommonMainFetch(models.AbstractModel):
         self.st_is_model_id = bool(fetch_item_id.model_id)
         self.topic_link = fetch_item_id.topic_link
         self.topic_path = fetch_item_id.topic_path
-
+        self.page_path = fetch_item_id.page_path
         self.is_test = False
+        self.fetch_item_id = fetch_item_id
 
+    def _fetch_a_url_id (self,url_id, fetch_item_id):
+        end_page_number_in_once_fetch = False
+        existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = 0, 0, 0, 0, 0
         if self.topic_link or self.topic_path:
+            topic_data_from_page = {}
             existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
-                    fail_link_number_one_page = \
-                self.topic_handle(fetch_item_id.topic_link, url_id, {}, fetch_item_id, None)
+                    fail_link_number_one_page, create_dict = \
+                self.topic_handle(self.topic_link, url_id, topic_data_from_page, fetch_item_id)
             link_number_one_page = 1
             existing_link_number += existing_link_number_one_page
             update_link_number += update_link_number_one_page
             create_link_number += create_link_number_one_page
             fail_link_number += fail_link_number_one_page
             link_number += link_number_one_page
+            is_finished = False
         elif self.st_is_model_id:
             existing_link_number, update_link_number, create_link_number, link_number, fail_link_number = \
                 self.fetch_bo_sung_da_co_link(fetch_item_id)
             link_number = update_link_number
-            end_page_number_in_once_fetch = False
             is_finished = False
         else:
             
-            if not fetch_item_id.page_path:
+            if not self.page_path:
                 end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
             else: 
                 page_lists = range(1)
-            
+            print ('***page_lists***', page_lists)
             for page_int in page_lists:
                 page_handle_rs = self.page_handle( page_int, url_id, fetch_item_id)
                 existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
@@ -608,15 +600,37 @@ class CommonMainFetch(models.AbstractModel):
                 create_link_number += create_link_number_one_page
                 fail_link_number += fail_link_number_one_page
                 link_number += link_number_one_page
-                
-                if not fetch_item_id.page_path:
+                if not self.page_path:
                     if end_page_number_in_once_fetch == self.max_page_assign_again:
                         is_finished = True
+                    else:
+                        is_finished = False
                 else:
                     is_finished = True
+        return existing_link_number, update_link_number, create_link_number, link_number, fail_link_number, is_finished, end_page_number_in_once_fetch
 
-        self.last_fetched_item_id = fetch_item_id
+
+    def fetch_a_url_id (self, fetch_item_id):
+        begin_time = datetime.datetime.now()
+        if fetch_item_id:
+            url_id = fetch_item_id.url_id
+        else:
+            url_id = False
+        self.setting_for_fetch_obj( url_id, fetch_item_id)
+        existing_link_number, update_link_number, create_link_number, link_number, fail_link_number, is_finished, end_page_number_in_once_fetch = \
+            self._fetch_a_url_id (url_id, fetch_item_id)
         interval = (datetime.datetime.now() - begin_time).total_seconds()
+        if not self.is_test:
+            self.write_fetch(fetch_item_id, interval, end_page_number_in_once_fetch, create_link_number,\
+            update_link_number, link_number, fail_link_number, existing_link_number, is_finished)
+            self.ph_fetch_item_history_deal(fetch_item_id, end_page_number_in_once_fetch, create_link_number,\
+            update_link_number, link_number, existing_link_number, interval)
+            self.last_fetched_item_id = fetch_item_id
+        return None
+
+    def write_fetch(self, fetch_item_id, interval, end_page_number_in_once_fetch, create_link_number,\
+        update_link_number, link_number, fail_link_number, existing_link_number, is_finished):
+        fetch_item_id.fetched_number +=1
         fetch_item_id.interval = interval
         fetch_item_id.write({'current_page': end_page_number_in_once_fetch,
                     'create_link_number': create_link_number,
@@ -626,9 +640,11 @@ class CommonMainFetch(models.AbstractModel):
                     'existing_link_number': existing_link_number,
                     'is_finished':is_finished,
                     })
+
+    def ph_fetch_item_history_deal(self, fetch_item_id, end_page_number_in_once_fetch, create_link_number,\
+        update_link_number, link_number, existing_link_number, interval):
         can_xoa = self.env['bds.fetch.item.history'].search([('fetch_item_id','=', fetch_item_id.id)], offset=4)
         can_xoa.unlink()
-
         self.env['bds.fetch.item.history'].create({
             'current_page': end_page_number_in_once_fetch,
             'create_link_number': create_link_number,
@@ -638,9 +654,7 @@ class CommonMainFetch(models.AbstractModel):
             'fetch_item_id':fetch_item_id.id,
             'interval':interval,
         })
-        fetch_item_id.fetched_number +=1
 
-        return None
 
     def look_next_fetched_url_id(self):
         fetch_item_ids = self.fetch_item_ids.filtered(lambda i: not i.disible)

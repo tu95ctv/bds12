@@ -1,9 +1,43 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.addons.bds.models.bds_tools  import  request_html
+from odoo.addons.bds.models.bds_tools  import  FetchError, SaveAndRaiseException, SaveAndPass
 import json
 import math
 import re
+from urllib import request
+import logging
+# from odoo.addons.bds.models.main_fetch.main_fetch_common import FetchError, SaveAndRaiseException, SaveAndPass
+
+_logger = logging.getLogger(__name__)
+
+
+
+
+headers = { 'User-Agent' : 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36' }
+def request_html(url, try_again=1, is_decode_utf8 = True, headers=headers):
+    _logger.warning('***request_html***' + url)
+    count_fail = 0
+    def in_try():
+        req =request.Request(url, None, headers)
+        rp= request.urlopen(req)
+        mybytes = rp.read()
+        if is_decode_utf8:
+            html = mybytes.decode("utf8")
+            return html
+        else:
+            return mybytes
+    while 1:
+        if not try_again:
+            return in_try()
+        try:
+            html = in_try()
+            return html
+        except Exception as e:
+            print ('loi html')
+            count_fail +=1
+            sleep(5)
+            if count_fail ==5:
+                raise FetchError(u'Lỗi get html, url: %s'%url)
 
 def create_cho_tot_page_link(url_input, page_int):
     repl = 'o=%s'%(20*(page_int-1))
@@ -17,13 +51,14 @@ def create_cho_tot_page_link(url_input, page_int):
         url_input = re.sub('page=\d+', repl, url_input)
     return url_input
 
-class ChototMainFetch(models.AbstractModel):
-    _inherit = 'abstract.main.fetch'
+class MainFetchChotot():
+    # _inherit = 'abstract.main.fetch'
 
     def ph_parse_pre_topic(self, html_page):
         topic_data_from_pages_of_a_page = []
         if self.site_name == 'chotot':
             json_a_page = json.loads(html_page)
+            raise SaveAndRaiseException('chotot')
             topic_data_from_pages_of_a_page_origin = json_a_page['ads']
             for ad in topic_data_from_pages_of_a_page_origin:
                 topic_data_from_page = {}
@@ -58,25 +93,22 @@ class ChototMainFetch(models.AbstractModel):
         return topic_data_from_pages_of_a_page
 
 
-
     def create_page_link(self, format_page_url, page_int):
         if self.site_name == 'chotot':
             url =  create_cho_tot_page_link(format_page_url, page_int)
             return url
 
-    def parse_html_topic (self, topic_html_or_json, url_id):
+    def parse_html_topic (self, topic_html_or_json):
         if self.site_name =='chotot':
             topic_dict = self.get_topic(topic_html_or_json, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json, url_id)
-
+        return super().parse_html_topic(topic_html_or_json)
 
     def make_topic_link_from_list_id(self, list_id):
         link = super().make_topic_link_from_list_id(list_id)
         if  self.site_name =='chotot':
             link  = 'https://gateway.chotot.com/v1/public/ad-listing/' + str(list_id)
         return link
-
 
     def get_last_page_number(self, url_id):
         if self.site_name =='chotot':

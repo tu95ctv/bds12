@@ -56,7 +56,7 @@ def get_last_page_from_bdsvn_website(url_id):
 
 
 class BDSFetch(models.AbstractModel):
-    _inherit = 'abstract.main.fetch'
+    _name = 'abstract.main.fetch'
 
     def get_last_page_number(self, url_id):
         if self.site_name =='batdongsan':
@@ -70,12 +70,12 @@ class BDSFetch(models.AbstractModel):
         
         return link
 
-    def parse_html_topic (self, topic_html_or_json, url_id):
+    def parse_html_topic (self, topic_html_or_json):
         if self.site_name =='batdongsan':
             # get_bds_dict_in_topic(self, topic_html_or_json, self.page_dict)
             topic_dict = get_bds_dict_in_topic(self, topic_html_or_json, self.page_dict)
             return topic_dict
-        return super().parse_html_topic(topic_html_or_json, url_id)
+        return super().parse_html_topic(topic_html_or_json)
         
 
     def create_page_link(self, format_page_url, page_int):
@@ -143,7 +143,7 @@ class BDSFetch(models.AbstractModel):
                     date_dang = date_dang[-10:]
                     # public_datetime = datetime.datetime.strptime(date_dang,"%d/%m/%Y")
                     # topic_data_from_page['public_datetime'] = public_datetime
-                    topic_data_from_page['public_datetime_str'] = date_dang
+                    topic_data_from_page['publish_date_str'] = date_dang
                     topic_data_from_page['thumb'] = icon_soup[0]['src']
                     topic_data_from_pages_of_a_page.append(topic_data_from_page)
             else:
@@ -215,8 +215,8 @@ class BDSFetch(models.AbstractModel):
             # print ('***page_css_type***', page_css_type)
             # raise SaveAndRaiseException('page_css_type_%s'%page_css_type)
             # print (aaa)
-        if topic_data_from_pages_of_a_page:
-            save_to_disk(html_page, 'bds_page_loai_%s'%page_css_type)
+            if topic_data_from_pages_of_a_page:
+                save_to_disk(html_page, 'bds_page_loai_%s'%page_css_type)
         return topic_data_from_pages_of_a_page
 
 ####################### PARSE##########################
@@ -239,12 +239,12 @@ def get_images_for_bds_com_vn(soup):
 def get_public_datetime(soup):
     try:
         select = soup.select('div.prd-more-info > div:nth-of-type(3)')#[0].contents[0]
-        public_datetime_str = select[0].contents[2]
+        publish_date_str = select[0].contents[2]
     except IndexError:
         pass
-    public_datetime_str = public_datetime_str.replace('\r','').replace('\n','')
-    public_datetime_str = re.sub('\s*', '', public_datetime_str)
-    public_datetime = datetime.datetime.strptime(public_datetime_str,"%d-%m-%Y")
+    publish_date_str = publish_date_str.replace('\r','').replace('\n','')
+    publish_date_str = re.sub('\s*', '', publish_date_str)
+    public_datetime = datetime.datetime.strptime(publish_date_str,"%d-%m-%Y")
     return public_datetime
 
 
