@@ -5,7 +5,7 @@ import re
 from odoo import models,fields
 from odoo.addons.bds.models.bds_tools  import  FetchError
 import math
-from odoo.addons.bds.models.main_fetch.main_fetch_common1 import MainFetchCommon
+from odoo.addons.bds.models.main_fetch_common1 import MainFetchCommon
 
 #lam gon lai ngay 29/07
 def div_part(total_page, number_of_part, nth_part):

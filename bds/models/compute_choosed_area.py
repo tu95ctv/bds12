@@ -2,7 +2,7 @@
 import re
 import base64
 from unidecode import unidecode
-from odoo.addons.bds.models.compute_bds  import previous_of_match
+from odoo.addons.bds.models.main_fetch_common1  import previous_of_match
 
 
 def tim_dien_tich_trong_bai(html):

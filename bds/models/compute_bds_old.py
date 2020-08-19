@@ -197,7 +197,9 @@ def _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r):#compu
 
 def _compute_mat_tien_or_trich_dia_chi1(self, html, html_trich_dia_chi):#compute
     mat_tien_address = detect_mat_tien_address_sum(html)
-    trich_dia_chi = False_compute_mat_tien_or_trich_dia_chi1etect_hem_address_list(address_list)
+    trich_dia_chi = False
+    address_list = [html_trich_dia_chi]
+    sum_full_hem_address, co_date_247_result_keys_sum = detect_hem_address_list(address_list)
     if sum_full_hem_address:
         trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
     mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
@@ -348,8 +350,6 @@ def detect_is_mat_tien(html):
             return hxh_str, full_hxh, is_mat_tien
         else:
             return hxh_str, full_hxh, is_mat_tien        
-
-
 
 
 def cach_search(pre):

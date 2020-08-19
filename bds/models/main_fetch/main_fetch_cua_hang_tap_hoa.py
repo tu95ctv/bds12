@@ -17,7 +17,7 @@ import math
 from odoo.addons.bds.models.bds_tools  import  FetchError
 import traceback
 
-class TapHoaMainFetch(models.AbstractModel):
+class TapHoaMainFetch():#models.AbstractModel
     # _inherit = 'abstract.main.fetch'
 
     def get_main_obj(self):

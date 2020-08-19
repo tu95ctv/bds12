@@ -8,7 +8,7 @@ import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
 from odoo.exceptions import UserError
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
-from odoo.addons.bds.models.compute_bds  import  _compute_so_phong_ngu, _compute_mat_tien_or_trich_dia_chi,\
+from odoo.addons.bds.models.main_fetch_common1  import  _compute_so_phong_ngu, _compute_mat_tien_or_trich_dia_chi,\
     _compute_dd_tin_cua_dau_tu, _compute_loai_hem_combine, _compute_kw_mg
 from odoo.addons.bds.models.compute_choosed_area  import _compute_choosed_area_muc_gia
 import psycopg2
@@ -125,14 +125,23 @@ class bds(models.Model):
     html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
     so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
     #dia chi
-    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',
-        compute='_compute_mat_tien_or_trich_dia_chi',store=True)
-    trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store = True, string='Trích địa chỉ')
-    mat_tien_address = fields.Char(compute ='_compute_mat_tien_or_trich_dia_chi', store=True)
-    mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
-    is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),
-        ('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    # same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',
+    #     )
+    # trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store = True, string='Trích địa chỉ')
+    # mat_tien_address = fields.Char(compute ='_compute_mat_tien_or_trich_dia_chi', store=True)
+    # mat_tien_or_trich_dia_chi = fields.Char(compute='_compute_mat_tien_or_trich_dia_chi', store=True)
+    # is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),
+    #     ('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
     
+    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',
+        )
+    trich_dia_chi = fields.Char( string='Trích địa chỉ')
+    mat_tien_address = fields.Char()
+    mat_tien_or_trich_dia_chi = fields.Char()
+    is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),
+        ('0','Không Có trích địa chỉ hoặc mặt tiền' )])
+
+
     #_compute_kw_mg
     dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),
         ('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
