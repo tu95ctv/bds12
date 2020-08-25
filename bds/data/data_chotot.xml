@@ -113,19 +113,19 @@
     </record>
 
     <record model="bds.url" id="url_chotot_cho_thue_all_hcm">
-        <field name="description">Chợ tốt cho thuê all</field>
+        <field name="description">Chợ tốt cho thuê all hcm rent</field>
         <field name="sell_or_rent">rent</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?region_v2=13000&amp;cg=1000&amp;limit=20&amp;t=u,h</field>
     </record>
     
     <record model="bds.url" id="url_chotot_bds_nhapho_toan_quoc_all_sell">
-        <field name="description">Chợ tốt all toàn quôc nhà phố sell</field>
+        <field name="description">Chợ tốt tq toàn quôc nhà phố sell</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?cg=1000&amp;limit=20&amp;st=s,k</field>
     </record>
     
 
     <record model="bds.url" id="url_chotot_bds_nhapho_toan_quoc_all_rent">
-        <field name="description">Chợ tốt all cho thuê toàn quôc nhà phố rent</field>
+        <field name="description">Chợ tốt tq cho thuê toàn quôc nhà phố rent</field>
         <field name="sell_or_rent">rent</field>
         <field name="url">https://gateway.chotot.com/v1/public/ad-listing?cg=1000&amp;limit=20&amp;st=u,h</field>
     </record>

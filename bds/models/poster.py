@@ -60,15 +60,8 @@ class Poster(models.Model):
             username_in_site_ids_shows = map(lambda r : r.username_in_site + '(' + r.site_id.name +   ')',r.poster_line_ids)
             r.poster_line_ids_show = ','.join(username_in_site_ids_shows)
 
-
-    du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
-                                         ('dd_dt','ĐT'),
-                                         ('dd_cc','CC'),
-                                         ('dd_kb', 'KB')],
-                                         string="Dự đoán CC hay MG")
-    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
-            ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
-            )
+    len_site = fields.Integer()
+  
 
     count_post_all_site = fields.Integer()
     count_post_of_onesite_max = fields.Integer()
@@ -82,6 +75,16 @@ class Poster(models.Model):
     chotot_count = fields.Integer()
     chotot_moi_gioi_count = fields.Integer()
     chotot_chinh_chu_count = fields.Integer()
+    du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
+                                         ('dd_dt','ĐT'),
+                                         ('dd_cc','CC'),
+                                         ('dd_kb', 'KB')],
+                                         string="Dự đoán CC hay MG")
+    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
+            ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
+            )
+
+
     detail_du_doan_cc_or_mg = fields.Selection(
                                                   [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
                                                    ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 

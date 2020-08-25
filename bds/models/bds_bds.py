@@ -568,7 +568,7 @@ class bds(models.Model):
             site_post_count[str(site_id)] = one_site_post_count + 1
             poster_dict['site_post_count'] = site_post_count
             site_and_count_max = max(site_post_count.items(), key=operator.itemgetter(1))
-
+            r.len_site = len(site_post_count)
 
             count_post_of_onesite_max = site_and_count_max[1]
             siteleech_max_id = int(site_and_count_max[0])
@@ -594,7 +594,7 @@ class bds(models.Model):
             guess_count['address_rate'] = address_rate
             # dd_tin_cua_co_count  = guess_count.get('dd_tin_cua_co_count', 0)
             dd_tin_cua_co_count = r.dd_tin_cua_co_count
-            if bds_id.dd_tin_cua_co:
+            if bds_id.dd_tin_cua_co == 'kw_co_cap_1':
                 dd_tin_cua_co_count +=1
                 guess_count['dd_tin_cua_co_count'] = dd_tin_cua_co_count
                 poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_count/count_post_all_site
