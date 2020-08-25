@@ -1,0 +1,68 @@
+<odoo>
+    <record id="address_form" model="ir.ui.view">
+        <field name="name">bds.address.form</field>
+        <field name="model">bds.address</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="count" />
+                            <field name="count_dict" />
+
+                            <field name="one_site_count_max" />
+                            <field name="bds_ids_dict" />
+                            <field name="user_ids_dict" />
+                            <field name="bds_ids_list" />
+                            <field name="user_ids_list" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="address_list" model="ir.ui.view">
+        <field name="name">bds.address.tree</field>
+        <field name="model">bds.address</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name" />
+                <field name="count" />
+                <field name="count_dict" />
+                <field name="one_site_count_max" />
+                <field name="bds_ids_dict" />
+                <field name="user_ids_dict" />
+                <field name="bds_ids_list" />
+                <field name="user_ids_list" />
+                
+            </tree>
+        </field>
+    </record>
+
+    <record id="address_search" model="ir.ui.view">
+        <field name="name">address search</field>
+        <field name="model">bds.address</field>
+        <field name="arch" type="xml">
+            <search string="address search">
+               <field name="name" />
+                <field name="count" />
+                <field name="bds_ids_dict" />
+                <field name="user_ids_dict" />
+                <field name="count_dict" />
+
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="address_action">
+        <field name="name">Address</field>
+        <field name="res_model">bds.address</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+
+
+</odoo>

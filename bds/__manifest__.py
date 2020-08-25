@@ -40,6 +40,7 @@
         'views/bds_form.xml',
         'views/bds_list.xml',
         'views/tap_hoa.xml',
+        'views/address.xml',
 
         'views/poster.xml',
         'views/quan.xml',

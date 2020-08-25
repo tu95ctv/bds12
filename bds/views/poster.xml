@@ -47,13 +47,12 @@
                         <group>
                             <group>
                                 <field name="nha_mang" />
-                                <field name="count_chotot_post_of_poster" />
                                 <field name="count_bds_post_of_poster" />
                                 <field name="count_post_all_site" />
                                 <field name="address_topic_number" />
                                 <field name="du_doan_cc_or_mg" />
                                 <field name="detail_du_doan_cc_or_mg" />
-
+                                <field name="site_post_count" />
                             </group>
                             <group>
                                 <field name="cong_ty" />
@@ -105,6 +104,8 @@
                      <field name="quan_chuyen_1" />
                      <field name="quan_chuyen_2" />
                      <field name="number_post_of_quan" />
+                     <field name="site_post_count" />
+                     <field name="guess_count" />
                      <!-- <field name="rate_chinh_chu" />
                      <field name="rate_moi_gioi" /> -->
                      <field name="username" />
@@ -115,7 +116,6 @@
                     <field name="detail_du_doan_cc_or_mg" />
                     <field name="du_doan_cc_or_mg" />
                     <field name="chotot_mg_or_cc" />
-                     <field name="count_chotot_post_of_poster" />
                     <field name="count_post_all_site_in_month" />
                     <field name="count_bds_post_of_poster" />
                     <field name="quanofposter_ids_show" />

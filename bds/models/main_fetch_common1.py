@@ -11,12 +11,13 @@ from time import sleep
 from dateutil.relativedelta import relativedelta
 import logging
 _logger = logging.getLogger(__name__)
-
+from unidecode import unidecode
 import json
 import math
 import re
 from urllib import request
 from unidecode import unidecode
+import threading, multiprocessing
 # from odoo.osv import expression
 # from .compute_bds import _compute_mat_tien_or_trich_dia_chi1
 import logging
@@ -200,7 +201,6 @@ def write_gia(topic_dict):
 
 def write_public_datetime(topic_dict):
     update = {}
-    print ('**topic_dict**', topic_dict)
     if 'date' in topic_dict and 'public_datetime' not in topic_dict:
         date = topic_dict['date']
         public_datetime = convert_chotot_date_to_datetime(date)
@@ -493,7 +493,6 @@ class MainFetchCommon():
                     create_dict.update(topic_data_from_page)
                 
                 if self.st_is_bds_site :
-                    print ('***vao day khong')
                     self.odoo_model_topic_dict(create_dict)
                     if not self.is_test:
                         more_create_dict = self.th_more_create_dict(create_dict, url_id, link)
@@ -597,10 +596,6 @@ class MainFetchCommon():
         for topic_count, topic_data_from_page in enumerate(topic_data_from_pages_of_a_page):
             self.topic_count = topic_count
             link = topic_data_from_page['link']
-            # link = self.make_topic_link_from_list_id(list_id)
-            # if self.topic_count == 5:
-            #     self.env.cr.rollback()
-                # return is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number
             try:
                 is_existing_link_number, is_update_link_number, is_create_link_number, is_fail_link_number,  a_topic_fetch_dict = \
                     self.topic_handle(link, url_id, topic_data_from_page
@@ -622,10 +617,8 @@ class MainFetchCommon():
             end_page_number_in_once_fetch, page_lists, begin, number_of_pages = 1,[1],1,1
             return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
         url_id = fetch_item_id
-        # current_page_field_name = 'current_page'
         set_number_of_page_once_fetch_name = 'set_number_of_page_once_fetch'
         set_leech_max_page_name = 'set_leech_max_page'
-        # self.current_page_field_name = current_page_field_name
         current_page = fetch_item_id.current_page
         set_number_of_page_once_fetch = getattr(url_id, set_number_of_page_once_fetch_name)
         url_set_leech_max_page = getattr(url_id, set_leech_max_page_name)
@@ -633,7 +626,7 @@ class MainFetchCommon():
         fetch_error = False
         try:
             web_last_page_number =  self.get_last_page_number(fetch_item_id.url_id)
-            print ('**8web_last_page_number**', web_last_page_number)
+            fetch_item_id.url_id.write({'web_last_page_number':web_last_page_number})
         except FetchError as e:
             web_last_page_number = fetch_item_id.url_id.web_last_page_number or 200
             fetch_error = True
@@ -642,9 +635,6 @@ class MainFetchCommon():
             max_page =  set_leech_max_page
         else:
             max_page = web_last_page_number
-        print ('***max_page***', max_page)
-        if fetch_error == False:
-            fetch_item_id.url_id.web_last_page_number = web_last_page_number
         begin = current_page + 1
         min_page = url_id.min_page or 1
         if begin < min_page:
@@ -654,11 +644,10 @@ class MainFetchCommon():
         end = begin   + set_number_of_page_once_fetch - 1
         if end > max_page:
             end = max_page
-        self.max_page_assign_again = max_page
         end_page_number_in_once_fetch = end
         page_lists = range(begin, end + 1)
         number_of_pages = end - begin + 1
-        return end_page_number_in_once_fetch, page_lists, begin, number_of_pages
+        return end_page_number_in_once_fetch, page_lists, begin, number_of_pages, max_page
 
 
     def fetch_bo_sung_da_co_link(self, fetch_item_id):
@@ -729,16 +718,18 @@ class MainFetchCommon():
             is_finished = False
         else:
             if not self.page_path and fetch_item_id:
-                end_page_number_in_once_fetch, page_lists, begin, so_page =  self.gen_page_number_list(fetch_item_id) 
+                end_page_number_in_once_fetch, page_lists, begin, so_page, max_page =  self.gen_page_number_list(fetch_item_id) 
             else: 
                 if not self.page_path:
                     begin_page, end_page = self.attrs_dict.get('begin_page') or 1, self.attrs_dict.get('end_page') or 1
                 else:
                     begin_page, end_page = 1,1
-                page_lists = range(begin_page,end_page+1)
-            
+                    page_lists = range(begin_page,end_page+1)
+            print ('**page_lists**', page_lists)
             for page_int in page_lists:
-                rs = self.page_handle( page_int,self.url, url_id, fetch_item_id)
+
+                rs = self.page_handle( page_int, self.url, url_id, fetch_item_id)
+
                 existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
                     fail_link_number_one_page, link_number_one_page, page_list = rs
                     
@@ -748,7 +739,7 @@ class MainFetchCommon():
                 fail_link_number += fail_link_number_one_page
                 link_number += link_number_one_page
                 if not self.page_path and not self.is_test:
-                    if end_page_number_in_once_fetch == self.max_page_assign_again:
+                    if end_page_number_in_once_fetch == max_page:
                         is_finished = True
                     else:
                         is_finished = False
@@ -978,6 +969,8 @@ header = {
                 'Referer': 'https://batdongsan.com.vn/ban-nha-dat-tp-hcm/p4',
                 'Connection': 'keep-alive',
                 'Cookie': 'SERVERNAME=L_22006251500; _gcl_au=1.1.271490124.1593699646; __cfduid=d962388d50425a164b6fa007bb18400a11593699656; _ga=GA1.3.2004129680.1593699653; usidtb=el2cCH0hYkeyFsUCXtus4pJnBJX0iIA5; __auc=fc627e9a1730fe6dc02b1aad644; ins-storage-version=75; c_u_id=104601; uitb=%7B%22name%22%3A%22Nguyen%20Duc%20Tu%22%2C%22email%22%3A%22nguyenductu%40gmail.com%22%2C%22mobile%22%3A%220916022787%22%2C%22time%22%3A1593701739318%7D; NPS_b514e4e7_last_seen=1593701743389; _fbp=fb.2.1593701744644.54625863; _ym_uid=15937017471040494592; _ym_d=1593701747; __zi=2000.SSZzejyD6jy_Zl2jp1eKttQU_gxC3nMGTChWuC8NLyncmFxoW0L1t2AVkF62JGtQ8fgnzeP5IDidclhqXafDtIkV_FG.1; fpsend=147621; __zlcmid=yzjFnky3OLinOV; SERVERID=H; ASP.NET_SessionId=pmzli2x4f0m2fw0jfdbp2aov; _gid=GA1.3.1740494310.1594452137; psortfilter=1%24all%24VOE%2FWO8MpO1adIX%2BwMGNUA%3D%3D; sidtb=Xs6HBrUnnCvh6iGaEMGmhBx2nCLrUMGh; __asc=b0a63b421733d08f828fd8fa4e2',
+                'Cookie': 'SERVERNAME=L_22006251500; _gcl_au=1.1.271490124.1593699646; __cfduid=d334ee9afa89db62b58be8d07341be0151598182301; _ga=GA1.3.2004129680.1593699653; usidtb=el2cCH0hYkeyFsUCXtus4pJnBJX0iIA5; __auc=fc627e9a1730fe6dc02b1aad644; ins-storage-version=75; c_u_id=104601; uitb=%7B%22name%22%3A%22Nguyen%20Duc%20Tu%22%2C%22email%22%3A%22nguyenductu%40gmail.com%22%2C%22mobile%22%3A%220916022787%22%2C%22time%22%3A1593701739318%7D; NPS_b514e4e7_last_seen=1593701743389; _fbp=fb.2.1593701744644.54625863; _ym_uid=15937017471040494592; _ym_d=1593701747; __zi=2000.SSZzejyD6jy_Zl2jp1eKttQU_gxC3nMGTChWuC8NLyncmFxoW0L1t2AVkF62JGtQ8fgnzeP5IDidclhqXafDtIkV_FG.1; fpsend=147621; __zlcmid=yzjFnky3OLinOV; SERVERID=H; ASP.NET_SessionId=pmzli2x4f0m2fw0jfdbp2aov; _gid=GA1.3.1740494310.1594452137; psortfilter=1%24all%24VOE%2FWO8MpO1adIX%2BwMGNUA%3D%3D; sidtb=Xs6HBrUnnCvh6iGaEMGmhBx2nCLrUMGh; __asc=b0a63b421733d08f828fd8fa4e2',
+                'Cookie':'__asc=16dd9320173b2dbe09b0f187dc8; PRODUCT_FILTER=%7B%22TabIndex%22%3A0%2C%22SortValue%22%3A1%2C%22PageIndex%22%3A1%2C%22HashAlias%22%3A%2248f0d40b1731d909212598242194556c2306f2dde9c6827fab303276aa8fec92%22%2C%22CurrentUrl%22%3A%22https%3A//batdongsan.com.vn/nha-dat-ban%22%7D'
                 # 'Upgrade-Insecure-Requests': 1
                 }
 from bs4 import BeautifulSoup
@@ -1647,7 +1640,6 @@ def detect_mat_tien_address(html, p = None):
                 if is_mt:
                     continue
                 bao_nhieu_met = re.search('\d+m|\dT', number, re.I)
-                print ('**bao_nhieu_met**', bao_nhieu_met)
                 if bao_nhieu_met:
                     continue
                 co_format_sdt = re.search('[\d\W]{6,}|3 Tháng 2|đi |thẳng |\d+(?:tr|t) \dL', full_address)
@@ -1692,13 +1684,13 @@ def detect_mat_tien_address_sum(html):
     return mat_tien_address
 
 def trim_street_name(street_name_may_be):
-    #pr: detect_hem_address
+    #pr: detect_trich_dia_chi
     rs = re.sub(',|\.','', street_name_may_be, flags=re.I)
     rs = rs.strip()
     return rs
 
-def detect_hem_address(address):
-    #@pr: detect_hem_address_list
+def detect_trich_dia_chi(address):
+    #@pr: detect_trich_dia_chi_list
     keys_street_has_numbers = ['3/2','30/4','19/5','3/2.','3/2,','23/9']
     pat_247 = '24h*/7|24h*/24|1/500'
     trust_address_result_keys = []
@@ -1719,6 +1711,10 @@ def detect_hem_address(address):
                 black_list_rs = re.search(black_list, address, re.I)
                 if black_list_rs:
                     only_number_trust_address_result_keys.append(adress_number)
+                    continue
+                rs = re.search('\d+m',street_name, re.I)
+                print ('***rs**', rs)
+                if  rs:
                     continue
                 if adress_number in ['1/2','50/100','100/100']:
                     continue
@@ -1745,21 +1741,32 @@ def detect_hem_address(address):
                     before_index = 0
                 before_string = address[before_index: index]
                 is_van_phong = re.search('văn phòng|vp|bđs|nhà đất|[\d\W]{4,}', before_string, re.I)
+
+
                 if is_van_phong:
                     continue
+
+                before_index = index -5
+                if before_index < 0:
+                    before_index = 0
+                before_string = address[before_index: index]
+                is_van_phong = re.search('hẻm|hẽm', before_string, re.I)
+                if is_van_phong:
+                    continue
+
                 trust_address_result_keys.append((adress_number, full_adress))
                 only_number_trust_address_result_keys.append(adress_number)
         else:
             break
     return trust_address_result_keys, co_date_247_result_keys
 
-def detect_hem_address_list(address_list):
+def detect_trich_dia_chi_list(address_list):
     #pr: _compute_mat_tien_or_trich_dia_chi
     sum_full_hem_address = [] 
     only_number_address_sum_full_hem_address = [] 
     co_date_247_result_keys_sum = []
     for ad in address_list:
-        trust_address_result_keys, co_date_247_result_keys = detect_hem_address(ad)
+        trust_address_result_keys, co_date_247_result_keys = detect_trich_dia_chi(ad)
         co_date_247_result_keys_sum.extend(co_date_247_result_keys)
         for i in trust_address_result_keys:
             number_address = i[0]
@@ -1772,7 +1779,7 @@ def _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r):#compu
         mat_tien_address = detect_mat_tien_address_sum(html)
         trich_dia_chi = False
         address_list = [html_trich_dia_chi]
-        sum_full_hem_address, co_date_247_result_keys_sum = detect_hem_address_list(address_list)
+        sum_full_hem_address, co_date_247_result_keys_sum = detect_trich_dia_chi_list(address_list)
         if sum_full_hem_address:
             trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
         mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
@@ -1789,10 +1796,19 @@ def _compute_mat_tien_or_trich_dia_chi1(self, html, html_trich_dia_chi):#compute
     mat_tien_address = detect_mat_tien_address_sum(html)
     trich_dia_chi = False
     address_list = [html_trich_dia_chi]
-    sum_full_hem_address, co_date_247_result_keys_sum = detect_hem_address_list(address_list)
+    sum_full_hem_address, co_date_247_result_keys_sum = detect_trich_dia_chi_list(address_list)
+    mat_tien_or_trich_dia_chis = []
+    if mat_tien_address:
+        mat_tien_or_trich_dia_chis.append(mat_tien_address)
     if sum_full_hem_address:
-        trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
-    mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
+        for i in sum_full_hem_address:
+            mat_tien_or_trich_dia_chis.append(i[1])
+    if mat_tien_or_trich_dia_chis:
+        mat_tien_or_trich_dia_chi = ','.join(mat_tien_or_trich_dia_chis)
+    else:
+        mat_tien_or_trich_dia_chi = False
+
+    # mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
     is_mat_tien_or_trich_dia_chi ='1' if  bool(mat_tien_or_trich_dia_chi) else '0'
     return mat_tien_address, trich_dia_chi, mat_tien_or_trich_dia_chi, is_mat_tien_or_trich_dia_chi
 
@@ -2111,13 +2127,13 @@ def valid_fetch_list(rs):
     filter_rs = list(filter(lambda r: not r['gia'], rs))
     print (len(filter_rs))
 
-def test_fetch():
+def test_fetch(begin_page = 1, end_page=1):
     attrs_dict = {}
     site_name = 'chotot'
     site_name = 'muaban'
     site_name = 'cuahangtaphoa'
     site_name = 'batdongsan'
-    site_name = 'chotot'
+    site_name = 'batdongsan'
     is_test = True
     is_save_mau = True
     topic_path = False
@@ -2138,7 +2154,7 @@ def test_fetch():
         # more_dict = {'is_test':True, 'site_name': 'batdongsan', 'page_path':'mau/bds_page_loai_2',
         # 'st_is_request_topic':False, }
         more_dict = {'url':'https://batdongsan.com.vn/nha-dat-ban',
-        'begin_page':500,  'end_page':500, }# 'is_save_and_raise_in_topic':True
+        'begin_page':1,  'end_page':1, }# 'is_save_and_raise_in_topic':True
     
         # more_dict = {'is_test':True, 'site_name': 'batdongsan', 'url':'https://batdongsan.com.vn/nha-dat-ban',
         # 'begin_page':500,  'end_page':500,  'topic_link':'https://batdongsan.com.vn/ban-can-ho-chung-cu-duong-ho-tung-mau-phuong-phu-dien-prj-goldmark-city/-bay-gio-hoac-khong-bao-gio-mua-160m2-cho-gia-dinh-da-the-he-tang-ngay-hon-600-000-000-pr26721510'
@@ -2153,25 +2169,36 @@ def test_fetch():
     attrs_dict['topic_link']=topic_link
     attrs_dict['page_path']=page_path
     attrs_dict['page_link']=page_link
+    attrs_dict['begin_page']=begin_page
+    attrs_dict['end_page']=end_page
+
 
     main_fetch = MainFetchCommon(attrs_dict = attrs_dict)
     fetch_list = main_fetch.fetch_a_url_id(False)
-    print ('***fetch_list***', fetch_list)
-    print ('len(fetch_list)',len(fetch_list))
     if site_name in ['chotot','batdongsan','cuahangtaphoa']:
         valid_fetch_list(fetch_list)
 
 def test_trich_dia_chi():
-    html = 'nhà 1tr 2L là không được'
+    html = 'bán nhà 26/3 200m'
+    html = '''Chính chủ bán nhà Hẻm xe hơi,3/31/11 đường 182,P:TNP A,Q9( Hẻm 3/31 kế bên nhà 3/31B)Diện tích công nhận 88.3m2,ngang 5m2 phòng ngủ,2 toilet,phòng khách,nhà bếp,sân đậu xe hơiNhà mới,vào ở ngay hoặc cho thuê,khu vực an ninh,thoáng mátHướng nhà: Đông NamVị trí thuận lợi:Cách ngã tư Thủ Đức 2km, Gần chợ Hiệp Phú,Chợ Tăng Nhơn Phú A,UBND Phường Tăng Nhơn Phú A,Trường học:ĐH Giao Thông Vận Tải,Học Viện Công Nghệ Bưu Chính Viễn Thông,ĐH SPKT,Trường THPT Dương Văn Thì,Khu Công Nghệ Cao....Giá:3 tỷ 6 thương lượngLiên hệ: Thành Hưng: 098 556 29 33'''
     rs = _compute_mat_tien_or_trich_dia_chi1 (False, html, html)
     print (rs)
 
 if __name__ == '__main__':
     loai_test = 'trich_dia_chi'
-    loai_test = 'test_fetch'
+    # loai_test = 'test_fetch'
     if loai_test == 'trich_dia_chi':
         test_trich_dia_chi()
     else:
+        # jobs = []
+        # nth = 2
+        # part = 1
+        # for i_thread in range(nth):
+        #     begin = i_thread* part + 1
+        #     end = (i_thread + 1) * part
+        #     p = multiprocessing.Process(target=test_fetch, args=(begin, end))
+        #     jobs.append(p)
+        #     p.start()
         test_fetch()
     
 

@@ -5,10 +5,43 @@ import datetime
 import re
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
 from odoo.exceptions import UserError
+import json
+class Jsonb(fields.Char):
+    column_cast_from = ('jsonb',)
+    _slots = {
+        'size': None,                   # maximum size of values (deprecated)
+    }
+
+    @property
+    def column_type(self):
+        return ('jsonb','jsonb')
+
+    def convert_to_read(self, value, record, use_name_get=True):
+        if isinstance(value,dict):
+            value = str(value)
+            value = value.replace("'",'"')
+        return value
+        
+    def convert_to_column(self, value, record, values=None):
+        if isinstance(value, dict):
+            value = json.dumps(value)
+        elif isinstance(value,str):
+            value = value.replace("'",'"')
+        return value
+
+    def convert_to_cache(self, value, record, validate=True):
+        if value and isinstance(value, str):
+            value = value.replace("'",'"')
+            value = json.loads(value)
+        return value
+
+
 
 class Poster(models.Model):
     _name = 'bds.poster'
     _order = 'count_post_all_site desc'
+    site_post_count = Jsonb(default={})
+    guess_count = Jsonb(default={})
     phone = fields.Char()
     login = fields.Char()
     username = fields.Char(compute = 'username_')
@@ -23,119 +56,28 @@ class Poster(models.Model):
     nha_mang = fields.Selection([('vina','vina'),('mobi','mobi'),('viettel','viettel'),('khac','khac')],compute='nha_mang_',store=True)
     username_in_site_ids = fields.One2many('bds.posternamelines','poster_id')
     username_in_site_ids_show = fields.Char(compute='username_in_site_ids_show_')
-    
     quan_id_for_search = fields.Many2one('res.country.district',related = 'quanofposter_ids.quan_id')
     quanofposter_ids_show = fields.Char(compute='quanofposter_ids_show_')
-    # site_ids = fields.Many2many('bds.siteleech','site_poster_rel','siteleech_id', 'poster_id')
     site_ids = fields.Many2many('bds.siteleech')
-    # len_site = fields.Integer(compute='_compute_len_site', store=True)
     len_site = fields.Integer()
-    # @api.depends('site_ids')
-    # def _compute_len_site(self):
-    #     for r in self:
-    #         r.len_site = len(r.site_ids)
 
-
-
-
-   
-
-
-
-    # site_count_of_poster = fields.Integer(, store=True)
-    # address_topic_number = fields.Integer(compute ='count_post_of_poster_', store=True)
-    # chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
-    #         ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
-    #         compute ='count_post_of_poster_', store=True)
-    # dd_tin_cua_co_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_', store=True)
-    # dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_', store=True)
-    # address_rate = fields.Float(digits=(6,2),compute ='count_post_of_poster_', store=True)
-    # du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
-    #                                      ('dd_dt','ĐT'),
-    #                                      ('dd_cc','CC'),
-    #                                      ('dd_kb', 'KB')],
-    #                                     compute = 'count_post_of_poster_', string="Dự đoán CC hay MG", store=True)
-    # count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',string=u'chotot count', store=True)
-    # count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_', store=True)
-    # count_post_all_site = fields.Integer(compute='count_post_of_poster_', store=True)
-    # count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_', store=True) 
-    # detail_du_doan_cc_or_mg = fields.Selection(
-    #                                               [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
-    #                                                ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
-                                                   
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
-    #                                                ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
-
-                                                   
-                                                   
-    #                                                ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
-    #                                                ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
-    #                                                ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
-    #                                                ('dd_kb','dd_kb'),
-    #                                                ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
-    #                                                ], store=True
-    #                                                )
-
-
-
-    # site_count_of_poster = fields.Integer()
-    # address_topic_number = fields.Integer(compute ='count_post_of_poster_')
-    # chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
-    #         ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
-    #         compute ='count_post_of_poster_')
-    # dd_tin_cua_co_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
-    # dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2), compute ='count_post_of_poster_')
-    # address_rate = fields.Float(digits=(6,2),compute ='count_post_of_poster_')
-    # du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
-    #                                      ('dd_dt','ĐT'),
-    #                                      ('dd_cc','CC'),
-    #                                      ('dd_kb', 'KB')],
-    #                                     compute = 'count_post_of_poster_', string="Dự đoán CC hay MG")
-    # count_chotot_post_of_poster = fields.Integer(compute='count_post_of_poster_',string=u'chotot count')
-    # count_bds_post_of_poster = fields.Integer(compute='count_post_of_poster_')
-    # count_post_all_site = fields.Integer(compute='count_post_of_poster_',store=True)
-    # count_post_all_site_in_month = fields.Integer(compute='count_post_of_poster_') 
-    # detail_du_doan_cc_or_mg = fields.Selection(
-    #                                               [('dd_cc_b_moi_gioi_n_address_rate_gt_0_5','dd_cc_b_moi_gioi_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_moi_gioi_n_address_rate_lte_0_5','dd_mg_b_moi_gioi_n_address_rate_lte_0_5'), 
-    #                                                ('dd_cc_b_kw_co_n_address_rate_gt_0_5', 'dd_cc_b_kw_co_n_address_rate_gt_0_5'),
-    #                                                ('dd_mg_b_kw_co_n_address_rate_lte_0_5','dd_mg_b_kw_co_n_address_rate_lte_0_5'),
-                                                   
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0', 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'),
-    #                                                ('dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0', 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'),
-    #                                                ('dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure', 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure'),
-
-                                                   
-                                                   
-    #                                                ('dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3','dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'),
-    #                                                ('dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3','dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'),
-    #                                                ('dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0','dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'),
-    #                                                ('dd_kb','dd_kb'),
-    #                                                ('dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0','dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0')
-    #                                                ]
-    #                                                )
-
-
-
-    site_count_of_poster = fields.Integer()
-    address_topic_number = fields.Integer()
-    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
-            ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
-            )
-    dd_tin_cua_co_rate = fields.Float(digits=(6,2))
-    dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2) )
-    address_rate = fields.Float(digits=(6,2))
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
                                          ('dd_cc','CC'),
                                          ('dd_kb', 'KB')],
                                          string="Dự đoán CC hay MG")
-    count_chotot_post_of_poster = fields.Integer(string=u'chotot count')
+    chotot_mg_or_cc = fields.Selection([('moi_gioi','moi_gioi'), 
+            ('chinh_chu','chinh_chu'), ('khong_biet', 'Không có bài ở chợ tốt')],
+            )
+
+            
+
+    site_count_of_poster = fields.Integer()
+    address_topic_number = fields.Integer()
+    dd_tin_cua_co_rate = fields.Float(digits=(6,2))
+    dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2) )
+    address_rate = fields.Float(digits=(6,2))
+                                        
     count_bds_post_of_poster = fields.Integer()
     count_post_all_site = fields.Integer()
     count_post_all_site_in_month = fields.Integer() 
@@ -226,98 +168,7 @@ class Poster(models.Model):
                 if len(qops) == 2:
                     r.quan_chuyen_2 = qops[1]
 
-    # @api.depends('post_ids','post_ids.trich_dia_chi', 'post_ids.dd_tin_cua_dau_tu', 'post_ids.dd_tin_cua_co')
-    # @api.depends('post_ids')
-    # def count_post_of_poster_(self):
-    #     bds_obj = self.env['bds.bds']
-    #     for r in self:
-    #         count_post_all_site = bds_obj.search_count([('poster_id','=',r.id)])
-    #         r.count_post_all_site = count_post_all_site
-    #         # return count_post_all_site
-    #         count_chotot_post_of_poster = bds_obj.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
-    #         r.count_chotot_post_of_poster = count_chotot_post_of_poster
-    #         count_bds_post_of_poster = bds_obj.search_count([('poster_id','=',r.id),('link','like','batdongsan')])
-    #         r.count_bds_post_of_poster = count_bds_post_of_poster
-    #         count_post_all_site_in_month = bds_obj.search_count([('poster_id','=',r.id),('public_datetime','>',fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))])
-    #         r.count_post_all_site_in_month = count_post_all_site_in_month
-    #         address_topic_number = bds_obj.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
-    #         r.address_topic_number= address_topic_number
-    #         address_rate = 0
-    #         if count_post_all_site:
-    #             address_rate = address_topic_number/count_post_all_site
-    #             r.address_rate = address_rate
-    #             dd_tin_cua_co_count = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
-    #             r.dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
-
-    #             dd_tin_cua_dau_tu_count = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
-    #             r.dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
-
-    #         count_chotot_moi_gioi = bds_obj.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
-    #         if count_chotot_moi_gioi:
-    #             chotot_mg_or_cc = 'moi_gioi'
-    #         else:
-    #             if count_chotot_post_of_poster:
-    #                 chotot_mg_or_cc = 'chinh_chu'
-    #             else:
-    #                 chotot_mg_or_cc = 'khong_biet'
-    #         r.chotot_mg_or_cc = chotot_mg_or_cc
-    #         dd_tin_cua_co = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', 'kw_co_cap_1')])
-    #         dd_tin_cua_dau_tu = bds_obj.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
-            
-    #         if chotot_mg_or_cc =='moi_gioi' :
-    #             if address_rate > 0.5:
-    #                 du_doan_cc_or_mg= 'dd_cc'
-    #                 detail_du_doan_cc_or_mg = 'dd_cc_b_moi_gioi_n_address_rate_gt_0_5'
-    #             else:
-    #                 du_doan_cc_or_mg= 'dd_mg'
-    #                 detail_du_doan_cc_or_mg = 'dd_mg_b_moi_gioi_n_address_rate_lte_0_5'
-    #         elif dd_tin_cua_co:
-    #             if address_rate > 0.5:
-    #                 du_doan_cc_or_mg= 'dd_cc'
-    #                 detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
-    #             else:
-    #                 du_doan_cc_or_mg= 'dd_mg'
-    #                 detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
-    #         else:
-    #             if chotot_mg_or_cc =='chinh_chu':
-                    
-    #                 if count_post_all_site > 3:
-    #                     if address_rate > 0:
-    #                         du_doan_cc_or_mg= 'dd_cc'
-    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
-    #                     else:
-    #                         du_doan_cc_or_mg= 'dd_mg'
-    #                         detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'
-    #                 else:
-    #                     du_doan_cc_or_mg= 'dd_cc'
-    #                     if address_rate > 0:
-    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'
-    #                     else:
-    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
-    #             else:#khong_biet, muaban
-    #                 if count_post_all_site  > 3:
-    #                     if address_rate >= 0.3:
-    #                         du_doan_cc_or_mg= 'dd_cc'
-    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'
-    #                     else:
-    #                         du_doan_cc_or_mg= 'dd_mg'
-    #                         detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
-                            
-    #                 else: #count_post_all_site  <= 3
-    #                     if address_rate: 
-    #                         du_doan_cc_or_mg= 'dd_cc'
-    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'
-    #                     else:
-    #                         du_doan_cc_or_mg= 'dd_kb'
-    #                         detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
-
-    #         if du_doan_cc_or_mg !='dd_mg':
-    #             if  dd_tin_cua_dau_tu:
-    #                 du_doan_cc_or_mg= 'dd_dt'
-                    
-                    
-    #         r.du_doan_cc_or_mg = du_doan_cc_or_mg
-    #         r.detail_du_doan_cc_or_mg = detail_du_doan_cc_or_mg     
+    
 
     
     # @api.depends('post_ids','post_ids.gia')

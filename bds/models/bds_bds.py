@@ -12,6 +12,7 @@ from odoo.addons.bds.models.main_fetch_common1  import  _compute_so_phong_ngu, _
     _compute_dd_tin_cua_dau_tu, _compute_loai_hem_combine, _compute_kw_mg
 from odoo.addons.bds.models.compute_choosed_area  import _compute_choosed_area_muc_gia
 import psycopg2
+import operator
 
 def skip_if_cate_not_bds(depend_func):
     def wrapper(*args,**kargs):
@@ -92,7 +93,6 @@ class bds(models.Model):
     #related store
     detail_du_doan_cc_or_mg = fields.Selection(related='poster_id.detail_du_doan_cc_or_mg', store = True)
     du_doan_cc_or_mg = fields.Selection(related='poster_id.du_doan_cc_or_mg', store = True)
-    count_chotot_post_of_poster = fields.Integer(related= 'poster_id.count_chotot_post_of_poster',store=True,string=u'chotot post quantity')
     count_bds_post_of_poster = fields.Integer(related= 'poster_id.count_bds_post_of_poster',store=True,string=u'bds post quantity')
     count_post_all_site = fields.Integer(related= 'poster_id.count_post_all_site',store=True)
     dd_tin_cua_co_rate = fields.Float(related='poster_id.dd_tin_cua_co_rate', store  = True)
@@ -228,10 +228,11 @@ class bds(models.Model):
         
         r = super(bds,self).create(vals)
         try:
+            # pass
             r.count_post_of_poster_()
-            r.poster_id.quanofposter_ids_()
-            r.quan_id.muc_gia_quan_()
-            r.quan_id.len_post_ids_()
+            # r.poster_id.quanofposter_ids_()
+            # r.quan_id.muc_gia_quan_()
+            # r.quan_id.len_post_ids_()
         except psycopg2.extensions.TransactionRollbackError:
             pass
         return r
@@ -557,64 +558,84 @@ class bds(models.Model):
         rs = self.env['ir.config_parameter'].get_param("bds.loai_nha")
         rs = eval(rs)
         raise UserError('%s-%s'%(type(rs),str(rs)))
-
     def count_post_of_poster_(self):
         for r in self:
             bds_id = r
             r = bds_id.poster_id    
             poster_dict = {}
-            count_chotot_post_of_poster = self.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot')])
-            poster_dict['count_chotot_post_of_poster'] = count_chotot_post_of_poster
-            count_bds_post_of_poster = self.search_count([('poster_id','=',r.id),('link','like','batdongsan')])
-            poster_dict['count_bds_post_of_poster'] = count_bds_post_of_poster
-            count_post_all_site = self.search_count([('poster_id','=',r.id)])
+           
+            site_id = bds_id.siteleech_id.id
+            site_post_count = r.site_post_count
+            one_site_post_count = site_post_count.get(str(site_id),0)
+            site_post_count[str(site_id)] = one_site_post_count + 1
+            poster_dict['site_post_count'] = site_post_count
+            count_post_of_onesite_max = max(site_post_count.items(), key=operator.itemgetter(1))[1]
+            count_post_all_site = r.count_post_all_site + 1
             poster_dict['count_post_all_site'] = count_post_all_site
-            month = ('public_datetime','>', fields.Datetime.to_string(datetime.datetime.now() + datetime.timedelta(days=-30)))
-            domain_in_month = [('poster_id','=',r.id), month]
-            count_post_every_site_max_readgroup_rsul = self.env['bds.bds'].read_group(domain_in_month,['siteleech_id'],['siteleech_id'])
-            list_siteleech_id_count_post = list(map(lambda i: i['siteleech_id_count'], count_post_every_site_max_readgroup_rsul))
-            site_ids = list(map(lambda i: i['siteleech_id'][0], count_post_every_site_max_readgroup_rsul))
-            try:
-                count_post_of_onesite_max = max(list_siteleech_id_count_post)
-                count_post_of_onesite_max_index = list_siteleech_id_count_post.index(count_post_of_onesite_max)
-                siteleech_max_id = count_post_every_site_max_readgroup_rsul[count_post_of_onesite_max_index]['siteleech_id'][0]
-            except ValueError as e:
-                count_post_of_onesite_max = count_post_all_site
-                siteleech_max_id = bds_id.siteleech_id.id
+            
+            if bds_id.mat_tien_or_trich_dia_chi:
+                address_topic_number = r.address_topic_number + 1
+                r.address_topic_number = address_topic_number
+            else:
+                address_topic_number = 0  
+
+
+            address_rate = address_topic_number/count_post_all_site
+            poster_dict['address_rate'] = address_rate
+            # else:
+            #     address_topic_number = r.address_topic_number
 
 
             poster_dict['count_post_of_onesite_max'] = count_post_of_onesite_max
-            poster_dict['siteleech_max_id'] = siteleech_max_id
-            count_post_all_site_in_month = self.search_count(domain_in_month)
 
-            poster_dict['site_ids'] = [(6,0,site_ids)]
+            # address_topic_number = self.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
+            # poster_dict['address_topic_number'] = address_topic_number
 
-            poster_dict['count_post_all_site_in_month'] = count_post_all_site_in_month
-            
-            address_topic_number = self.search_count([('poster_id','=',r.id),('trich_dia_chi','!=', False)])
-            poster_dict['address_topic_number'] = address_topic_number
-            address_rate = 0
+            if bds_id.mat_tien_or_trich_dia_chi:
+                self.env['bds.address'].write_address_to_table(bds_id.mat_tien_or_trich_dia_chi, bds_id.siteleech_id.id, bds_id.id, r.id)
 
-            if count_post_all_site:
-                address_rate = address_topic_number/count_post_all_site
-                poster_dict['address_rate'] = address_rate
-                dd_tin_cua_co_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', True)])
+            # if count_post_all_site:
+            guess_count  = r.guess_count
+            guess_count['address_rate'] = address_rate
+            dd_tin_cua_co_count  = guess_count.get('dd_tin_cua_co_count', 0)
+            # dd_tin_cua_co_count  = r.dd_tin_cua_co_count
+            if bds_id.dd_tin_cua_co:
+                dd_tin_cua_co_count +=1
+                guess_count['dd_tin_cua_co_count'] = dd_tin_cua_co_count
                 poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_count/count_post_all_site
-
-                dd_tin_cua_dau_tu_count = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','=', True)])
+                r.dd_tin_cua_co_count = dd_tin_cua_co_count
+            
+            dd_tin_cua_dau_tu_count  = guess_count.get('dd_tin_cua_dau_tu_count', 0)
+            if bds_id.dd_tin_cua_dau_tu:
+                dd_tin_cua_dau_tu_count +=1
+                guess_count['dd_tin_cua_dau_tu_count'] = dd_tin_cua_dau_tu_count
                 poster_dict['dd_tin_cua_dau_tu_rate'] = dd_tin_cua_dau_tu_count/count_post_all_site
-
+                r.dd_tin_cua_dau_tu_count = dd_tin_cua_dau_tu_count
+            
+            
+            r.guess_count = guess_count 
+            chotot_moi_gioi_count  = guess_count.get('chotot_moi_gioi_count', 0)
+            chotot_chinh_chu_count  = guess_count.get('chotot_chinh_chu_count', 0)
+            if bds_id.siteleech_id.name =='chotot':
+                if bds_id.chotot_moi_gioi_hay_chinh_chu =='moi_gioi':
+                    chotot_moi_gioi_count += 1
+                    guess_count['chotot_moi_gioi_count'] = chotot_moi_gioi_count
+                else:
+                    chotot_chinh_chu_count += 1
+                    guess_count['chotot_chinh_chu_count'] = chotot_chinh_chu_count
             count_chotot_moi_gioi = self.search_count([('poster_id','=',r.id),('siteleech_id.name','=', 'chotot'), ('chotot_moi_gioi_hay_chinh_chu','=', 'moi_gioi')])
-            if count_chotot_moi_gioi:
+            
+            if chotot_moi_gioi_count:
                 chotot_mg_or_cc = 'moi_gioi'
             else:
-                if count_chotot_post_of_poster:
+                if chotot_chinh_chu_count:
                     chotot_mg_or_cc = 'chinh_chu'
                 else:
                     chotot_mg_or_cc = 'khong_biet'
             poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
-            dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', 'kw_co_cap_1')])
-            dd_tin_cua_dau_tu = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
+            guess_count['chotot_mg_or_cc'] = chotot_mg_or_cc
+            # dd_tin_cua_co = self.search_count([('poster_id','=',r.id),('dd_tin_cua_co','=', 'kw_co_cap_1')])
+            # dd_tin_cua_dau_tu = self.search_count([('poster_id','=',r.id),('dd_tin_cua_dau_tu','!=', False)])
             
             if chotot_mg_or_cc =='moi_gioi' :
                 if address_rate > 0.5:
@@ -623,7 +644,7 @@ class bds(models.Model):
                 else:
                     du_doan_cc_or_mg= 'dd_mg'
                     detail_du_doan_cc_or_mg = 'dd_mg_b_moi_gioi_n_address_rate_lte_0_5'
-            elif dd_tin_cua_co:
+            elif dd_tin_cua_co_count:
                 if address_rate > 0.5:
                     du_doan_cc_or_mg= 'dd_cc'
                     detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
@@ -663,15 +684,17 @@ class bds(models.Model):
                             detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
 
             if du_doan_cc_or_mg !='dd_mg':
-                if  dd_tin_cua_dau_tu:
+                if  dd_tin_cua_dau_tu_count:
                     du_doan_cc_or_mg= 'dd_dt'
             poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
             poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
+            r.guess_count = guess_count
             r.write(poster_dict)
 
 
 
 
+    #
     
         
 
