@@ -7,10 +7,8 @@
             <field name="arch" type="xml">
                 <search string="poster search">
                     <field name="name" />
-                    <field name="quan_id_for_search" />
                     <field name="count_post_all_site" string='count_post_all_site lon hon' filter_domain ="[('count_post_all_site','&gt;=',self)]"/>
                     <field name="count_post_all_site" string='count_post_all_site be hon' filter_domain ="[('count_post_all_site','&lt;=',self)]"/>
-                    <field name="cong_ty" />
                     <field name="phone" />
                     <field name="nha_mang" />
                     <field name="login" />
@@ -19,7 +17,6 @@
                     <filter name="tao_cach_day_1_phut" string="Tạo cách đâ 1 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() - datetime.timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
                     <group expand="0" string="Group By">
                         <filter name="nha_mang" string="groupby nha mang" domain="[]" context="{'group_by':'nha_mang'}" />
-                        <filter name="quan_chuyen_1_id" string="quan_chuyen_1_id" domain="[]" context="{'group_by':'quan_chuyen_1_id'}" />
                         <filter name="detail_du_doan_cc_or_mg" string="detail_du_doan_cc_or_mg" domain="[]" context="{'group_by':'detail_du_doan_cc_or_mg'}" />
                         <filter name="du_doan_cc_or_mg" string="du_doan_cc_or_mg" domain="[]" context="{'group_by':'du_doan_cc_or_mg'}" />
                     </group>
@@ -32,12 +29,6 @@
             <field name="priority" eval="1" />
             <field name="arch" type="xml">
                 <form>
-                    <header>
-                        <button name="avg" string="avg price " type="object" class="btn-primary" />
-
-                        <button name="trig" string="trig" type="object" class="btn-primary" />
-                        <button name="test" string="test" type="object" class="btn-primary" />
-                    </header>
                     <div class="oe_title">
                         <h1>
                             <field name="name" />
@@ -54,9 +45,7 @@
                                 <field name="site_post_count" />
                             </group>
                             <group>
-                                <field name="cong_ty" />
-                                <field name="created_by_site_id" />
-                                <field name="username_in_site_ids">
+                                <field name="poster_line_ids">
                                     <tree>
                                         <field name="username_in_site" />
                                         <field name="site_id" />
@@ -65,22 +54,6 @@
                                 <field name="phone" />
                                 <field name="login" />
                             </group>
-                        </group>
-                        <group>
-                            <field name="quanofposter_ids">
-                                <tree>
-                                    <field name="name" />
-                                    <field name="quan_id" />
-                                    <field name="siteleech_id" />
-                                    <field name="quantity" />
-                                    <field name="min_price" />
-                                    <field name="avg_price" />
-                                    <field name="max_price" />
-                                    <field name="poster_id" />
-                                </tree>
-                            </field>
-                            <field name="quan_chuyen_1" />
-                            <field name="quan_chuyen_2" />
                         </group>
 
                         <group>
@@ -99,35 +72,22 @@
                     <field name="id" />
                     <field name="name" readonly="0"/>
                     <button name="open_something" type="object"/>
-                    <field name="created_by_site_id"></field>
-                    <field name="quan_chuyen_1" />
-                    <field name="quan_chuyen_2" />
-                    <field name="number_post_of_quan" />
                     <field name="site_post_count" />
                     <field name="guess_count" />
-                    <field name="username" />
                     <field name="count_post_all_site" />
-                    <field name="site_ids" />
+                    <field name="count_post_of_onesite_max" />
+                    <field name="siteleech_max_id" />
                     <field name="address_topic_number" />
                     <field name="address_rate" />
-                    <field name="detail_du_doan_cc_or_mg" />
-                    <field name="du_doan_cc_or_mg" />
-                    <field name="chotot_mg_or_cc" />
-                    <field name="count_post_all_site_in_month" />
-                    <field name="quanofposter_ids_show" />
+                    <field name="dd_tin_cua_co_rate" />
+                    <field name="dd_tin_cua_dau_tu_count" />
+                    <field name="dd_tin_cua_dau_tu_rate" />
+                    <field name="chotot_count" />
+                    <field name="chotot_moi_gioi_count" />
+                    <field name="chotot_chinh_chu_count" />
                     <field name="create_date" />
                     <field name="write_date" />
-                    <field name="cong_ty" />
-                    <field name="username_in_site_ids" invisible="1"/>
-                    <field name="username_in_site_ids_show" />
-                    <field name="site_count_of_poster"  invisible = "1"/>
-                    <field name="phone" invisible="1" />
-                    <field name="nha_mang" invisible="1" />
-                    <field name="post_ids" invisible="1"/>
-                    <field name="quan_chuyen_1" />
-                    <field name="quan_chuyen_1_id" />
-                    <field name="quan_chuyen_2" />
-                    <field name="username" />
+                    <field name="detail_du_doan_cc_or_mg" />
                 </tree>
             </field>
         </record>

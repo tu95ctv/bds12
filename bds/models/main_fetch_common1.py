@@ -389,7 +389,6 @@ class MainFetchCommon():
             
             poster =  self.env['bds.poster'].create(search_dict)
             if siteleech_id_id:
-                search_dict.update({'created_by_site_id': siteleech_id_id})
                 self.env['bds.posternamelines'].create( {'username_in_site':account_name, 'site_id':siteleech_id_id, 'poster_id':poster.id})
         return {'poster_id':poster.id}
 
