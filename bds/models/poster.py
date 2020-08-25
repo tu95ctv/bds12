@@ -78,7 +78,6 @@ class Poster(models.Model):
     dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2) )
     address_rate = fields.Float(digits=(6,2))
                                         
-    count_bds_post_of_poster = fields.Integer()
     count_post_all_site = fields.Integer()
     count_post_all_site_in_month = fields.Integer() 
     count_post_of_onesite_max = fields.Integer()

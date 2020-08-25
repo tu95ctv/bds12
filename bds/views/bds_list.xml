@@ -45,9 +45,6 @@
                 <!-- <field name="site_ids" /> -->
                 <field name="diff_gia" />
                 <field name="diff_public_datetime" />
-                <field name="len_site" />
-                <field name="count_post_of_onesite_max" />
-                <field name="siteleech_max_id" />
              
                 <field name="du_doan_cc_or_mg" />
                 <field name="mat_tien_or_trich_dia_chi" />
@@ -76,7 +73,6 @@
                 <field name="kw_so_tien_hoa_hong"/>
                 <field name="dd_tin_cua_co"/>
                 <field name="kw_mg"/>
-                <field name="dd_tin_cua_co_rate"/>
                 <field name="dd_tin_cua_dau_tu_rate"/>
                 <field name="du_doan_cc_or_mg" />
                 <field name="chotot_moi_gioi_hay_chinh_chu" />

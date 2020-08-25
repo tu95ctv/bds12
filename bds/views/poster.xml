@@ -1,6 +1,6 @@
 <odoo>
-<data>
- <!-- POSTER -->
+    <data>
+        <!-- POSTER -->
         <record id="poster_search" model="ir.ui.view">
             <field name="name">bds poster</field>
             <field name="model">bds.poster</field>
@@ -16,7 +16,7 @@
                     <field name="login" />
                     <field name="post_ids" />
                     <field name="du_doan_cc_or_mg" />
-                    <filter name="tao_cach_day_1_phut" string="Tạo cách đâ 1 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() -  datetime.timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                    <filter name="tao_cach_day_1_phut" string="Tạo cách đâ 1 phút" domain="[('create_date','&gt;', (datetime.datetime.utcnow() - datetime.timedelta(minutes=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
                     <group expand="0" string="Group By">
                         <filter name="nha_mang" string="groupby nha mang" domain="[]" context="{'group_by':'nha_mang'}" />
                         <filter name="quan_chuyen_1_id" string="quan_chuyen_1_id" domain="[]" context="{'group_by':'quan_chuyen_1_id'}" />
@@ -34,7 +34,7 @@
                 <form>
                     <header>
                         <button name="avg" string="avg price " type="object" class="btn-primary" />
-                        
+
                         <button name="trig" string="trig" type="object" class="btn-primary" />
                         <button name="test" string="test" type="object" class="btn-primary" />
                     </header>
@@ -47,7 +47,6 @@
                         <group>
                             <group>
                                 <field name="nha_mang" />
-                                <field name="count_bds_post_of_poster" />
                                 <field name="count_post_all_site" />
                                 <field name="address_topic_number" />
                                 <field name="du_doan_cc_or_mg" />
@@ -80,10 +79,10 @@
                                     <field name="poster_id" />
                                 </tree>
                             </field>
-                            <field name="quan_chuyen_1"  />
-                    		<field name="quan_chuyen_2"  />
+                            <field name="quan_chuyen_1" />
+                            <field name="quan_chuyen_2" />
                         </group>
-                       
+
                         <group>
                             <field name="post_ids" />
                         </group>
@@ -101,14 +100,12 @@
                     <field name="name" readonly="0"/>
                     <button name="open_something" type="object"/>
                     <field name="created_by_site_id"></field>
-                     <field name="quan_chuyen_1" />
-                     <field name="quan_chuyen_2" />
-                     <field name="number_post_of_quan" />
-                     <field name="site_post_count" />
-                     <field name="guess_count" />
-                     <!-- <field name="rate_chinh_chu" />
-                     <field name="rate_moi_gioi" /> -->
-                     <field name="username" />
+                    <field name="quan_chuyen_1" />
+                    <field name="quan_chuyen_2" />
+                    <field name="number_post_of_quan" />
+                    <field name="site_post_count" />
+                    <field name="guess_count" />
+                    <field name="username" />
                     <field name="count_post_all_site" />
                     <field name="site_ids" />
                     <field name="address_topic_number" />
@@ -117,7 +114,6 @@
                     <field name="du_doan_cc_or_mg" />
                     <field name="chotot_mg_or_cc" />
                     <field name="count_post_all_site_in_month" />
-                    <field name="count_bds_post_of_poster" />
                     <field name="quanofposter_ids_show" />
                     <field name="create_date" />
                     <field name="write_date" />
@@ -127,11 +123,11 @@
                     <field name="site_count_of_poster"  invisible = "1"/>
                     <field name="phone" invisible="1" />
                     <field name="nha_mang" invisible="1" />
-                    <field name="post_ids"  invisible="1"/>
-                    <field name="quan_chuyen_1"  />
-                    <field name="quan_chuyen_1_id"  />
-                    <field name="quan_chuyen_2"  />
-                    <field name="username"  />
+                    <field name="post_ids" invisible="1"/>
+                    <field name="quan_chuyen_1" />
+                    <field name="quan_chuyen_1_id" />
+                    <field name="quan_chuyen_2" />
+                    <field name="username" />
                 </tree>
             </field>
         </record>
@@ -154,5 +150,5 @@
             <field name="act_window_id" ref="bds.poster_action" />
         </record>
         <!-- !POSTER -->
-</data>
+    </data>
 </odoo>
