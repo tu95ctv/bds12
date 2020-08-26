@@ -2452,6 +2452,7 @@ def _compute_choosed_area_muc_gia(html, gia, area, quan_id, loai_hem_combine):
                 ti_le_gia_dat_con_lai_gia = gia_dat_con_lai/gia
                 if ti_le_gia_dat_con_lai_gia  < 0.5:
                     gia_dat_con_lai = gia
+                    ti_le_gia_dat_con_lai_gia = gia_dat_con_lai/gia
                 if choose_area:
                     don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
             

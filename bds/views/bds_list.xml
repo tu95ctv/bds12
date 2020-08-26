@@ -94,6 +94,7 @@
                 <field name="dtsd_combine" />
                 <field name="gia_xac_nha" />
                 <field name="gia_dat_con_lai" />
+                <field name="ti_le_don_gia" />
                 <field name="ti_le_don_gia_dat_con_lai" />
                 <field name="don_gia_quan" />
                 <field name="muc_don_gia" />

@@ -618,143 +618,331 @@ class bds(models.Model):
         rs = eval(rs)
         raise UserError('%s-%s'%(type(rs),str(rs)))
 
-    def count_post_of_poster_(self):
-        for r in self:
-            bds_id = r
-            r = bds_id.poster_id    
-            poster_dict = {}
+
+    # def count_post_of_poster_(self):
+    #     for r in self:
+    #         bds_id = r
+    #         r = bds_id.poster_id    
+    #         poster_dict = {}
            
-            site_id = bds_id.siteleech_id.id
-            site_post_count = r.site_post_count
-            one_site_post_count = site_post_count.get(str(site_id),0)
-            site_post_count[str(site_id)] = one_site_post_count + 1
-            poster_dict['site_post_count'] = site_post_count
-            site_and_count_max = max(site_post_count.items(), key=operator.itemgetter(1))
-            r.len_site = len(site_post_count)
+    #         site_id = bds_id.siteleech_id.id
+    #         site_post_count = r.site_post_count
+    #         one_site_post_count = site_post_count.get(str(site_id),0)
+    #         site_post_count[str(site_id)] = one_site_post_count + 1
+    #         poster_dict['site_post_count'] = site_post_count
+    #         site_and_count_max = max(site_post_count.items(), key=operator.itemgetter(1))
+    #         r.len_site = len(site_post_count)
 
-            count_post_of_onesite_max = site_and_count_max[1]
-            siteleech_max_id = int(site_and_count_max[0])
-            poster_dict['count_post_of_onesite_max'] = count_post_of_onesite_max
-            poster_dict['siteleech_max_id'] = siteleech_max_id
+    #         count_post_of_onesite_max = site_and_count_max[1]
+    #         siteleech_max_id = int(site_and_count_max[0])
+    #         poster_dict['count_post_of_onesite_max'] = count_post_of_onesite_max
+    #         poster_dict['siteleech_max_id'] = siteleech_max_id
 
-            count_post_all_site = r.count_post_all_site + 1
-            poster_dict['count_post_all_site'] = count_post_all_site
+    #         count_post_all_site = r.count_post_all_site + 1
+    #         poster_dict['count_post_all_site'] = count_post_all_site
             
-            address_topic_number = r.address_topic_number
+    #         address_topic_number = r.address_topic_number
 
-            if bds_id.mat_tien_or_trich_dia_chi:
-                address_topic_number = r.address_topic_number + 1
-                r.address_topic_number = address_topic_number
+    #         if bds_id.mat_tien_or_trich_dia_chi:
+    #             address_topic_number = r.address_topic_number + 1
+    #             r.address_topic_number = address_topic_number
          
-            address_rate = address_topic_number/count_post_all_site
-            poster_dict['address_rate'] = address_rate
+    #         address_rate = address_topic_number/count_post_all_site
+    #         poster_dict['address_rate'] = address_rate
             
-            if bds_id.mat_tien_or_trich_dia_chi:
-                self.env['bds.address'].write_address_to_table(bds_id.mat_tien_or_trich_dia_chi, bds_id.siteleech_id.id, bds_id.id, r.id)
+    #         if bds_id.mat_tien_or_trich_dia_chi:
+    #             self.env['bds.address'].write_address_to_table(bds_id.mat_tien_or_trich_dia_chi, bds_id.siteleech_id.id, bds_id.id, r.id)
             
-            guess_count  = r.guess_count
-            guess_count['address_rate'] = address_rate
-            # dd_tin_cua_co_count  = guess_count.get('dd_tin_cua_co_count', 0)
-            dd_tin_cua_co_count = r.dd_tin_cua_co_count
-            if bds_id.dd_tin_cua_co == 'kw_co_cap_1':
-                dd_tin_cua_co_count +=1
-                guess_count['dd_tin_cua_co_count'] = dd_tin_cua_co_count
-                poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_count/count_post_all_site
-                r.dd_tin_cua_co_count = dd_tin_cua_co_count
+    #         guess_count  = r.guess_count
+    #         guess_count['address_rate'] = address_rate
+    #         # dd_tin_cua_co_count  = guess_count.get('dd_tin_cua_co_count', 0)
+    #         dd_tin_cua_co_count = r.dd_tin_cua_co_count
+    #         if bds_id.dd_tin_cua_co == 'kw_co_cap_1':
+    #             dd_tin_cua_co_count +=1
+    #             guess_count['dd_tin_cua_co_count'] = dd_tin_cua_co_count
+    #             poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_count/count_post_all_site
+    #             r.dd_tin_cua_co_count = dd_tin_cua_co_count
             
-            # dd_tin_cua_dau_tu_count  = guess_count.get('dd_tin_cua_dau_tu_count', 0)
-            dd_tin_cua_dau_tu_count  = r.dd_tin_cua_dau_tu_count
-            if bds_id.dd_tin_cua_dau_tu:
-                dd_tin_cua_dau_tu_count +=1
-                guess_count['dd_tin_cua_dau_tu_count'] = dd_tin_cua_dau_tu_count
-                poster_dict['dd_tin_cua_dau_tu_rate'] = dd_tin_cua_dau_tu_count/count_post_all_site
-                r.dd_tin_cua_dau_tu_count = dd_tin_cua_dau_tu_count
+    #         # dd_tin_cua_dau_tu_count  = guess_count.get('dd_tin_cua_dau_tu_count', 0)
+    #         dd_tin_cua_dau_tu_count  = r.dd_tin_cua_dau_tu_count
+    #         if bds_id.dd_tin_cua_dau_tu:
+    #             dd_tin_cua_dau_tu_count +=1
+    #             guess_count['dd_tin_cua_dau_tu_count'] = dd_tin_cua_dau_tu_count
+    #             poster_dict['dd_tin_cua_dau_tu_rate'] = dd_tin_cua_dau_tu_count/count_post_all_site
+    #             r.dd_tin_cua_dau_tu_count = dd_tin_cua_dau_tu_count
             
             
-            # chotot_count  = guess_count.get('chotot_count', 0)
-            # chotot_moi_gioi_count  = guess_count.get('chotot_moi_gioi_count', 0)
-            # chotot_chinh_chu_count  = guess_count.get('chotot_chinh_chu_count', 0)
+    #         # chotot_count  = guess_count.get('chotot_count', 0)
+    #         # chotot_mo_gioi_count  = guess_count.get('chotot_mo_gioi_count', 0)
+    #         # chotot_chinh_chu_count  = guess_count.get('chotot_chinh_chu_count', 0)
 
-            chotot_count  = r.chotot_count
-            chotot_moi_gioi_count  = r.chotot_moi_gioi_count
-            chotot_chinh_chu_count  = r.chotot_chinh_chu_count
+    #         chotot_count  = r.chotot_count
+    #         chotot_mo_gioi_count  = r.chotot_mo_gioi_count
+    #         chotot_chinh_chu_count  = r.chotot_chinh_chu_count
 
-            if bds_id.siteleech_id.name =='chotot':
-                chotot_count +=1
-                r.chotot_count = chotot_count
-                if bds_id.chotot_moi_gioi_hay_chinh_chu =='moi_gioi':
-                    chotot_moi_gioi_count += 1
-                    guess_count['chotot_moi_gioi_count'] = chotot_moi_gioi_count
-                    r.chotot_moi_gioi_count = chotot_moi_gioi_count
-                else:
-                    chotot_chinh_chu_count += 1
-                    guess_count['chotot_chinh_chu_count'] = chotot_chinh_chu_count
-                    r.chotot_chinh_chu_count = chotot_chinh_chu_count
+    #         if bds_id.siteleech_id.name =='chotot':
+    #             chotot_count +=1
+    #             r.chotot_count = chotot_count
+    #             if bds_id.chotot_moi_gioi_hay_chinh_chu =='moi_gioi':
+    #                 chotot_mo_gioi_count += 1
+    #                 guess_count['chotot_mo_gioi_count'] = chotot_mo_gioi_count
+    #                 r.chotot_mo_gioi_count = chotot_mo_gioi_count
+    #             else:
+    #                 chotot_chinh_chu_count += 1
+    #                 guess_count['chotot_chinh_chu_count'] = chotot_chinh_chu_count
+    #                 r.chotot_chinh_chu_count = chotot_chinh_chu_count
             
-            if chotot_moi_gioi_count:
-                chotot_mg_or_cc = 'moi_gioi'
-            else:
-                if chotot_chinh_chu_count:
-                    chotot_mg_or_cc = 'chinh_chu'
-                else:
-                    chotot_mg_or_cc = 'khong_biet'
-            poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
-            guess_count['chotot_mg_or_cc'] = chotot_mg_or_cc
+    #         if chotot_mo_gioi_count:
+    #             chotot_mg_or_cc = 'moi_gioi'
+    #         else:
+    #             if chotot_chinh_chu_count:
+    #                 chotot_mg_or_cc = 'chinh_chu'
+    #             else:
+    #                 chotot_mg_or_cc = 'khong_biet'
+    #         poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
+    #         guess_count['chotot_mg_or_cc'] = chotot_mg_or_cc
             
-            if chotot_mg_or_cc =='moi_gioi' :
-                if address_rate > 0.5:
-                    du_doan_cc_or_mg= 'dd_cc'
-                    detail_du_doan_cc_or_mg = 'dd_cc_b_moi_gioi_n_address_rate_gt_0_5'
-                else:
-                    du_doan_cc_or_mg= 'dd_mg'
-                    detail_du_doan_cc_or_mg = 'dd_mg_b_moi_gioi_n_address_rate_lte_0_5'
-            elif dd_tin_cua_co_count:
-                if address_rate > 0.5:
-                    du_doan_cc_or_mg= 'dd_cc'
-                    detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
-                else:
-                    du_doan_cc_or_mg= 'dd_mg'
-                    detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
-            else:
-                if chotot_mg_or_cc =='chinh_chu':
-                    if count_post_of_onesite_max > 3:
-                        if address_rate > 0:
-                            du_doan_cc_or_mg= 'dd_cc'
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
-                        else:
-                            du_doan_cc_or_mg= 'dd_mg'
-                            detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'
-                    else:
-                        du_doan_cc_or_mg= 'dd_cc'
-                        if address_rate > 0:
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'
-                        else:
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
-                else:#khong_biet, muaban
-                    if count_post_of_onesite_max  > 3:
-                        if address_rate >= 0.3:
-                            du_doan_cc_or_mg= 'dd_cc'
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'
-                        else:
-                            du_doan_cc_or_mg= 'dd_mg'
-                            detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
+    #         if chotot_mg_or_cc =='moi_gioi' :
+    #             if address_rate > 0.5:
+    #                 du_doan_cc_or_mg= 'dd_cc'
+    #                 detail_du_doan_cc_or_mg = 'dd_cc_b_moi_gioi_n_address_rate_gt_0_5'
+    #             else:
+    #                 du_doan_cc_or_mg= 'dd_mg'
+    #                 detail_du_doan_cc_or_mg = 'dd_mg_b_moi_gioi_n_address_rate_lte_0_5'
+    #         elif dd_tin_cua_co_count:
+    #             if address_rate > 0.5:
+    #                 du_doan_cc_or_mg= 'dd_cc'
+    #                 detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
+    #             else:
+    #                 du_doan_cc_or_mg= 'dd_mg'
+    #                 detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
+    #         else:
+    #             if chotot_mg_or_cc =='chinh_chu':
+    #                 if count_post_of_onesite_max > 3:
+    #                     if address_rate > 0:
+    #                         du_doan_cc_or_mg= 'dd_cc'
+    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
+    #                     else:
+    #                         du_doan_cc_or_mg= 'dd_mg'
+    #                         detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'
+    #                 else:
+    #                     du_doan_cc_or_mg= 'dd_cc'
+    #                     if address_rate > 0:
+    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'
+    #                     else:
+    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
+    #             else:#khong_biet, muaban
+    #                 if count_post_of_onesite_max  > 3:
+    #                     if address_rate >= 0.3:
+    #                         du_doan_cc_or_mg= 'dd_cc'
+    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'
+    #                     else:
+    #                         du_doan_cc_or_mg= 'dd_mg'
+    #                         detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
                             
-                    else: #count_post_of_onesite_max  <= 3
-                        if address_rate: 
-                            du_doan_cc_or_mg= 'dd_cc'
-                            detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'
-                        else:
-                            du_doan_cc_or_mg= 'dd_kb'
-                            detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
+    #                 else: #count_post_of_onesite_max  <= 3
+    #                     if address_rate: 
+    #                         du_doan_cc_or_mg= 'dd_cc'
+    #                         detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'
+    #                     else:
+    #                         du_doan_cc_or_mg= 'dd_kb'
+    #                         detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
 
-            if du_doan_cc_or_mg !='dd_mg':
-                if  dd_tin_cua_dau_tu_count:
-                    du_doan_cc_or_mg= 'dd_dt'
-            poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
-            poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
-            r.guess_count = guess_count
-            r.write(poster_dict)
+    #         if du_doan_cc_or_mg !='dd_mg':
+    #             if  dd_tin_cua_dau_tu_count:
+    #                 du_doan_cc_or_mg= 'dd_dt'
+    #         poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
+    #         poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
+    #         r.guess_count = guess_count
+    #         r.write(poster_dict)
 
+    def du_doan_cc_or_mg_(self,address_rate, chotot_mg_or_cc, dd_tin_cua_co_count,
+        count_post_of_onesite_max, dd_tin_cua_dau_tu_count):
+        if chotot_mg_or_cc =='moi_gioi' :
+            if address_rate > 0.5:
+                du_doan_cc_or_mg= 'dd_cc'
+                detail_du_doan_cc_or_mg = 'dd_cc_b_moi_gioi_n_address_rate_gt_0_5'
+            else:
+                du_doan_cc_or_mg= 'dd_mg'
+                detail_du_doan_cc_or_mg = 'dd_mg_b_moi_gioi_n_address_rate_lte_0_5'
+        elif dd_tin_cua_co_count:
+            if address_rate > 0.5:
+                du_doan_cc_or_mg= 'dd_cc'
+                detail_du_doan_cc_or_mg = 'dd_cc_b_kw_co_n_address_rate_gt_0_5'
+            else:
+                du_doan_cc_or_mg= 'dd_mg'
+                detail_du_doan_cc_or_mg = 'dd_mg_b_kw_co_n_address_rate_lte_0_5'
+        else:
+            if chotot_mg_or_cc =='chinh_chu':
+                if count_post_of_onesite_max > 3:
+                    if address_rate > 0:
+                        du_doan_cc_or_mg= 'dd_cc'
+                        detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_gt_3_n_address_rate_gt_0'
+                    else:
+                        du_doan_cc_or_mg= 'dd_mg'
+                        detail_du_doan_cc_or_mg = 'dd_mg_b_chinh_chu_n_cpas_gt_3_n_address_rate_eq_0'
+                else:
+                    du_doan_cc_or_mg= 'dd_cc'
+                    if address_rate > 0:
+                        detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_gt_0_sure'
+                    else:
+                        detail_du_doan_cc_or_mg = 'dd_cc_b_chinh_chu_n_cpas_lte_3_n_address_rate_eq_0_nosure' 
+            else:#khong_biet, muaban
+                if count_post_of_onesite_max  > 3:
+                    if address_rate >= 0.3:
+                        du_doan_cc_or_mg= 'dd_cc'
+                        detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_gt_3_n_address_rate_gte_0_3'
+                    else:
+                        du_doan_cc_or_mg= 'dd_mg'
+                        detail_du_doan_cc_or_mg = 'dd_mg_b_khong_biet_n_cpas_gt_3_n_address_rate_lt_0_3'
+                        
+                else: #count_post_of_onesite_max  <= 3
+                    if address_rate: 
+                        du_doan_cc_or_mg= 'dd_cc'
+                        detail_du_doan_cc_or_mg = 'dd_cc_b_khong_biet_n_cpas_lte_3_n_address_rate_gt_0'
+                    else:
+                        du_doan_cc_or_mg= 'dd_kb'
+                        detail_du_doan_cc_or_mg = 'dd_kb_b_khong_biet_n_cpas_lte_3_n_address_rate_eq_0'
+
+        if du_doan_cc_or_mg !='dd_mg':
+            if  dd_tin_cua_dau_tu_count:
+                du_doan_cc_or_mg= 'dd_dt'
+        return du_doan_cc_or_mg, detail_du_doan_cc_or_mg
+
+
+    def site_post_count_(self,site_post_count,  bds_id__siteleech_id__id):
+        one_site_post_count = site_post_count.get(str(bds_id__siteleech_id__id),0)
+        site_post_count[str(bds_id__siteleech_id__id)] = one_site_post_count + 1
+        site_and_count_max = max(site_post_count.items(), key=operator.itemgetter(1))
+        count_post_of_onesite_max = site_and_count_max[1]
+        siteleech_max_id = int(site_and_count_max[0])
+        len_site = len(site_post_count)
+        return count_post_of_onesite_max,siteleech_max_id, len_site, site_post_count
+
+
+    def du_doan_tin_cua_co_(self, bds_id__dd_tin_cua_co, dd_tin_cua_co_count,
+        bds_id__dd_tin_cua_dau_tu, dd_tin_cua_dau_tu_count, count_post_all_site):
+        dd_tin_cua_co_rate = False
+        dd_tin_cua_dau_tu_rate = False
+        if bds_id__dd_tin_cua_co == 'kw_co_cap_1':
+            dd_tin_cua_co_count +=1
+            dd_tin_cua_co_rate = dd_tin_cua_co_count/count_post_all_site
+        if bds_id__dd_tin_cua_dau_tu:
+            dd_tin_cua_dau_tu_count +=1
+            dd_tin_cua_dau_tu_rate = dd_tin_cua_dau_tu_count/count_post_all_site
+        return dd_tin_cua_co_count, dd_tin_cua_dau_tu_count, dd_tin_cua_co_rate, dd_tin_cua_dau_tu_rate
+    
+    def cho_tot_cc_(self, bds_id__siteleech_id__name,bds_id__chotot_moi_gioi_hay_chinh_chu, chotot_count, chotot_mo_gioi_count, chotot_chinh_chu_count):
+        if bds_id__siteleech_id__name =='chotot':
+            chotot_count +=1
+            if bds_id__chotot_moi_gioi_hay_chinh_chu =='moi_gioi':
+                chotot_mo_gioi_count += 1
+            else:
+                chotot_chinh_chu_count += 1
+        if chotot_mo_gioi_count:
+            chotot_mg_or_cc = 'moi_gioi'
+        else:
+            if chotot_chinh_chu_count:
+                chotot_mg_or_cc = 'chinh_chu'
+            else:
+                chotot_mg_or_cc = 'khong_biet'
+        return chotot_mo_gioi_count, chotot_chinh_chu_count, chotot_mg_or_cc
+
+    
+    def count_post_of_poster_min_(self, bds_id__siteleech_id__id,bds_id__mat_tien_or_trich_dia_chi, site_post_count,count_post_all_site,
+        address_topic_number, guess_count, dd_tin_cua_co_count, bds_id__dd_tin_cua_co, dd_tin_cua_dau_tu_count,
+        bds_id__dd_tin_cua_dau_tu,chotot_count, chotot_mo_gioi_count, chotot_chinh_chu_count, bds_id__siteleech_id__name,
+        bds_id__chotot_moi_gioi_hay_chinh_chu):
+        
+        poster_dict = {}
+
+        count_post_of_onesite_max,siteleech_max_id, len_site, site_post_count = \
+            self.site_post_count_(site_post_count,  bds_id__siteleech_id__id)
+        poster_dict['len_site'] = len_site
+        poster_dict['site_post_count'] = site_post_count
+        poster_dict['count_post_of_onesite_max'] = count_post_of_onesite_max
+        poster_dict['siteleech_max_id'] = siteleech_max_id
+
+        count_post_all_site = count_post_all_site + 1
+        poster_dict['count_post_all_site'] = count_post_all_site
+        
+        address_rate = False
+        if bds_id__mat_tien_or_trich_dia_chi:
+            address_topic_number = address_topic_number + 1
+        address_rate = address_topic_number/count_post_all_site
+        
+        poster_dict['address_topic_number'] = address_topic_number
+        if address_rate:
+            poster_dict['address_rate'] = address_rate
+            guess_count['address_rate'] = address_rate
+        poster_dict['guess_count'] = guess_count
+        
+        dd_tin_cua_co_count, dd_tin_cua_dau_tu_count, dd_tin_cua_co_rate, dd_tin_cua_dau_tu_rate = \
+            self.du_doan_tin_cua_co_(bds_id__dd_tin_cua_co, dd_tin_cua_co_count,
+            bds_id__dd_tin_cua_dau_tu, dd_tin_cua_dau_tu_count, count_post_all_site)
+
+        guess_count['dd_tin_cua_co_count'] = dd_tin_cua_co_count
+        if dd_tin_cua_co_rate:
+            poster_dict['dd_tin_cua_co_rate'] = dd_tin_cua_co_rate
+        poster_dict['dd_tin_cua_co_count'] = dd_tin_cua_co_count
+        
+        guess_count['dd_tin_cua_dau_tu_count'] = dd_tin_cua_dau_tu_count
+        if dd_tin_cua_dau_tu_rate:
+            poster_dict['dd_tin_cua_dau_tu_rate'] = dd_tin_cua_dau_tu_rate
+        poster_dict['dd_tin_cua_dau_tu_count'] = dd_tin_cua_dau_tu_count
+
+        chotot_mo_gioi_count, chotot_chinh_chu_count, chotot_mg_or_cc = \
+            self.cho_tot_cc_(bds_id__siteleech_id__name,bds_id__chotot_moi_gioi_hay_chinh_chu,
+                chotot_count, chotot_mo_gioi_count, chotot_chinh_chu_count)
+        
+        if bds_id__siteleech_id__name =='chotot':
+            poster_dict['chotot_count'] = chotot_count
+            guess_count['chotot_mo_gioi_count'] = chotot_mo_gioi_count
+            poster_dict['chotot_mo_gioi_count'] = chotot_mo_gioi_count
+            guess_count['chotot_chinh_chu_count'] = chotot_chinh_chu_count
+            poster_dict['chotot_chinh_chu_count'] = chotot_chinh_chu_count
+
+
+        poster_dict['chotot_mg_or_cc'] = chotot_mg_or_cc
+        guess_count['chotot_mg_or_cc'] = chotot_mg_or_cc
+        
+        du_doan_cc_or_mg,detail_du_doan_cc_or_mg =  self.du_doan_cc_or_mg_(address_rate, chotot_mg_or_cc, dd_tin_cua_co_count,
+        count_post_of_onesite_max, dd_tin_cua_dau_tu_count)
+        poster_dict['du_doan_cc_or_mg'] = du_doan_cc_or_mg
+        poster_dict['detail_du_doan_cc_or_mg'] = detail_du_doan_cc_or_mg
+        return poster_dict
+
+
+    def count_post_of_poster_(self):
+        bds_id =self 
+        poster = bds_id.poster_id    
+        
+        bds_id__siteleech_id__id = bds_id.siteleech_id.id
+        bds_id__mat_tien_or_trich_dia_chi = bds_id.mat_tien_or_trich_dia_chi
+        bds_id__dd_tin_cua_co = bds_id.dd_tin_cua_co
+        bds_id__siteleech_id__name = bds_id.siteleech_id.name
+        bds_id__chotot_moi_gioi_hay_chinh_chu = bds_id.chotot_moi_gioi_hay_chinh_chu
+        bds_id__dd_tin_cua_dau_tu = bds_id.dd_tin_cua_dau_tu
+
+        site_post_count = poster.site_post_count
+        count_post_all_site = poster.count_post_all_site
+        address_topic_number = poster.address_topic_number
+        guess_count  = poster.guess_count
+        dd_tin_cua_co_count = poster.dd_tin_cua_co_count
+        dd_tin_cua_dau_tu_count  = poster.dd_tin_cua_dau_tu_count
+        chotot_count  = poster.chotot_count
+        chotot_mo_gioi_count  = poster.chotot_mo_gioi_count
+        chotot_chinh_chu_count  = poster.chotot_chinh_chu_count
+        
+        
+        poster_dict = self.count_post_of_poster_min_(bds_id__siteleech_id__id,bds_id__mat_tien_or_trich_dia_chi, site_post_count,count_post_all_site,
+        address_topic_number, guess_count, dd_tin_cua_co_count, bds_id__dd_tin_cua_co, dd_tin_cua_dau_tu_count,
+        bds_id__dd_tin_cua_dau_tu,chotot_count, chotot_mo_gioi_count, chotot_chinh_chu_count, bds_id__siteleech_id__name,
+        bds_id__chotot_moi_gioi_hay_chinh_chu)
+        poster.write(poster_dict)
+
+        if bds_id__mat_tien_or_trich_dia_chi:
+            self.env['bds.address'].write_address_to_table(bds_id__mat_tien_or_trich_dia_chi, bds_id__siteleech_id__id, self.id, poster.id)
 
 
 

@@ -84,7 +84,7 @@
                     <field name="dd_tin_cua_dau_tu_count" />
                     <field name="dd_tin_cua_dau_tu_rate" />
                     <field name="chotot_count" />
-                    <field name="chotot_moi_gioi_count" />
+                    <field name="chotot_mo_gioi_count" />
                     <field name="create_date" />
                     <field name="write_date" />
                     <field name="chotot_chinh_chu_count" />

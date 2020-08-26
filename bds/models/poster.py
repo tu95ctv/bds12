@@ -73,7 +73,7 @@ class Poster(models.Model):
     dd_tin_cua_dau_tu_count = fields.Integer()
     dd_tin_cua_dau_tu_rate = fields.Float(digits=(6,2) )
     chotot_count = fields.Integer()
-    chotot_moi_gioi_count = fields.Integer()
+    chotot_mo_gioi_count = fields.Integer()
     chotot_chinh_chu_count = fields.Integer()
     du_doan_cc_or_mg = fields.Selection([('dd_mg','MG'),
                                          ('dd_dt','ĐT'),
