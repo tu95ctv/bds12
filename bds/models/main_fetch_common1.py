@@ -4,7 +4,6 @@ import datetime
 from datetime import timedelta
 import os
 import sys
-print (sys.path)
 import pytz
 import traceback
 from time import sleep
@@ -215,7 +214,6 @@ def write_public_datetime(topic_dict):
     gmt7_public_datetime = convert_native_utc_datetime_to_gmt_7(public_datetime)
     public_date  = gmt7_public_datetime.date()
     # return public_datetime, public_date
-    print ('***public_date***', public_date)
     update['public_date'] = public_date
     update['public_datetime'] = public_datetime
     return update
@@ -400,7 +398,97 @@ class MainFetchCommon():
         topic_dict['trich_dia_chi'] = trich_dia_chi
         topic_dict['mat_tien_or_trich_dia_chi'] = mat_tien_or_trich_dia_chi
         topic_dict['is_mat_tien_or_trich_dia_chi'] = is_mat_tien_or_trich_dia_chi
-        
+    
+    def write_so_phong_ngu(self, topic_dict):
+        html = topic_dict['html']
+        so_phong_ngu = _compute_so_phong_ngu(html)
+        topic_dict['so_phong_ngu'] = so_phong_ngu
+
+    def write_html_khong_dau(self, topic_dict):
+        html = topic_dict['html']
+        html_khong_dau = unidecode(html) if html else html
+        topic_dict['html_khong_dau'] = html_khong_dau
+
+    def write_loai_hem_combine(self, topic_dict):
+        html = topic_dict['html']
+        mat_tien, full_mat_tien, is_mat_tien, hem_rong_char, hem_rong, full_loai_hem,\
+        loai_hem_selection, loai_hem_combine = \
+            _compute_loai_hem_combine(html)
+        topic_dict['mat_tien'] = mat_tien
+        topic_dict['full_mat_tien'] = full_mat_tien
+        topic_dict['is_mat_tien'] = is_mat_tien
+        topic_dict['hem_rong_char'] = hem_rong_char
+        topic_dict['hem_rong'] = hem_rong
+        topic_dict['loai_hem_selection'] = loai_hem_selection
+        topic_dict['loai_hem_combine'] = loai_hem_combine
+
+    def write_compute_kw_mg(self, topic_dict):
+        html = topic_dict['html']
+        kw_co_date, kw_mg_cap_2, is_kw_mg_cap_2, kw_co_special_break, kw_co_break,\
+            hoa_la_canh, t1l1, kw_mg, dd_tin_cua_co = _compute_kw_mg(html)
+
+        topic_dict['kw_co_date'] = kw_co_date
+        topic_dict['kw_mg_cap_2'] = kw_mg_cap_2
+        topic_dict['is_kw_mg_cap_2'] = is_kw_mg_cap_2
+        topic_dict['kw_co_special_break'] = kw_co_special_break
+        topic_dict['kw_co_break'] = kw_co_break
+        topic_dict['hoa_la_canh'] = hoa_la_canh
+        topic_dict['t1l1'] = t1l1
+        topic_dict['kw_mg'] = kw_mg
+        topic_dict['dd_tin_cua_co'] = dd_tin_cua_co
+
+    def write_dd_tin_cua_dau_tu(self, topic_dict):
+        html = topic_dict['html']
+        kw_hoa_hong, kw_so_tien_hoa_hong, dd_tin_cua_dau_tu = _compute_dd_tin_cua_dau_tu(html)
+
+        topic_dict['kw_hoa_hong'] = kw_hoa_hong
+        topic_dict['kw_so_tien_hoa_hong'] = kw_so_tien_hoa_hong
+        topic_dict['dd_tin_cua_dau_tu'] = dd_tin_cua_dau_tu
+
+    def write_compute_choosed_area_muc_gia(self, topic_dict):
+        html = topic_dict['html']
+        gia = topic_dict['gia']
+        if not self.is_test:
+            quan_id = topic_dict['quan_id']
+            quan_id_obj = self.env['res.country.district'].browse(quan_id)
+        else:
+            quan_id_obj = False
+        loai_hem_combine = topic_dict['loai_hem_combine']
+        area = topic_dict['area']
+        don_gia_quan, ti_le_don_gia_dat_con_lai, ti_le_don_gia, \
+            auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich, \
+            dtsd, choose_area, so_lau, so_lau_char, so_lau_he_so,\
+            dtsd_tu_so_lau, ti_le_dtsd, dtsd_combine, gia_xac_nha,\
+            gia_dat_con_lai, don_gia_dat_con_lai, don_gia, muc_don_gia,\
+            muc_ti_le_don_gia, muc_dt, muc_gia, ti_le_gia_dat_con_lai_gia = \
+            _compute_choosed_area_muc_gia(html, gia, area, quan_id_obj, loai_hem_combine)
+        topic_dict['don_gia_quan'] = don_gia_quan
+        topic_dict['ti_le_don_gia_dat_con_lai'] = ti_le_don_gia_dat_con_lai
+        topic_dict['ti_le_don_gia'] = ti_le_don_gia
+        topic_dict['auto_ngang'] = auto_ngang
+        topic_dict['auto_doc'] = auto_doc
+        topic_dict['auto_dien_tich'] = auto_dien_tich
+
+        topic_dict['ti_le_dien_tich_web_vs_auto_dien_tich'] = ti_le_dien_tich_web_vs_auto_dien_tich
+        topic_dict['dtsd'] = dtsd
+        topic_dict['choose_area'] = choose_area
+        topic_dict['so_lau'] = so_lau
+        topic_dict['so_lau_char'] = so_lau_char
+        topic_dict['so_lau_he_so'] = so_lau_he_so
+
+        topic_dict['dtsd_tu_so_lau'] = dtsd_tu_so_lau
+        topic_dict['ti_le_dtsd'] = ti_le_dtsd
+        topic_dict['dtsd_combine'] = dtsd_combine
+        topic_dict['gia_xac_nha'] = gia_xac_nha
+        topic_dict['gia_dat_con_lai'] = gia_dat_con_lai
+        topic_dict['don_gia_dat_con_lai'] = don_gia_dat_con_lai
+
+        topic_dict['don_gia'] = don_gia
+        topic_dict['muc_don_gia'] = muc_don_gia
+        topic_dict['muc_ti_le_don_gia'] = muc_ti_le_don_gia
+        topic_dict['muc_dt'] = muc_dt
+        topic_dict['muc_gia'] = muc_gia
+        topic_dict['ti_le_gia_dat_con_lai_gia'] = ti_le_gia_dat_con_lai_gia
     def odoo_model_topic_dict(self, topic_dict):
         if not self.is_test:
             topic_dict.update(self.write_quan_phuong(topic_dict))
@@ -410,7 +498,12 @@ class MainFetchCommon():
         topic_dict.update(write_gia(topic_dict))
         topic_dict.update(write_public_datetime(topic_dict))
         self.write_trich_dia_chi(topic_dict)
-
+        self.write_html_khong_dau(topic_dict)
+        self.write_so_phong_ngu(topic_dict)
+        self.write_loai_hem_combine(topic_dict)
+        self.write_compute_kw_mg(topic_dict)
+        self.write_dd_tin_cua_dau_tu(topic_dict) 
+        self.write_compute_choosed_area_muc_gia(topic_dict)
     def request_parse_html_topic(self, link):
         if getattr(self,'topic_path',None):
             topic_html = self.file_from_tuong_doi(self.topic_path)
@@ -723,10 +816,9 @@ class MainFetchCommon():
                     begin_page, end_page = self.attrs_dict.get('begin_page') or 1, self.attrs_dict.get('end_page') or 1
                 else:
                     begin_page, end_page = 1,1
-                    page_lists = range(begin_page,end_page+1)
-            print ('**page_lists**', page_lists)
+                page_lists = range(begin_page, end_page+1)
+            
             for page_int in page_lists:
-
                 rs = self.page_handle( page_int, self.url, url_id, fetch_item_id)
 
                 existing_link_number_one_page, update_link_number_one_page, create_link_number_one_page,\
@@ -1641,7 +1733,7 @@ def detect_mat_tien_address(html, p = None):
                 bao_nhieu_met = re.search('\d+m|\dT', number, re.I)
                 if bao_nhieu_met:
                     continue
-                co_format_sdt = re.search('[\d\W]{6,}|3 Tháng 2|đi |thẳng |\d+(?:tr|t) \dL', full_address)
+                co_format_sdt = re.search('[\d\s]{6,}|3 Tháng 2|đi |thẳng |\d+(?:tr|t) \dL', full_address)
                 if co_format_sdt:
                     continue
                 if len(ten_duong) == 1:
@@ -1692,9 +1784,8 @@ def detect_trich_dia_chi(address):
     #@pr: detect_trich_dia_chi_list
     keys_street_has_numbers = ['3/2','30/4','19/5','3/2.','3/2,','23/9']
     pat_247 = '24h*/7|24h*/24|1/500'
-    trust_address_result_keys = []
-    only_number_trust_address_result_keys = []
-    co_date_247_result_keys=[]
+    hem_full_addresses = []
+    hem_address_numbers = []
     index_before = 0
     while 1:
         address = address[index_before:]
@@ -1705,21 +1796,19 @@ def detect_trich_dia_chi(address):
             street_name = posible_address_search.group('ten_duong')
             street_name = trim_street_name(street_name)
             full_adress = adress_number +' ' + street_name
-            if adress_number not in only_number_trust_address_result_keys:
+            if adress_number not in hem_address_numbers:
                 black_list = '23/23 Nguyễn Hữu Tiến|5 Độc Lập'
                 black_list_rs = re.search(black_list, address, re.I)
                 if black_list_rs:
-                    only_number_trust_address_result_keys.append(adress_number)
+                    hem_address_numbers.append(adress_number)
                     continue
                 rs = re.search('\d+m',street_name, re.I)
-                print ('***rs**', rs)
                 if  rs:
                     continue
                 if adress_number in ['1/2','50/100','100/100']:
                     continue
                 rs = re.search(pat_247, adress_number, re.I)
                 if rs:
-                    co_date_247_result_keys.append(rs.group(0))
                     continue
                 if adress_number in keys_street_has_numbers:
                     # street_result_keys.append(adress_number)
@@ -1733,18 +1822,14 @@ def detect_trich_dia_chi(address):
                 is_ty_m2 =  re.search('tỷ|tr|m2', full_adress, re.I)
                 if is_ty_m2:
                     continue
-                
                 index = posible_address_search.span()[0]
                 before_index = index -20
                 if before_index < 0:
                     before_index = 0
                 before_string = address[before_index: index]
-                is_van_phong = re.search('văn phòng|vp|bđs|nhà đất|[\d\W]{4,}', before_string, re.I)
-
-
+                is_van_phong = re.search('văn phòng|vp|bđs|nhà đất|[\d]{4,}', before_string, re.I)
                 if is_van_phong:
                     continue
-
                 before_index = index -5
                 if before_index < 0:
                     before_index = 0
@@ -1752,33 +1837,30 @@ def detect_trich_dia_chi(address):
                 is_van_phong = re.search('hẻm|hẽm', before_string, re.I)
                 if is_van_phong:
                     continue
-
-                trust_address_result_keys.append((adress_number, full_adress))
-                only_number_trust_address_result_keys.append(adress_number)
+                hem_full_addresses.append((adress_number, full_adress))
+                hem_address_numbers.append(adress_number)
         else:
             break
-    return trust_address_result_keys, co_date_247_result_keys
+    return hem_full_addresses
 
 def detect_trich_dia_chi_list(address_list):
     #pr: _compute_mat_tien_or_trich_dia_chi
     sum_full_hem_address = [] 
     only_number_address_sum_full_hem_address = [] 
-    co_date_247_result_keys_sum = []
     for ad in address_list:
-        trust_address_result_keys, co_date_247_result_keys = detect_trich_dia_chi(ad)
-        co_date_247_result_keys_sum.extend(co_date_247_result_keys)
-        for i in trust_address_result_keys:
+        hem_full_addresses = detect_trich_dia_chi(ad)
+        for i in hem_full_addresses:
             number_address = i[0]
             if number_address not in only_number_address_sum_full_hem_address:
                 sum_full_hem_address.append(i)
                 only_number_address_sum_full_hem_address.append(number_address)
-    return sum_full_hem_address, co_date_247_result_keys_sum
+    return sum_full_hem_address
 
 def _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r):#compute
         mat_tien_address = detect_mat_tien_address_sum(html)
         trich_dia_chi = False
         address_list = [html_trich_dia_chi]
-        sum_full_hem_address, co_date_247_result_keys_sum = detect_trich_dia_chi_list(address_list)
+        sum_full_hem_address = detect_trich_dia_chi_list(address_list)
         if sum_full_hem_address:
             trich_dia_chi = ','.join(map(lambda i:i[1], sum_full_hem_address))
         mat_tien_or_trich_dia_chi = mat_tien_address or trich_dia_chi
@@ -1795,7 +1877,7 @@ def _compute_mat_tien_or_trich_dia_chi1(self, html, html_trich_dia_chi):#compute
     mat_tien_address = detect_mat_tien_address_sum(html)
     trich_dia_chi = False
     address_list = [html_trich_dia_chi]
-    sum_full_hem_address, co_date_247_result_keys_sum = detect_trich_dia_chi_list(address_list)
+    sum_full_hem_address = detect_trich_dia_chi_list(address_list)
     mat_tien_or_trich_dia_chis = []
     if mat_tien_address:
         mat_tien_or_trich_dia_chis.append(mat_tien_address)
@@ -2105,13 +2187,335 @@ def _compute_loai_hem_combine(html):
                 elif hem_rong:
                     loai_hem_combine = 'hxm'
         return mat_tien, full_mat_tien, is_mat_tien,hem_rong_char, hem_rong, full_loai_hem, loai_hem_selection, loai_hem_combine
+
+########################### compute choosed area ###################
+
+def tim_dien_tich_trong_bai(html):
+    p ='(?:diện tích|dt|dtcn)[\W]*([1-9]+[\.,]\d+)\s*m2'
+    rs = re.search(p, html, re.I)
+    dt = 0
+    if rs:
+        dt = rs.group(1)
+        dt = dt.replace(',','.')
+        dt = float(dt)
+    return dt
+
+def tim_dien_tich_sd_trong_bai(html):
+    dt = 0
+    while 1:
+        p ='(?:(?:diện tích|dt)\s*(?:sử dụng|sd|sàn|xd))[\W]*([0-9]+[\.,]*\d*)\s*m2'
+        rs = re.search(p, html, re.I)
+        if rs:
+            span0 = rs.span(0)[0]
+            span1 =  rs.span(0)[1]
+            pre_index = span0-50
+            if pre_index<0:
+                pre_index = 0
+            pre = html[pre_index:span0]
+            gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
+            gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
+            if gpxd_search:
+                before_index = span1 + 1
+                html = html[before_index:]
+                continue
+            else:
+                dt = rs.group(1)
+                dt = dt.replace(',','.')
+                dt = float(dt)
+                return dt
+        else:
+            return dt
+
+def tim_dai_rong(html):
+    auto_ngang, auto_doc = 0,0
+    pt= '(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(( {0,1}[x*] {0,1}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
+    rs = re.search(pt, html,flags = re.I)
+    
+    if rs:
+        auto_ngang, auto_doc = float(rs.group(1).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(4).replace(',','.').replace('m','.').replace('M','.'))
+    elif not rs:
+        pt= '(dài|rộng|ngang)[: ]{1,2}(\d{1,3}[\.,m]{0,1}\d{0,2}) {0,1}m{0,1}(([\W]{1,3}(dài|rộng|ngang)[: ]{1,2}))(\d{1,3}[\.,m]{0,1}\d{0,2})'
+        rs = re.search(pt, html,flags = re.I)
+        if rs:
+            auto_ngang, auto_doc = float(rs.group(2).replace(',','.').replace('m','.').replace('M','.')),float(rs.group(6).replace(',','.').replace('m','.').replace('M','.'))
+    return auto_ngang, auto_doc
+
+def auto_ngang_doc_compute(html,rarea):
+    auto_ngang, auto_doc = tim_dai_rong(html)
+    dien_tich_trong_topic = tim_dien_tich_trong_bai(html)
+    choose_area = 0
+    auto_dien_tich = 0
+    ti_le_dien_tich_web_vs_auto_dien_tich = 0
+    if auto_ngang and auto_doc:
+        auto_dien_tich = auto_ngang*auto_doc
+        ti_le_dien_tich_web_vs_auto_dien_tich = rarea/auto_dien_tich
+        if rarea ==0:
+            choose_area = auto_dien_tich 
+        elif ti_le_dien_tich_web_vs_auto_dien_tich > 1.4 and ti_le_dien_tich_web_vs_auto_dien_tich < 5:
+            choose_area = auto_dien_tich
+        else:
+            choose_area = rarea
+    else:
+        choose_area = rarea or dien_tich_trong_topic
+    return auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic
+
+def gpxd_search(pre):
+    gan_sat_cach_pt = 'gpxd|giấy phép xây dựng'
+    gpxd_search = re.search(gan_sat_cach_pt,pre, re.I)
+    return gpxd_search
+
+def detect_only_lau(html, pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'):
+    while 1:
+        rs = re.search(pt, html, re.I)
+        so_lau = 0
+        so_lau_char = False
+        if rs:
+            pre = previous_of_match(html, rs)
+            gpxd_search_rs = gpxd_search(pre)
+            if gpxd_search_rs:
+                before_index = rs.span(0)[1] + 1
+                html = html[before_index:]
+                continue
+            else:
+                so_lau = rs.group(1)
+                so_lau_char = rs.group(0)
+                try:
+                    so_lau = int(so_lau)
+                except:
+                    so_lau = 0
+                return so_lau, so_lau_char
+        else:
+            return so_lau, so_lau_char
+
+def detect_lung_only(html, pt = 'lửng|lững'):
+    while 1:
+        is_lung = False
+        rs = re.search(pt, html, re.I)
+        so_lau = 0
+        so_lau_char = False
+        if rs:
+            pre = previous_of_match(html, rs)
+            gpxd_search_rs = gpxd_search(pre)
+            if gpxd_search_rs:
+                before_index = rs.span(0)[1] + 1
+                html = html[before_index:]
+                continue
+            else:
+                is_lung = True
+                return is_lung
+        else:
+            return is_lung
+
+def detect_lau_tranh_gpxd(html):
+    so_lau, so_lau_char = detect_only_lau(html)
+    if not so_lau:
+        so_lau, so_lau_char = detect_only_lau(html, pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)')
+        if so_lau:
+            so_lau = so_lau -1
+    so_lau_he_so = so_lau
+    is_lung = detect_lung_only(html)
+    if is_lung:
+        so_lau +=0.5
+        so_lau_he_so +=0.7
+
+    is_st = detect_lung_only(html, pt = 'sân thượng')
+    if is_st:
+        so_lau +=1
+        so_lau_he_so +=0.5
+    return so_lau, so_lau_char, so_lau_he_so
+
+def detect_lau(html):
+    pt = '(\d{1,2})\s*(?:lầu|l)(?:\W|$)'
+    rs = re.search(pt, html, re.I)
+    so_lau = 0
+    so_lau_char = False
+    
+    if rs:
+        so_lau = rs.group(1)
+        so_lau_char = rs.group(0)
+        try:
+            so_lau = int(so_lau)
+        except:
+            so_lau = 0
+    else:
+        pt = '(\d{1,2})\s*(?:tầng)(?:\W|$)'
+        rs = re.search(pt, html, re.I)
+        if rs:
+            so_lau = rs.group(1)
+            so_lau_char = rs.group(0)
+            try:
+                so_lau = int(so_lau)
+            except:
+                so_lau = 0
+        else:
+            pt = '(cấp 4|c4|c4)\W'
+            rs = re.search(pt, html, re.I)
+            if rs:
+                so_lau = 0.1
+                so_lau_char = rs.group(1)
+
+
+                
+    so_lau_he_so = so_lau
+    pt = 'lửng|lững'
+    rs = re.search(pt, html, re.I)
+    if rs:
+        so_lau +=0.5
+        so_lau_he_so +=0.7
+
+    pt = 'sân thượng'
+    rs = re.search(pt, html, re.I)
+    if rs:
+        so_lau +=1
+        so_lau_he_so +=0.5
+
+    return so_lau, so_lau_char, so_lau_he_so
+
+def _compute_muc_gia(gia):
+        muc_gia_list = [('0','0'),('<1','<1'),('1-2','1-2'),('2-3','2-3'),
+            ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')]
+        selection = None
+        for muc_gia_can_tren in range(0,len(muc_gia_list)):
+            if gia <= muc_gia_can_tren:
+                selection = muc_gia_list[muc_gia_can_tren][0]
+                break
+        if not selection:
+            selection = muc_gia_list[-1][0]
+        return selection
+
+def muc_don_gia_(don_gia):
+    muc_dt_list =[('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
+                                ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),('180-210','180-210'),('>210','>210')]
+    selection = None
+    for muc_gia_can_tren in range(0,8):
+        if don_gia <= muc_gia_can_tren*30:
+            selection = muc_dt_list[muc_gia_can_tren][0]
+            break
+    if not selection:
+        selection = muc_dt_list[-1][0]
+    return selection
+
+def muc_ti_le_don_gia_(ti_le_don_gia):
+    muc_dt_list =[('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
+                                ('1.2-1.6','1.2-1.6'), ('1.6-2.0','1.6-2.0'), ('2.0-2.4','2.0-2.4'), ('2.4-2.8','2.4-2.8'), ('>2.8','>2.8')]
+    selection = None
+    for muc_gia_can_tren in range(0,8):
+        if ti_le_don_gia <= muc_gia_can_tren*0.4:
+            selection = muc_dt_list[muc_gia_can_tren][0]
+            break
+    if not selection:
+        selection = muc_dt_list[-1][0]
+    return selection
+    
+def _muc_dt(choose_area):
+        muc_dt_list = [('0','0'), ('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')]
+        selection = None
+        for muc_gia_can_tren in range(0,8):
+            if choose_area <= muc_gia_can_tren*10:
+                selection = muc_dt_list[muc_gia_can_tren][0]
+                break
+        if not selection:
+            selection = muc_dt_list[-1][0]
+        return selection
+
+def _compute_choosed_area_muc_gia(html, gia, area, quan_id, loai_hem_combine):
+        auto_ngang, auto_doc, auto_dien_tich, choose_area, ti_le_dien_tich_web_vs_auto_dien_tich,  dien_tich_trong_topic = \
+                auto_ngang_doc_compute(html, area)
+        dtsd = tim_dien_tich_sd_trong_bai(html)
+        so_lau, so_lau_char, so_lau_he_so =  detect_lau_tranh_gpxd(html)
+        ti_le_dtsd = False
+        dtsd_tu_so_lau = 0
+        dtsd_he_so_lau = 0
+
+        allow_loop = 2
+        while allow_loop:
+            allow_loop -=1
+            if so_lau:
+                dtsd_tu_so_lau = (so_lau + 1) * choose_area * 0.9
+                dtsd_he_so_lau = (so_lau_he_so + 1) * choose_area * 0.9 #để tính tiền xác nhà 
+                if so_lau_he_so < 2:
+                    dtsd_he_so_lau = dtsd_he_so_lau * 0.5# để tính tiền xác nhà
+                if dtsd and choose_area:
+                    ti_le_dtsd = dtsd_tu_so_lau / dtsd
+            dtsd_combine = dtsd or dtsd_tu_so_lau
+            dtsd_combine_he_so_lau = dtsd_he_so_lau or dtsd
+            if not dtsd_combine_he_so_lau:
+                dtsd_combine_he_so_lau =  choose_area * 0.5
+            gia_xac_nha = dtsd_combine_he_so_lau * 0.006
+            
+            gia_dat_con_lai = 0
+            don_gia_dat_con_lai = 0
+            
+            ti_le_gia_dat_con_lai_gia = 0
+            if gia > 0.2 and gia_xac_nha:
+                gia_dat_con_lai = gia - gia_xac_nha
+                ti_le_gia_dat_con_lai_gia = gia_dat_con_lai/gia
+                if ti_le_gia_dat_con_lai_gia  < 0.5:
+                    gia_dat_con_lai = gia
+                if choose_area:
+                    don_gia_dat_con_lai = 1000 * gia_dat_con_lai / choose_area
+            
+            
+            don_gia = 0
+            if gia > 0.5 and choose_area:
+                don_gia = gia*1000/choose_area
+
+            # muc gia quan vao day
+            don_gia_quan = 0
+            ti_le_don_gia_dat_con_lai = 0
+
+            if loai_hem_combine and don_gia_dat_con_lai:
+                if loai_hem_combine =='mt':
+                    loai_hem_combine = 'mat_tien'
+                else:
+                    loai_hem_combine = loai_hem_combine
+                attr = 'don_gia_%s'%loai_hem_combine
+                
+
+                if quan_id:
+                    don_gia_quan = getattr(quan_id, attr)
+                    if not don_gia_quan:
+                        don_gia_quan = getattr(quan_id, attr + '_tc')
+
+            
+            if not don_gia_quan and quan_id:
+                don_gia_quan = quan_id.muc_gia_quan or quan_id.don_gia_hbg_tc
+
+            if don_gia_quan:
+                ti_le_don_gia_dat_con_lai = don_gia_dat_con_lai/don_gia_quan
+
+            if ti_le_don_gia_dat_con_lai != 0 and ti_le_don_gia_dat_con_lai < 0.3:
+                if choose_area and so_lau:
+                    choose_area = choose_area/(so_lau + 1) # cho lập lại khi choose_area được gán lại
+                    continue
+                else:
+                    break
+            else:
+                break
+
+        ti_le_don_gia = ti_le_don_gia_dat_con_lai
+        muc_ti_le_don_gia = muc_ti_le_don_gia_(ti_le_don_gia)   
+        muc_don_gia = muc_don_gia_(don_gia)  
+        muc_dt = _muc_dt(choose_area)
+        muc_gia = _compute_muc_gia(gia)
+
+        return don_gia_quan, ti_le_don_gia_dat_con_lai, ti_le_don_gia, \
+            auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich, \
+            dtsd, choose_area, so_lau, so_lau_char, so_lau_he_so,\
+            dtsd_tu_so_lau, ti_le_dtsd, dtsd_combine, gia_xac_nha,\
+            gia_dat_con_lai, don_gia_dat_con_lai, don_gia, muc_don_gia,\
+            muc_ti_le_don_gia, muc_dt, muc_gia, ti_le_gia_dat_con_lai_gia
+
+
+
 ######################### !compute function ###############
 
 
 
 
 def valid_fetch_list(rs):
-    for i in ['public_date', 'public_datetime',  'area_name', 'region_name', 'price', 'gia','mat_tien_or_trich_dia_chi']:
+    shows = ['gia_dat_con_lai']
+    for i in ['public_date', 'public_datetime',  'area_name', 'region_name', 'price', 'gia','mat_tien_or_trich_dia_chi','gia_dat_con_lai']:
         print ('**%s**'%i)
         filter_rs = list(filter(lambda r: r[i], rs))
         print (len(filter_rs))
@@ -2119,12 +2523,16 @@ def valid_fetch_list(rs):
             for r in filter_rs:
                 print ('mat_tien_or_trich_dia_chi', r['link'])
                 print ('mat_tien_or_trich_dia_chi', r['mat_tien_or_trich_dia_chi'])
+        if i in shows:
+            for j in filter_rs:
+                print (i, j[i], j['link'], j['ti_le_don_gia_dat_con_lai'],j['ti_le_gia_dat_con_lai_gia'])
+        
 
 
 
-    print ('**not gia**')
-    filter_rs = list(filter(lambda r: not r['gia'], rs))
-    print (len(filter_rs))
+    # print ('**not gia**')
+    # filter_rs = list(filter(lambda r: not r['gia'], rs))
+    # print (len(filter_rs))
 
 def test_fetch(begin_page = 1, end_page=1):
     attrs_dict = {}
@@ -2132,16 +2540,17 @@ def test_fetch(begin_page = 1, end_page=1):
     site_name = 'muaban'
     site_name = 'cuahangtaphoa'
     site_name = 'batdongsan'
-    site_name = 'batdongsan'
+    site_name = 'chotot'
     is_test = True
     is_save_mau = True
     topic_path = False
     topic_link = False
     page_path = False
     page_link = False
-
+    
     attrs_dict.update({'is_test':is_test, 'site_name': site_name, 'is_save_mau':is_save_mau})
     if site_name == 'chotot':
+        page_path = 'page_chotot'
         # topic_link = 'https://gateway.chotot.com/v1/public/ad-listing/73970343'
         # topic_link = 'https://gateway.chotot.com/v1/public/ad-listing/76138717'
         # topic_path = 'mau/topic_chotot_50_50'
@@ -2179,13 +2588,14 @@ def test_fetch(begin_page = 1, end_page=1):
 
 def test_trich_dia_chi():
     html = 'bán nhà 26/3 200m'
-    html = '''Chính chủ bán nhà Hẻm xe hơi,3/31/11 đường 182,P:TNP A,Q9( Hẻm 3/31 kế bên nhà 3/31B)Diện tích công nhận 88.3m2,ngang 5m2 phòng ngủ,2 toilet,phòng khách,nhà bếp,sân đậu xe hơiNhà mới,vào ở ngay hoặc cho thuê,khu vực an ninh,thoáng mátHướng nhà: Đông NamVị trí thuận lợi:Cách ngã tư Thủ Đức 2km, Gần chợ Hiệp Phú,Chợ Tăng Nhơn Phú A,UBND Phường Tăng Nhơn Phú A,Trường học:ĐH Giao Thông Vận Tải,Học Viện Công Nghệ Bưu Chính Viễn Thông,ĐH SPKT,Trường THPT Dương Văn Thì,Khu Công Nghệ Cao....Giá:3 tỷ 6 thương lượngLiên hệ: Thành Hưng: 098 556 29 33'''
+    html = '''cần bán những căn nhà sau: (: :địa chỉ bên dưới thật 100%) .nhà thứ 1) hẻm xe hơi số 67/4b hoàng hoa thám p6 bình thạnh , nhà gồm lầu đúc mới , gồm 2pn,2Wc, giá 3,25 tỷ( sổ hồng bao sang tên),,,,,,,,,,,,...nhà thứ 1) số 62/7/29. Trần bình trọng p5 bình Thạnh: diện tích: ngang 3,5 m dài 18m / gồm 3 lầu đúc mới, giá :4,3 tỷ ( sổ Hồng) .........cần bán 2 lô đất số 273/40..nguyễn văn đậu , giá :6,1 tỷ/lô , còn 2 lô ( hình bên dưới) .................chú ý: địa chỉ dưới đây thật 100% :*) nhà bán hẻm xe hơi số 97/13 nguyễn bỉnh khiêm ( gần phạm văn đồng và lê quang định) , diện tích ngang 3m dài 12m/ 1 lầu , giá: 2,15 tỷ ...........nhà bán thứ 1) số 361/35 lê quang định , quận bình thạnh , dtsd : gần 20m2 / gồm lầu mới giá: 1,05 tỷ ( sổ hồng.).........nhà bán thứ.4) : hẻm xe hơi số 220/52 hoàng hoa thám / nhà gồm 2 lầu đúc mới , giá 2,75 tỷ ....,;căn bán thứ 4) : hẻm 251/92/4 lê quang định p7 bình thạnh, dtsd:30m2/ gồm 2 lầu đúc mới giá: 1,5 tỷ (sổ hồng).....................căn bán thứ 5)..giá bán 4,7 tỷ/ nhà số 170 Nguyễn văn đậu p7 bình thạnh ( đầu trần bình trọng ) ngang 7m dài 6m / 2 lầu và sân thương..;................nhà bán thứ 6) số 106/9/8 lương Ngọc quyến , nhà gồm 2 lầu , giá : 1,45 tỷ ............................. [email protected]) cần bán những căn nhà sau: Nhà bán thứ 8) số 207 đường bạch đằng p15 bình thạnh, dtsd: 42m2, giá: 3,8 tỷ ( sổ hồng) ... @) .. nhà bán 9) số 395/30 Lê quang định p5 bình thạnh, nhà gồm lầu mới, dtsd:25m2; giá 1,35 tỷ ( sổ hồng).. , khu dân cư văn minh, có trí thức, rất an ninh, .....mong tiếp khách thiện chí...hình dưới đây thật 100%................Lh: 0906975079 / tùng hoặc lh : 1/9c trần bình trọng p5 bình thạnh. nhận ký gửi , mua bán , hợp thức hóa ,kê khai di sản thừa kế, nhận làm đơn khiếu nại, khiếu kiện, nhận làm dv hôn nhân, nhận đại diện ủy quyền tại tòa.: về vụ việc: dân sự , hình sự, hành chính...............'''
+    html = 'bán nhà 10 Ho, bán nhà 23 Ba Đọ av , 15/32 hoa thi buoi abc a  d d 32/35 chi do'
     rs = _compute_mat_tien_or_trich_dia_chi1 (False, html, html)
     print (rs)
 
 if __name__ == '__main__':
     loai_test = 'trich_dia_chi'
-    # loai_test = 'test_fetch'
+    loai_test = 'test_fetch'
     if loai_test == 'trich_dia_chi':
         test_trich_dia_chi()
     else:

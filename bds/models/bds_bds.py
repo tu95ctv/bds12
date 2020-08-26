@@ -8,7 +8,7 @@ import datetime
 from odoo.addons.bds.models.bds_tools  import  request_html
 from odoo.exceptions import UserError
 from odoo.addons.bds.models.bds_tools import g_or_c_ss
-from odoo.addons.bds.models.main_fetch_common1  import  _compute_so_phong_ngu, _compute_mat_tien_or_trich_dia_chi,\
+from odoo.addons.bds.models.main_fetch_common1  import  _compute_so_phong_ngu,\
     _compute_dd_tin_cua_dau_tu, _compute_loai_hem_combine, _compute_kw_mg
 from odoo.addons.bds.models.compute_choosed_area  import _compute_choosed_area_muc_gia
 import psycopg2
@@ -120,8 +120,8 @@ class bds(models.Model):
     #! compute no store
 
     #compute field#store field
-    html_khong_dau = fields.Html(compute='html_khong_dau_',store=True)
-    so_phong_ngu = fields.Integer(compute='_compute_so_phong_ngu', store=True)
+    html_khong_dau = fields.Html()
+    so_phong_ngu = fields.Integer()
     #dia chi
     # same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',
     #     )
@@ -131,8 +131,7 @@ class bds(models.Model):
     # is_mat_tien_or_trich_dia_chi = fields.Selection([('1','Có trích địa chỉ hoặc mặt tiền'),
     #     ('0','Không Có trích địa chỉ hoặc mặt tiền' )],compute='_compute_mat_tien_or_trich_dia_chi', store=True)
     
-    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id',
-        )
+    same_address_bds_ids = fields.Many2many('bds.bds','same_bds_and_bds_rel','same_bds_id','bds_id')
     trich_dia_chi = fields.Char( string='Trích địa chỉ')
     mat_tien_address = fields.Char()
     mat_tien_or_trich_dia_chi = fields.Char()
@@ -141,69 +140,139 @@ class bds(models.Model):
 
 
     #_compute_kw_mg
+    # dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),
+    #     ('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
+    # kw_mg = fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
+    # kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
+    # is_kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
+    # kw_co_date = fields.Char(compute='_compute_kw_mg',store=True)
+    # kw_co_break = fields.Integer(compute='_compute_kw_mg',store=True)
+    # kw_co_special_break = fields.Integer(compute='_compute_kw_mg',store=True)
+    # kw_co_mtg = fields.Char(compute='_compute_kw_mg',store=True)
+    # number_char = fields.Integer(compute='_compute_kw_mg',store=True)
+    # hoa_la_canh = fields.Char(compute='_compute_kw_mg',store=True)
+    # t1l1 = fields.Char(compute='_compute_kw_mg', store=True)
+
     dd_tin_cua_co = fields.Selection([('kw_co_cap_1', 'Keyword cò cấp 1'),
-        ('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')],compute='_compute_kw_mg', store = True, string='is có kw môi giới')
-    kw_mg = fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới')
-    kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
-    is_kw_mg_cap_2= fields.Char(compute='_compute_kw_mg', store = True, string='kw môi giới cấp 2')
-    kw_co_date = fields.Char(compute='_compute_kw_mg',store=True)
-    kw_co_break = fields.Integer(compute='_compute_kw_mg',store=True)
-    kw_co_special_break = fields.Integer(compute='_compute_kw_mg',store=True)
-    kw_co_mtg = fields.Char(compute='_compute_kw_mg',store=True)
-    number_char = fields.Integer(compute='_compute_kw_mg',store=True)
-    hoa_la_canh = fields.Char(compute='_compute_kw_mg',store=True)
-    t1l1 = fields.Char(compute='_compute_kw_mg', store=True)
+        ('no_kw_co_cap_1', 'Không coKeyword cò cấp 1')], string='is có kw môi giới')
+    kw_mg = fields.Char(string='kw môi giới')
+    kw_mg_cap_2= fields.Char(string='kw môi giới cấp 2')
+    is_kw_mg_cap_2= fields.Char(string='kw môi giới cấp 2')
+    kw_co_date = fields.Char()
+    kw_co_break = fields.Integer()
+    kw_co_special_break = fields.Integer()
+    kw_co_mtg = fields.Char()
+    number_char = fields.Integer()
+    hoa_la_canh = fields.Char()
+    t1l1 = fields.Char()
+
+
+
     #!_compute_kw_mg
     #_compute_dd_tin_cua_dau_tu
-    dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
-    kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
-    kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+    # dd_tin_cua_dau_tu = fields.Boolean(compute='_compute_dd_tin_cua_dau_tu', store = True,string='kw đầu tư')
+    # kw_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+    # kw_so_tien_hoa_hong = fields.Char(compute ='_compute_dd_tin_cua_dau_tu', store=True)
+
+    dd_tin_cua_dau_tu = fields.Boolean(string='kw đầu tư')
+    kw_hoa_hong = fields.Char(store=True)
+    kw_so_tien_hoa_hong = fields.Char(store=True)
+
+
     #!_compute_dd_tin_cua_dau_tu
    
-    hem_rong = fields.Float(digits=(6,2), compute='_compute_loai_hem_combine', store=True)
-    hem_rong_char = fields.Char(compute='_compute_loai_hem_combine', store=True)
-    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], 
-        compute='_compute_loai_hem_combine', store=True)
-    loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
-         compute='_compute_loai_hem_combine', store=True)
-    mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
-    full_mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
-    is_mat_tien = fields.Boolean(compute='_compute_loai_hem_combine', store = True)
+    # hem_rong = fields.Float(digits=(6,2), compute='_compute_loai_hem_combine', store=True)
+    # hem_rong_char = fields.Char(compute='_compute_loai_hem_combine', store=True)
+    # loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')], 
+    #     compute='_compute_loai_hem_combine', store=True)
+    # loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm') ],
+    #      compute='_compute_loai_hem_combine', store=True)
+    # mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
+    # full_mat_tien = fields.Char(compute='_compute_loai_hem_combine', store=True)
+    # is_mat_tien = fields.Boolean(compute='_compute_loai_hem_combine', store = True)
+
+    hem_rong = fields.Float()
+    hem_rong_char = fields.Char()
+    loai_hem_selection = fields.Selection([('hxh','hxh'), ('hxt','hxt'), ('hxm','hxm'), ('hbg','hbg')])
+    loai_hem_combine = fields.Selection([('mt','mặt tiền'), ('hxh','hxh'), ('hxt','hxt'), ('hbg','hbg'), ('hxm','hxm')])
+    mat_tien = fields.Char()
+    full_mat_tien = fields.Char()
+    is_mat_tien = fields.Boolean()
+
+
+
     #auto_ngang_doc_
+    # muc_gia = fields.Selection([('0','0'), ('<1','<1'),('1-2','1-2'),('2-3','2-3'),
+    #                             ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
+    #                             ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
+    #                             ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
+    #                            compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức Giá')
+    # muc_dt = fields.Selection(
+    #     [('0','0'), ('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),
+    #     ('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
+    #     compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức diện tích')
+    # muc_don_gia = fields.Selection([('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
+    #                                 ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
+    #                                 ('180-210','180-210'),('>210','>210')], compute='_compute_choosed_area_muc_gia', store=True )
+    # ti_le_don_gia = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True )
+    # muc_ti_le_don_gia = fields.Selection([('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
+    #                                 ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
+    #                                 ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')], compute='_compute_choosed_area_muc_gia', store=True)
+    # auto_ngang = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
+    # auto_doc = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
+    # auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
+    # ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
+    # don_gia = fields.Float(digit=(6,2),compute='_compute_choosed_area_muc_gia',store=True,string=u'Đơn giá')
+    # choose_area = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia', store=True)#,store=True
+    # so_lau = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
+    # so_lau_he_so = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
+    # so_lau_char = fields.Char(compute ='_compute_choosed_area_muc_gia',store=True)
+    # dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # ti_le_dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # dtsd_combine = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # gia_xac_nha = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+    # don_gia_quan = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+
+
     muc_gia = fields.Selection([('0','0'), ('<1','<1'),('1-2','1-2'),('2-3','2-3'),
                                 ('3-4','3-4'),('4-5','4-5'),('5-6','5-6'),
                                 ('6-7','6-7'),('7-8','7-8'),('8-9','8-9'),
-                                ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')],
-                               compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức Giá')
+                                ('9-10','9-10'),('10-11','10-11'),('11-12','11-12'),('>12','>12')], string=u'Mức Giá')
     muc_dt = fields.Selection(
         [('0','0'), ('<10','<10'),('10-20','10-20'),('20-30','20-30'),('30-40','30-40'),
-        ('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],
-        compute='_compute_choosed_area_muc_gia', store = True, string=u'Mức diện tích')
+        ('40-50','40-50'),('50-60','50-60'),('60-70','60-70'),('>70','>70')],string=u'Mức diện tích')
     muc_don_gia = fields.Selection([('0','0'),('0-30','0-30'),('30-60','30-60'),('60-90','60-90'),
                                     ('90-120','90-120'),('120-150','120-150'),('150-180','150-180'),
-                                    ('180-210','180-210'),('>210','>210')], compute='_compute_choosed_area_muc_gia', store=True )
-    ti_le_don_gia = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True )
+                                    ('180-210','180-210'),('>210','>210')])
+    ti_le_don_gia = fields.Float(digits=(6,2))
     muc_ti_le_don_gia = fields.Selection([('0','0'), ('0-0.4','0-0.4'),('0.4-0.8','0.4-0.8'),('0.8-1.2','0.8-1.2'),
                                     ('1.2-1.6','1.2-1.6'),('1.6-2.0','1.6-2.0'),('2.0-2.4','2.0-2.4'),
-                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')], compute='_compute_choosed_area_muc_gia', store=True)
-    auto_ngang = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
-    auto_doc = fields.Float(compute = '_compute_choosed_area_muc_gia',store=True)
-    auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
-    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia',store=True)
-    don_gia = fields.Float(digit=(6,2),compute='_compute_choosed_area_muc_gia',store=True,string=u'Đơn giá')
-    choose_area = fields.Float(digits=(6,2), compute = '_compute_choosed_area_muc_gia', store=True)#,store=True
-    so_lau = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
-    so_lau_he_so = fields.Float(digits=(6,1),compute ='_compute_choosed_area_muc_gia',store=True)
-    so_lau_char = fields.Char(compute ='_compute_choosed_area_muc_gia',store=True)
-    dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    dtsd_tu_so_lau = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    ti_le_dtsd = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    dtsd_combine = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    gia_xac_nha = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
-    don_gia_quan = fields.Float(digits=(6,2), compute='_compute_choosed_area_muc_gia', store=True)
+                                    ('2.4-2.8','2.4-2.8'),('>2.8','>2.8')])
+    auto_ngang = fields.Float()
+    auto_doc = fields.Float()
+    auto_dien_tich = fields.Float(digits=(6,2))
+    ti_le_dien_tich_web_vs_auto_dien_tich = fields.Float(digits=(6,2))
+    don_gia = fields.Float(digit=(6,2),string=u'Đơn giá')
+    choose_area = fields.Float(digits=(6,2))#,store=True
+    so_lau = fields.Float(digits=(6,1))
+    so_lau_he_so = fields.Float(digits=(6,1))
+    so_lau_char = fields.Char()
+    dtsd = fields.Float(digits=(6,2))
+    dtsd_tu_so_lau = fields.Float(digits=(6,2))
+    ti_le_dtsd = fields.Float(digits=(6,2))
+    dtsd_combine = fields.Float(digits=(6,2))
+    gia_xac_nha = fields.Float(digits=(6,2))
+    gia_dat_con_lai = fields.Float(digits=(6,2))
+    don_gia_dat_con_lai = fields.Float(digits=(6,2))
+    ti_le_don_gia_dat_con_lai = fields.Float(digits=(6,2))
+    don_gia_quan = fields.Float(digits=(6,2))
+
+
+
     
     # function not depends
     def search(self, args, **kwargs):
@@ -240,9 +309,6 @@ class bds(models.Model):
 
     # method out function
    
-
-    # !for search
-    
     def user_read_mark(self):
         for r in self:
             user = self.env.user
@@ -400,103 +466,99 @@ class bds(models.Model):
     # ! depend no store
 
 
-    @api.depends('html')
-    @skip_if_cate_not_bds
-    def _compute_loai_hem_combine(self):
-        for r in self:
-            html = r.title + ' '  + r.html
+    # @api.depends('html')
+    # @skip_if_cate_not_bds
+    # def _compute_loai_hem_combine(self):
+    #     for r in self:
+    #         html = r.title + ' '  + r.html
             
-            r.mat_tien, r.full_mat_tien, r.is_mat_tien, r.hem_rong_char, r.hem_rong, full_loai_hem,\
-            r.loai_hem_selection, r.loai_hem_combine = \
-                _compute_loai_hem_combine(html)
+    #         r.mat_tien, r.full_mat_tien, r.is_mat_tien, r.hem_rong_char, r.hem_rong, full_loai_hem,\
+    #         r.loai_hem_selection, r.loai_hem_combine = \
+    #             _compute_loai_hem_combine(html)
 
 
-    @api.depends('html','title')
-    @skip_if_cate_not_bds
-    def _compute_mat_tien_or_trich_dia_chi(self):
-        for r in self:
-            html = r.title + ' ' + r.html
-            html_trich_dia_chi = r.title or '' +  r.html or '' + r.address or ''
-            r.mat_tien_address, r.trich_dia_chi, r.mat_tien_or_trich_dia_chi, r.is_mat_tien_or_trich_dia_chi,\
-            r.same_address_bds_ids = \
-            _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r)
+    # @api.depends('html','title')
+    # @skip_if_cate_not_bds
+    # def _compute_mat_tien_or_trich_dia_chi(self):
+    #     for r in self:
+    #         html = r.title + ' ' + r.html
+    #         html_trich_dia_chi = r.title or '' +  r.html or '' + r.address or ''
+    #         r.mat_tien_address, r.trich_dia_chi, r.mat_tien_or_trich_dia_chi, r.is_mat_tien_or_trich_dia_chi,\
+    #         r.same_address_bds_ids = \
+    #         _compute_mat_tien_or_trich_dia_chi(self, html, html_trich_dia_chi, r)
 
             
-    @api.depends('html')
-    @skip_if_cate_not_bds
-    def _compute_so_phong_ngu(self):
-        for r in self:
-            html = (r.title or '' ) + ' ' + (r.html or '')
-            so_phong_ngu = _compute_so_phong_ngu(html)
-            r.so_phong_ngu = so_phong_ngu
+    # @api.depends('html')
+    # @skip_if_cate_not_bds
+    # def _compute_so_phong_ngu(self):
+    #     for r in self:
+    #         html = (r.title or '' ) + ' ' + (r.html or '')
+    #         so_phong_ngu = _compute_so_phong_ngu(html)
+    #         r.so_phong_ngu = so_phong_ngu
 
 
-    @api.depends('html', 'title')
-    @skip_if_cate_not_bds 
-    def _compute_kw_mg(self):  
-        for r in self:
-            html = r.title + ' ' + r.html
-            r.kw_co_date, r.kw_mg_cap_2, r.is_kw_mg_cap_2, r.kw_co_special_break, r.kw_co_break,\
-                r.hoa_la_canh, r.t1l1, r.kw_mg, r.dd_tin_cua_co = _compute_kw_mg(html)
+    # @api.depends('html', 'title')
+    # @skip_if_cate_not_bds 
+    # def _compute_kw_mg(self):  
+    #     for r in self:
+    #         html = r.title + ' ' + r.html
+    #         r.kw_co_date, r.kw_mg_cap_2, r.is_kw_mg_cap_2, r.kw_co_special_break, r.kw_co_break,\
+    #             r.hoa_la_canh, r.t1l1, r.kw_mg, r.dd_tin_cua_co = _compute_kw_mg(html)
             
-    
+    # @api.depends('html','cate','area','trigger','gia','loai_hem_combine')
+    # @skip_if_cate_not_bds            
+    # def _compute_choosed_area_muc_gia(self):
+    #     for r in self:
+    #         html = r.title + r.html
+    #         gia = r.gia
+    #         quan_id = r.quan_id
+    #         loai_hem_combine = r.loai_hem_combine
+    #         area = r.area
 
 
-
-    @api.depends('html','cate','area','trigger','gia','loai_hem_combine')
-    @skip_if_cate_not_bds            
-    def _compute_choosed_area_muc_gia(self):
-        for r in self:
-            html = r.title + r.html
-            gia = r.gia
-            quan_id = r.quan_id
-            loai_hem_combine = r.loai_hem_combine
-            area = r.area
+    #         don_gia_quan, ti_le_don_gia_dat_con_lai, ti_le_don_gia, \
+    #         auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich, \
+    #         dtsd, choose_area, so_lau, so_lau_char, so_lau_he_so,\
+    #         dtsd_tu_so_lau, ti_le_dtsd, dtsd_combine, gia_xac_nha,\
+    #         gia_dat_con_lai, don_gia_dat_con_lai, don_gia, muc_don_gia,\
+    #         muc_ti_le_don_gia, muc_dt, muc_gia = _compute_choosed_area_muc_gia(html, gia, area, quan_id, loai_hem_combine)
 
 
-            don_gia_quan, ti_le_don_gia_dat_con_lai, ti_le_don_gia, \
-            auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich, \
-            dtsd, choose_area, so_lau, so_lau_char, so_lau_he_so,\
-            dtsd_tu_so_lau, ti_le_dtsd, dtsd_combine, gia_xac_nha,\
-            gia_dat_con_lai, don_gia_dat_con_lai, don_gia, muc_don_gia,\
-            muc_ti_le_don_gia, muc_dt, muc_gia = _compute_choosed_area_muc_gia(html, gia, area, quan_id, loai_hem_combine)
+    #         r.don_gia_quan = don_gia_quan
+    #         r.ti_le_don_gia_dat_con_lai = ti_le_don_gia_dat_con_lai
+    #         r.ti_le_don_gia  = ti_le_don_gia
+    #         r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
+    #              auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
+    #         r.dtsd = dtsd
+    #         r.choose_area = choose_area
+    #         r.so_lau = so_lau
+    #         r.so_lau_char = so_lau_char
+    #         r.so_lau_he_so = so_lau_he_so
 
+    #         r.dtsd_tu_so_lau = dtsd_tu_so_lau
+    #         r.ti_le_dtsd = ti_le_dtsd
+    #         r.dtsd_combine = dtsd_combine 
+    #         r.gia_xac_nha = gia_xac_nha
 
-            r.don_gia_quan = don_gia_quan
-            r.ti_le_don_gia_dat_con_lai = ti_le_don_gia_dat_con_lai
-            r.ti_le_don_gia  = ti_le_don_gia
-            r.auto_ngang,r.auto_doc, r.auto_dien_tich, r.ti_le_dien_tich_web_vs_auto_dien_tich =\
-                 auto_ngang, auto_doc, auto_dien_tich, ti_le_dien_tich_web_vs_auto_dien_tich
-            r.dtsd = dtsd
-            r.choose_area = choose_area
-            r.so_lau = so_lau
-            r.so_lau_char = so_lau_char
-            r.so_lau_he_so = so_lau_he_so
+    #         r.gia_dat_con_lai = gia_dat_con_lai
+    #         r.don_gia_dat_con_lai = don_gia_dat_con_lai
+    #         r.don_gia = don_gia
+    #         r.muc_don_gia = muc_don_gia
+    #         r.muc_ti_le_don_gia = muc_ti_le_don_gia
+    #         r.muc_dt = muc_dt
+    #         r.muc_gia = muc_gia
 
-            r.dtsd_tu_so_lau = dtsd_tu_so_lau
-            r.ti_le_dtsd = ti_le_dtsd
-            r.dtsd_combine = dtsd_combine 
-            r.gia_xac_nha = gia_xac_nha
-
-            r.gia_dat_con_lai = gia_dat_con_lai
-            r.don_gia_dat_con_lai = don_gia_dat_con_lai
-            r.don_gia = don_gia
-            r.muc_don_gia = muc_don_gia
-            r.muc_ti_le_don_gia = muc_ti_le_don_gia
-            r.muc_dt = muc_dt
-            r.muc_gia = muc_gia
-
-    @api.depends('html')
-    @skip_if_cate_not_bds               
-    def _compute_dd_tin_cua_dau_tu(self):
-        for r in self:
-            r.kw_hoa_hong, r.kw_so_tien_hoa_hong, r.dd_tin_cua_dau_tu =  _compute_dd_tin_cua_dau_tu(r.html)
+    # @api.depends('html')
+    # @skip_if_cate_not_bds               
+    # def _compute_dd_tin_cua_dau_tu(self):
+    #     for r in self:
+    #         r.kw_hoa_hong, r.kw_so_tien_hoa_hong, r.dd_tin_cua_dau_tu =  _compute_dd_tin_cua_dau_tu(r.html)
                     
     
-    @api.depends('html')
-    def html_khong_dau_(self):
-        for r in self:
-            r.html_khong_dau = unidecode(r.html) if r.html else r.html
+    # @api.depends('html')
+    # def html_khong_dau_(self):
+    #     for r in self:
+    #         r.html_khong_dau = unidecode(r.html) if r.html else r.html
   
 
     # out function 

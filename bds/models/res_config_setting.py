@@ -7,7 +7,6 @@ from odoo import api, fields, models, _
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    group_detail_guest = fields.Boolean(string='group detail guest', implied_group='bds.detail_guest')
     interval_mail_chinh_chu_minutes = fields.Integer()
     gia = fields.Float(digits=(6,2))
     email_to = fields.Char()

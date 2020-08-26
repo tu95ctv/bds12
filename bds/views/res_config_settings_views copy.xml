@@ -11,21 +11,17 @@
                     <div class="app_settings_block" data-string="BDS" string="BDS" data-key="bds">
                         <h2>BDS</h2>
                         <div class="row mt16 o_settings_container" title="Shipping connectors allow to compute accurate shipping costs, print shipping labels and request carrier picking at your warehouse to ship to the customer. Apply shipping connector from delivery methods.">
-
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="interval_mail_chinh_chu_minutes"/>
+                                </div>
                                 <div class="o_setting_right_pane">
                                     <label for="interval_mail_chinh_chu_minutes"/>
                                     <div class="text-muted">
                                     interval_mail_chinh_chu_minutes
                                     </div>
-                                    <div class="content-group">
-                                        <div class="mt16">
-                                            <field name="interval_mail_chinh_chu_minutes"/>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
                             <div class="col-12 col-lg-6 o_setting_box">
                                 <div class="o_setting_left_pane">
                                     <field name="khong_hien_thi_nhieu_html"/>
@@ -37,49 +33,39 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="gia"/>
+                                </div>
                                 <div class="o_setting_right_pane">
                                     <label for="gia"/>
                                     <div class="text-muted">
                                     gia
                                     </div>
-                                    <div class="content-group">
-                                        <div class="mt16">
-                                            <field name="gia"/>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
-
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="email_to"/>
+                                </div>
                                 <div class="o_setting_right_pane">
                                     <label for="email_to"/>
                                     <div class="text-muted">
                                     email_to
                                     </div>
-                                    <div class="content-group">
-                                        <div class="mt16">
-                                            <field name="email_to"/>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
-                            <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                    <field name="black_list_address"/>
+                                </div>
                                 <div class="o_setting_right_pane">
                                     <label for="black_list_address"/>
                                     <div class="text-muted">
                                     black_list_address
                                     </div>
-                                    <div class="content-group">
-                                        <div class="mt16">
-                                            <field name="black_list_address"/>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </xpath>

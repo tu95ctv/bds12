@@ -26,9 +26,6 @@
                 <field name="public_datetime" />
                 <field name="public_date" />
                 <field name="images_ids"/>
-                <!-- <field name="trigger"/> -->
-                <!-- <field name="don_gia"></field> -->
-                <!-- <field name="ti_le_don_gia" /> -->
                 <field name="area"/>
                 <field name="choose_area"/>
                 <field name="don_gia_dat_con_lai" />
@@ -37,12 +34,11 @@
                 <field name="so_lau" />
                 <field name="so_lau_he_so" />
                 <field name="so_phong_ngu" />
+                <!-- <field name="html_khong_dau" /> -->
+                <field name="mat_tien" />
                 <field name="hem_rong" />
-                <!-- <field name="loai_nha"/>
-                <field name="sell_or_rent"/> -->
-                <!-- <field name="phuong_id"/> -->
+                <field name="loai_hem_combine" />
                 <field name="html_show"  string="Htmmmmmmmmmmmmmmllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll" readonly="0"/>
-                <!-- <field name="site_ids" /> -->
                 <field name="diff_gia" />
                 <field name="diff_public_datetime" />
              
@@ -98,7 +94,6 @@
                 <field name="dtsd_combine" />
                 <field name="gia_xac_nha" />
                 <field name="gia_dat_con_lai" />
-                <field name="loai_hem_combine" />
                 <field name="ti_le_don_gia_dat_con_lai" />
                 <field name="don_gia_quan" />
                 <field name="muc_don_gia" />

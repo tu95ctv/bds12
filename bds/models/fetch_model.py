@@ -44,7 +44,7 @@ class BDSFetchLine(models.Model):
     web_last_page_number = fields.Integer(related='url_id.web_last_page_number')
     fetch_id = fields.Many2one('bds.fetch')
     min_page = fields.Integer()
-    set_number_of_page_once_fetch = fields.Integer(default=5)
+    set_number_of_page_once_fetch = fields.Integer(default=1)
     current_page = fields.Integer()
     update_link_number = fields.Integer(readonly=1)
     create_link_number = fields.Integer(readonly=1)
@@ -209,7 +209,7 @@ class Fetch(models.Model ):
 
     @api.multi
     def set_0(self):
-        self.url_ids.write({'current_page':0, 'create_link_number':0})
+        self.fetch_item_ids.write({'current_page':0, 'create_link_number':0})
     
     
 
