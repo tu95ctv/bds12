@@ -538,14 +538,14 @@ class MainFetchCommon():
 
 
     def topic_handle(self, link, url_id, topic_data_from_page, search_bds_obj=None):
-        
+        a_topic_fetch_dict = {}
         create_dict = {}
         self.link = link
         self.page_dict = topic_data_from_page
         if not self.is_test:
             if not search_bds_obj:
-                main_obj = self.get_main_obj()
-                search_bds_obj= main_obj.search([('link','=',link)])
+                Main_obj = self.get_main_obj()
+                search_bds_obj= Main_obj.search([('link','=',link)])
             else:
                 link = search_bds_obj.link
         is_fail_link_number = 0
@@ -591,7 +591,7 @@ class MainFetchCommon():
                         create_dict.update(more_create_dict)
                 a_topic_fetch_dict = create_dict
                 if not self.is_test:
-                    main_obj.create(create_dict) 
+                    Main_obj.create(create_dict) 
                     self.env.cr.commit()
                 is_create_link_number = 1
                 if not self.is_test:

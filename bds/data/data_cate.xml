@@ -1,0 +1,7 @@
+<odoo>
+    <record model="bds.cate" id="cate_nha_o">
+        <field name="name">Nhà ở</field>
+        <field name="source">chotot,</field>
+        <field name="url"></field>
+    </record>
+</odoo>

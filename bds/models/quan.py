@@ -122,6 +122,7 @@ class QuanHuyen(models.Model):
 
     def compute_don_gia_mat_tien(self, key='mt'):
         readgroup_rs = self.env['bds.bds'].read_group([('don_gia','>=', 10), ('don_gia','<=', 1000),
+                                                       ('loai_nha','=','Nhà ở'),('sell_or_rent','=','sell'),
             ('ti_le_don_gia_dat_con_lai','>',0.3), ('ti_le_don_gia_dat_con_lai','<',5),
             ('quan_id','=',self.id), ('loai_hem_combine','=', key)],
         ['don_gia:avg(don_gia)', 'don_gia_dat_con_lai:avg(don_gia_dat_con_lai)'],[])
